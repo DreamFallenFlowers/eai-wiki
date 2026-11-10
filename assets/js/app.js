@@ -554,7 +554,7 @@
       { icon: "05", title: "物理本体", sub: "BODY / ACT", cls: "loop-node--five" }
     ];
     return `
-      <div class="hero-art reveal" style="--delay:150ms" aria-label="具身智能闭环示意：语言、视觉、世界模型、动作与物理本体">
+      <div class="hero-art reveal" style="--delay:150ms" role="img" aria-label="具身智能闭环示意：语言、视觉、世界模型、动作与物理本体">
         <div class="art-topline">
           <span>FIG. 01 / THE EMBODIED LOOP</span>
           <span class="art-live"><i></i>LIVE INDEX</span>
@@ -2486,8 +2486,11 @@ ${value("contributor") || "匿名 / 待联系"}
 
     if (target.closest(".skip-link")) {
       event.preventDefault();
-      app.focus({ preventScroll: true });
-      app.scrollIntoView({ block: "start" });
+      const main = document.getElementById("main");
+      if (main) {
+        main.focus({ preventScroll: true });
+        main.scrollIntoView({ block: "start" });
+      }
       return;
     }
 
