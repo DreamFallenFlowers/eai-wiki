@@ -4,7 +4,7 @@
 (() => {
   "use strict";
 
-  const { DOMAINS, ENTRIES, PATHS, TYPE_LABELS } = window.EAI_DATA;
+  const { DOMAINS, ENTRIES, PATHS, RESOURCES, TYPE_LABELS } = window.EAI_DATA;
   const CFG = window.EAI_CONFIG || {};
 
   const app = document.getElementById("main");
@@ -12,30 +12,37 @@
   const domainById = new Map(DOMAINS.map(d => [d.id, d]));
   const entryById = new Map(ENTRIES.map(e => [e.id, e]));
   const entriesByDomain = new Map(DOMAINS.map(d => [d.id, []]));
+  const entriesByRoute = new Map();
+  DOMAINS.forEach(domain => {
+    (domain.routes || []).forEach(route => {
+      entriesByRoute.set(`${domain.id}:${route.id}`, []);
+    });
+  });
   ENTRIES.forEach(entry => {
     if (entriesByDomain.has(entry.domain)) entriesByDomain.get(entry.domain).push(entry);
+    const key = `${entry.domain}:${entry.route}`;
+    if (entriesByRoute.has(key)) entriesByRoute.get(key).push(entry);
   });
   entriesByDomain.forEach(list => list.sort(sortByYearDesc));
+  entriesByRoute.forEach(list => list.sort((a, b) => a.year - b.year || Number(b.featured) - Number(a.featured) || a.title.localeCompare(b.title, "en")));
+
+  const TOTAL_ROUTES = DOMAINS.reduce((sum, domain) => sum + (domain.routes || []).length, 0);
 
   const NODE_LABELS = {
-    vla: "视觉语言",
-    "world-models": "世界模型",
-    "policy-learning": "策略学习",
-    manipulation: "灵巧操作",
-    navigation: "导航移动",
-    humanoids: "人形机器人",
-    simulation: "仿真迁移",
-    perception: "具身感知",
-    "data-benchmarks": "数据评测"
+    navigation: "导航",
+    manipulation: "操作",
+    "loco-manipulation": "移动操作",
+    simulation: "仿真器",
+    data: "数据评测"
   };
 
   const TYPE_ORDER = ["paper", "system", "concept", "dataset", "benchmark"];
 
   const state = {
     route: { name: "home" },
-    catalog: { q: "", type: "all", domain: "all", sort: "featured", bookmarksOnly: false },
+    catalog: { q: "", type: "all", domain: "all", route: "all", sort: "featured", bookmarksOnly: false },
     search: { items: [], selected: 0, query: "" },
-    graphDomain: "vla",
+    graphDomain: "manipulation",
     mobileOpen: false,
     citationText: "",
     bookmarks: loadBookmarks()
@@ -66,6 +73,30 @@
 
   function domainOf(entry) {
     return domainById.get(entry.domain);
+  }
+
+  function routeInfo(domain, routeId) {
+    return (domain?.routes || []).find(route => route.id === routeId) || null;
+  }
+
+  function routeOf(entry) {
+    return routeInfo(domainOf(entry), entry.route);
+  }
+
+  function routeHref(domain, route) {
+    return `#/route/${domain.id}/${route.id}`;
+  }
+
+  function routeEntries(domainId, routeId) {
+    return entriesByRoute.get(`${domainId}:${routeId}`) || [];
+  }
+
+  function resourcesForDomain(domainId) {
+    return RESOURCES.filter(resource => resource.domains.includes(domainId));
+  }
+
+  function externalResourceCount() {
+    return RESOURCES.filter(resource => !resource.entryId).length;
   }
 
   function padded(number) {
@@ -114,22 +145,6 @@
 
   function countDomainEntries(id) {
     return (entriesByDomain.get(id) || []).length;
-  }
-
-  function totalRefs() {
-    return ENTRIES.reduce((sum, entry) => sum + (entry.links ? entry.links.length : 0), 0);
-  }
-
-  function uniqueRelatedCount() {
-    const pairs = new Set();
-    DOMAINS.forEach(domain => {
-      (domain.related || []).forEach(other => {
-        if (domainById.has(other) && other !== domain.id) {
-          pairs.add([domain.id, other].sort().join("--"));
-        }
-      });
-    });
-    return pairs.size;
   }
 
   function allTags(limit = 0) {
@@ -235,15 +250,11 @@
   /* ------------------------------------------------------------------ icons */
 
   const DOMAIN_ICONS = {
-    vla: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M8 18v-7h8M40 18v-7h-8M8 30v7h8M40 30v7h-8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="24" r="6" stroke="currentColor" stroke-width="2"/><path d="M17 24h-5m19 0h-5M24 17v-5m0 19v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
-    "world-models": `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="15" stroke="currentColor" stroke-width="2"/><ellipse cx="24" cy="24" rx="7" ry="15" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 20h29M9.5 28h29" stroke="currentColor" stroke-width="1.5"/><circle cx="32" cy="15" r="3" fill="currentColor"/></svg>`,
-    "policy-learning": `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M8 32c7-18 12 4 18-8s8 13 14-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 38h32" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 4"/><circle cx="8" cy="32" r="3" fill="currentColor"/><circle cx="40" cy="17" r="3" fill="currentColor"/></svg>`,
-    manipulation: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 7v13m-8-8v8a8 8 0 0 0 16 0v-8M16 25v8m16-8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 33h18v5H15z" stroke="currentColor" stroke-width="2"/><path d="M20 25v8m8-8v8" stroke="currentColor" stroke-width="2"/></svg>`,
     navigation: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="2"/><path d="m30 18-4.2 8.1L18 30l4.2-8.1L30 18Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="24" r="2" fill="currentColor"/></svg>`,
-    humanoids: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="10" r="5" stroke="currentColor" stroke-width="2"/><path d="M24 15v15m-9-10 9 4 9-4M24 30l-7 11m7-11 7 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    manipulation: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 7v13m-8-8v8a8 8 0 0 0 16 0v-8M16 25v8m16-8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 33h18v5H15z" stroke="currentColor" stroke-width="2"/><path d="M20 25v8m8-8v8" stroke="currentColor" stroke-width="2"/></svg>`,
+    "loco-manipulation": `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="10" r="5" stroke="currentColor" stroke-width="2"/><path d="M24 15v15m-9-10 9 4 9-4M24 30l-7 11m7-11 7 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     simulation: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="m24 7 15 8.5v17L24 41 9 32.5v-17L24 7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m9 15.5 15 8.7 15-8.7M24 24.2V41" stroke="currentColor" stroke-width="1.5"/><circle cx="24" cy="24" r="3" fill="currentColor"/></svg>`,
-    perception: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M6 24s6.5-10 18-10 18 10 18 10-6.5 10-18 10S6 24 6 24Z" stroke="currentColor" stroke-width="2"/><circle cx="24" cy="24" r="5" stroke="currentColor" stroke-width="2"/><circle cx="24" cy="24" r="1.5" fill="currentColor"/><path d="M12 12 9 8M36 12l3-4M12 36l-3 4m27-4 3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
-    "data-benchmarks": `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M10 37V24m9 13V14m9 23V28m9 9V8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M6 41h36" stroke="currentColor" stroke-width="1.5"/><circle cx="19" cy="14" r="2.5" fill="currentColor"/></svg>`
+    data: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M10 37V24m9 13V14m9 23V28m9 9V8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M6 41h36" stroke="currentColor" stroke-width="1.5"/><circle cx="19" cy="14" r="2.5" fill="currentColor"/></svg>`
   };
 
   function arrowIcon() {
@@ -320,11 +331,13 @@
 
   function renderHome() {
     const domainsCount = padded(DOMAINS.length);
+    const routesCount = padded(TOTAL_ROUTES);
     const entriesCount = padded(ENTRIES.length);
-    const pathsCount = padded(PATHS.length);
+    const resourcesCount = padded(RESOURCES.length);
     const featPrimary = byId("openvla");
-    const featuredList = ["pi0", "genie-3", "diffusion-policy", "groot-n1"].map(byId).filter(Boolean);
     const featDomain = domainOf(featPrimary);
+    const featRoute = routeOf(featPrimary);
+    const featuredList = ["pi0", "genie-3", "diffusion-policy", "groot-n1"].map(byId).filter(Boolean);
     const topTags = allTags(8);
 
     return `
@@ -341,20 +354,17 @@
           </h1>
           <p class="hero-lede reveal" style="--delay:110ms">
             一个由研究者、工程师和好奇的人共同维护的具身智能开放知识库。
-            从 VLA 到世界模型，从论文到真机——让每个概念都有出处，每次争论都有上下文。
+            先看五大领域，再沿技术路线走到具体论文——让每个概念都有出处，每次争论都有上下文。
           </p>
           <button class="hero-search reveal" style="--delay:160ms" type="button" data-open-search>
             <span class="hero-search-icon">${smallSearchIcon()}</span>
-            <span class="hero-search-placeholder">搜索论文、系统或概念</span>
+            <span class="hero-search-placeholder">搜索领域、技术路线、论文或资源</span>
             <span class="hero-search-hint">按 <kbd>Ctrl K</kbd> 开始</span>
             <span class="hero-search-arrow">${smallArrow()}</span>
           </button>
           <div class="hero-trending reveal" style="--delay:210ms">
             <span>从这里开始</span>
-            <a href="#/entry/vla-paradigm">VLA 范式</a>
-            <a href="#/entry/genie-3">世界模型</a>
-            <a href="#/domain/simulation">Sim2Real</a>
-            <a href="#/entry/open-x-embodiment">开放数据</a>
+            ${DOMAINS.map(domain => `<a href="#/domain/${domain.id}">${esc(domain.name)}</a>`).join("")}
           </div>
         </div>
         ${heroArt()}
@@ -364,23 +374,23 @@
         <div class="wrap stat-grid">
           <div class="stat reveal">
             <span class="stat-value">${domainsCount}</span>
-            <span class="stat-label">个知识领域</span>
-            <span class="stat-note">从感知到行动</span>
+            <span class="stat-label">个研究领域</span>
+            <span class="stat-note">navigation → data</span>
           </div>
           <div class="stat reveal" style="--delay:50ms">
+            <span class="stat-value">${routesCount}</span>
+            <span class="stat-label">条技术路线</span>
+            <span class="stat-note">领域内的研究分支</span>
+          </div>
+          <div class="stat reveal" style="--delay:100ms">
             <span class="stat-value">${entriesCount}</span>
             <span class="stat-label">个深度词条</span>
             <span class="stat-note">论文、系统与概念</span>
           </div>
-          <div class="stat reveal" style="--delay:100ms">
-            <span class="stat-value">${pathsCount}</span>
-            <span class="stat-label">条阅读路径</span>
-            <span class="stat-note">有顺序地进入领域</span>
-          </div>
           <div class="stat reveal" style="--delay:150ms">
-            <span class="stat-value">∞</span>
-            <span class="stat-label">次修订可能</span>
-            <span class="stat-note">评论 / 纠错 / 补充</span>
+            <span class="stat-value">${resourcesCount}</span>
+            <span class="stat-label">个数据集与基准</span>
+            <span class="stat-note">训练、评测与复现</span>
           </div>
         </div>
       </section>
@@ -395,11 +405,11 @@
       <section class="section domains-section wrap" id="domains">
         <div class="section-head">
           <div>
-            <p class="eyebrow">01 / DOMAIN ATLAS</p>
-            <h2 class="section-title">九个领域，<br><em>一张行动地图。</em></h2>
+            <p class="eyebrow">01 / RESEARCH AREAS</p>
+            <h2 class="section-title">五个领域，<br><em>一张技术地图。</em></h2>
           </div>
           <div class="section-aside">
-            <p>从语义理解到物理接触，从单篇论文到一个领域的时间线。点击任一领域，查看核心问题、里程碑与全部词条。</p>
+            <p>每个领域先拆成技术路线，再落到具体论文、系统与概念。每个领域另设常用的数据集与 benchmark，方便从「读论文」进入「做实验」。</p>
             <a class="text-link" href="#/entries">浏览全部 ${ENTRIES.length} 个词条 ${smallArrow()}</a>
           </div>
         </div>
@@ -429,7 +439,7 @@
               </div>
               <div class="spotlight-main">
                 <div class="spotlight-copy">
-                  <p class="spotlight-domain">${featDomain.num} / ${esc(featDomain.en)}</p>
+                  <p class="spotlight-domain">${featDomain.num} / ${esc(featDomain.en)} · ${esc(featRoute.name)}</p>
                   <h3>${esc(featPrimary.title)}</h3>
                   <p class="spotlight-sub">${esc(featPrimary.subtitle)}</p>
                   <p class="spotlight-tldr">${esc(featPrimary.tldr)}</p>
@@ -459,7 +469,7 @@
                 <a class="featured-row" href="#/entry/${entry.id}" style="--accent:${domain.accent}">
                   <span class="fr-index">${padded(index + 2)}</span>
                   <span class="fr-copy">
-                    <span class="fr-meta">${domain.num} / ${esc(domain.short)} · ${typeLabel(entry.type)}</span>
+                    <span class="fr-meta">${esc(domain.short)} / ${esc(routeOf(entry).name)} · ${typeLabel(entry.type)}</span>
                     <strong>${esc(entry.title)}</strong>
                     <span class="fr-sub">${esc(entry.subtitle)}</span>
                   </span>
@@ -497,12 +507,12 @@
       <section class="section home-graph-section wrap">
         <div class="home-graph-copy">
           <p class="eyebrow">04 / CONNECTIONS</p>
-          <h2 class="section-title">理解一个词条，<br><em>也要看它和谁相连。</em></h2>
-          <p>领域不是抽屉。VLA 依赖策略学习，世界模型改变仿真，评测又反过来定义什么叫「通用」。知识网络把这种关系画出来，也把选择权交给你。</p>
+          <h2 class="section-title">领域不是抽屉。<br><em>路线也不是。</em></h2>
+          <p>导航会借操作的语义规划，移动操作依赖仿真与数据，评测又反过来定义什么叫「通用」。知识网络从五个领域展开，再带你进入领域内部的技术路线。</p>
           <div class="home-graph-stats">
             <div><strong>${DOMAINS.length}</strong><span>领域节点</span></div>
-            <div><strong>${uniqueRelatedCount()}</strong><span>跨领域连接</span></div>
-            <div><strong>${totalRefs()}+</strong><span>原始文献入口</span></div>
+            <div><strong>${TOTAL_ROUTES}</strong><span>技术路线</span></div>
+            <div><strong>${RESOURCES.length}</strong><span>数据 / 基准</span></div>
           </div>
           <a class="button button--dark" href="#/graph">进入知识网络 <span>${smallArrow()}</span></a>
         </div>
@@ -546,17 +556,17 @@
   }
 
   function heroArt() {
-    const nodes = [
-      { icon: "01", title: "语言指令", sub: "LLM / PLAN", cls: "loop-node--one" },
-      { icon: "02", title: "视觉感知", sub: "RGB-D / 3DGS", cls: "loop-node--two" },
-      { icon: "03", title: "世界模型", sub: "PREDICT", cls: "loop-node--three" },
-      { icon: "04", title: "动作策略", sub: "VLA / POLICY", cls: "loop-node--four" },
-      { icon: "05", title: "物理本体", sub: "BODY / ACT", cls: "loop-node--five" }
-    ];
+    const positions = ["one", "two", "three", "four", "five"];
+    const nodes = DOMAINS.map((domain, index) => ({
+      icon: padded(index + 1),
+      title: domain.name,
+      sub: domain.short,
+      cls: `loop-node--${positions[index]}`
+    }));
     return `
-      <div class="hero-art reveal" style="--delay:150ms" role="img" aria-label="具身智能闭环示意：语言、视觉、世界模型、动作与物理本体">
+      <div class="hero-art reveal" style="--delay:150ms" role="img" aria-label="具身智能研究地图：导航、操作、移动操作、仿真器与数据评测">
         <div class="art-topline">
-          <span>FIG. 01 / THE EMBODIED LOOP</span>
+          <span>FIG. 01 / RESEARCH ATLAS</span>
           <span class="art-live"><i></i>LIVE INDEX</span>
         </div>
         <div class="art-canvas">
@@ -584,8 +594,8 @@
           </svg>
           <div class="loop-core">
             <span class="core-index">EAI / 000</span>
-            <strong>感知<br>→ 行动</strong>
-            <span class="core-sub">CLOSED LOOP</span>
+            <strong>领域<br>→ 论文</strong>
+            <span class="core-sub">${TOTAL_ROUTES} ROUTES INSIDE</span>
           </div>
           ${nodes.map(node => `
             <div class="loop-node ${node.cls}">
@@ -593,19 +603,19 @@
               <b>${node.title}</b>
               <small>${node.sub}</small>
             </div>`).join("")}
-          <span class="art-axis art-axis--top">Y / ACTION</span>
-          <span class="art-axis art-axis--bottom">X / OBSERVATION</span>
+          <span class="art-axis art-axis--top">Y / ROUTES</span>
+          <span class="art-axis art-axis--bottom">X / EVIDENCE</span>
           <span class="art-coord">31.2304° N<br>121.4737° E</span>
         </div>
         <div class="art-foot">
-          <span>EMBODIED / GENERALIST / OPEN</span>
-          <span>${ENTRIES.length} ENTRIES · ${DOMAINS.length} DOMAINS</span>
+          <span>NAV / MANIP / LOCO / SIM / DATA</span>
+          <span>${ENTRIES.length} ENTRIES · ${TOTAL_ROUTES} ROUTES</span>
         </div>
       </div>`;
   }
 
   function marqueeItems() {
-    const items = ["VLA", "WORLD MODELS", "DIFFUSION POLICY", "SIM2REAL", "WHOLE-BODY CONTROL", "OPEN X-EMBODIMENT", "DEXTEROUS MANIPULATION", "GENERATIVE ENVIRONMENTS"];
+    const items = ["NAVIGATION", "MANIPULATION", "LOCO-MANIPULATION", "SIMULATION", "DATA & EVALUATION", "VLA", "WAM", "CODE AS POLICY", "EMBODIED HARNESS", "SIM2REAL"];
     return `<div class="marquee-group">${items.map((item, index) => `<span>${item}</span><i aria-hidden="true">${index % 3 === 0 ? "✳" : index % 3 === 1 ? "+" : "→"}</i>`).join("")}</div>`;
   }
 
@@ -615,11 +625,13 @@
 
   function domainCard(domain, index) {
     const count = countDomainEntries(domain.id);
-    const isFeature = domain.id === "vla";
+    const resourceCount = resourcesForDomain(domain.id).length;
+    const routeCount = domain.routes.length;
+    const isFeature = Boolean(domain.feature);
     const style = `--accent:${domain.accent};--tint:${domain.tint};--delay:${index * 40}ms;`;
     if (isFeature) {
       return `
-        <article class="domain-card domain-card--feature reveal" style="${style}">
+        <article class="domain-card domain-card--feature reveal" data-domain="${domain.id}" style="${style}">
           <a href="#/domain/${domain.id}" aria-label="进入${esc(domain.name)}领域">
             <div class="dc-top">
               <span class="dc-num">${domain.num}</span>
@@ -632,20 +644,22 @@
                 <h3>${esc(domain.name)}</h3>
                 <p class="dc-tagline">${esc(domain.tagline)}</p>
                 <div class="dc-pipeline" aria-hidden="true">
-                  <span>SEE</span><i>×</i><span>SAY</span><i>→</i><span>ACT</span>
+                  <span>IL</span><i>×</i><span>RL</span><i>→</i><span>VLA</span><i>→</i><span>WAM</span>
                 </div>
               </div>
-              <div class="dc-watermark" aria-hidden="true">VLA</div>
+              <div class="dc-watermark" aria-hidden="true">MANIP</div>
+            </div>
+            <div class="dc-feature-route-list">
+              ${domain.routes.map((route, routeIndex) => `<span><b>${padded(routeIndex + 1)}</b>${esc(route.name)}</span>`).join("")}
             </div>
             <div class="dc-feature-foot">
-              <div class="dc-mini-tags">${domain.topics.slice(0, 4).map(topic => `<span>${esc(topic)}</span>`).join("")}</div>
-              <span class="dc-count">${count} 个词条 <i>↗</i></span>
+              <span class="dc-count">${routeCount} 条路线 · ${count} 个词条 · ${resourceCount} 个资源 <i>↗</i></span>
             </div>
           </a>
         </article>`;
     }
     return `
-      <article class="domain-card reveal" style="${style}">
+      <article class="domain-card reveal" data-domain="${domain.id}" style="${style}">
         <a href="#/domain/${domain.id}" aria-label="进入${esc(domain.name)}领域">
           <div class="dc-top">
             <span class="dc-num">${domain.num}</span>
@@ -656,10 +670,10 @@
             <p class="dc-en">${esc(domain.en)}</p>
             <h3>${esc(domain.name)}</h3>
             <p class="dc-description">${esc(domain.description)}</p>
+            <div class="dc-route-list">${domain.routes.map(route => `<span>${esc(route.name)}</span>`).join("")}</div>
           </div>
           <div class="dc-foot">
-            <div class="dc-mini-tags">${domain.topics.slice(0, 2).map(topic => `<span>${esc(topic)}</span>`).join("")}</div>
-            <span class="dc-count">${count} 个词条 <i>↗</i></span>
+            <span class="dc-count">${routeCount} 条路线 · ${count} 个词条 <i>↗</i></span>
           </div>
         </a>
       </article>`;
@@ -674,18 +688,21 @@
   }
 
   function filterCatalogEntries() {
-    const { q, type, domain, sort, bookmarksOnly } = state.catalog;
+    const { q, type, domain, route, sort, bookmarksOnly } = state.catalog;
     let list = ENTRIES.slice();
     if (bookmarksOnly) list = list.filter(entry => state.bookmarks.has(entry.id));
     if (type !== "all") list = list.filter(entry => entry.type === type);
     if (domain !== "all") list = list.filter(entry => entry.domain === domain);
+    if (route !== "all") list = list.filter(entry => entry.route === route);
     if (q.trim()) {
       const query = q.trim().toLowerCase();
       list = list.filter(entry => {
         const domainInfo = domainOf(entry);
+        const route = routeOf(entry);
         return [
           entry.title, entry.subtitle, entry.tldr, entry.org, entry.venue,
-          entry.year, ...(entry.tags || []), domainInfo.name, domainInfo.en, domainInfo.short
+          entry.year, ...(entry.tags || []), domainInfo.name, domainInfo.en, domainInfo.short,
+          route?.name || "", route?.en || ""
         ].join(" ").toLowerCase().includes(query);
       });
     }
@@ -701,6 +718,7 @@
 
   function entryCardMarkup(entry, index = 0) {
     const domain = domainOf(entry);
+    const route = routeOf(entry);
     return `
       <a class="entry-card" href="#/entry/${entry.id}" style="--accent:${domain.accent};--tint:${domain.tint};--delay:${Math.min(index, 8) * 35}ms">
         <div class="entry-card-top">
@@ -708,7 +726,7 @@
           <span class="entry-year">${entry.year}</span>
         </div>
         <div class="entry-card-heading">
-          <p class="entry-card-domain">${domain.num} / ${esc(domain.short)}</p>
+          <p class="entry-card-domain">${domain.num} / ${esc(domain.short)} <span>·</span> ${esc(route?.name || "")}</p>
           <h3>${esc(entry.title)}</h3>
           <p class="entry-card-sub">${esc(entry.subtitle)}</p>
         </div>
@@ -751,10 +769,10 @@
                 <h1>词条库<em>Index</em></h1>
               </div>
               <div class="page-hero-aside">
-                <p>论文、系统、概念、数据集与基准。用同一套模板写作，用同一套标准检验。所有词条开放修订，也开放质疑。</p>
+                <p>论文、系统、概念、数据集与基准。按五个研究领域和技术路线组织，用同一套模板写作，用同一套标准检验。</p>
                 <div class="page-hero-count">
                   <strong>${padded(ENTRIES.length)}</strong>
-                  <span>个词条<br>跨 ${DOMAINS.length} 个领域</span>
+                  <span>个词条<br>跨 ${DOMAINS.length} 个领域 / ${TOTAL_ROUTES} 条路线</span>
                 </div>
               </div>
             </div>
@@ -783,6 +801,14 @@
                 <select id="catalog-domain">
                   <option value="all">全部领域</option>
                   ${DOMAINS.map(domain => `<option value="${domain.id}" ${state.catalog.domain === domain.id ? "selected" : ""}>${esc(domain.name)}</option>`).join("")}
+                </select>
+                <span class="select-arrow">⌄</span>
+              </label>
+              <label class="select-wrap select-wrap--route">
+                <span class="sr-only">按技术路线筛选</span>
+                <select id="catalog-route">
+                  <option value="all">全部路线</option>
+                  ${DOMAINS.map(domain => `<optgroup label="${esc(domain.name)}">${domain.routes.map(route => `<option value="${route.id}" ${state.catalog.route === route.id ? "selected" : ""}>${esc(route.name)}</option>`).join("")}</optgroup>`).join("")}
                 </select>
                 <span class="select-arrow">⌄</span>
               </label>
@@ -850,11 +876,34 @@
 
   /* ------------------------------------------------------------------- domain */
 
+  function resourceMarkup(resource) {
+    const entry = resource.entryId ? byId(resource.entryId) : null;
+    const href = entry ? `#/entry/${entry.id}` : safeUrl(resource.url);
+    const external = !entry;
+    return `
+      <a class="resource-card" href="${href}" ${external ? 'target="_blank" rel="noopener"' : ""} style="--resource-accent:${entry ? domainOf(entry).accent : "var(--orange)"}">
+        <div class="resource-top">
+          <span class="resource-type">${resource.type === "dataset" ? "DATASET" : "BENCHMARK"}</span>
+          <span class="resource-year">${resource.year}</span>
+          <span class="resource-link-icon">${external ? arrowIcon() : "↗"}</span>
+        </div>
+        <h4>${esc(resource.name)}</h4>
+        <p>${esc(resource.summary)}</p>
+        <div class="resource-foot">
+          <span>${esc(resource.scale)}</span>
+          <span>${entry ? "站内词条" : "外部资源"}</span>
+        </div>
+      </a>`;
+  }
+
   function renderDomain(domain) {
     const entries = entriesByDomain.get(domain.id) || [];
     const related = (domain.related || []).map(id => domainById.get(id)).filter(Boolean);
+    const resources = resourcesForDomain(domain.id);
+    const datasets = resources.filter(resource => resource.type === "dataset");
+    const benchmarks = resources.filter(resource => resource.type === "benchmark");
     return `
-      <div class="view view--domain">
+      <div class="view view--domain" style="--accent:${domain.accent};--tint:${domain.tint}">
         <section class="domain-hero" style="--accent:${domain.accent};--tint:${domain.tint}">
           <div class="wrap">
             <nav class="breadcrumbs breadcrumbs--on-tint" aria-label="面包屑">
@@ -877,11 +926,12 @@
               </div>
             </div>
             <div class="domain-hero-meta">
+              <div class="domain-meta-item"><span>ROUTES</span><strong>${domain.routes.length}</strong></div>
               <div class="domain-meta-item"><span>ENTRIES</span><strong>${entries.length}</strong></div>
-              <div class="domain-meta-item"><span>TOPICS</span><strong>${domain.topics.length}</strong></div>
+              <div class="domain-meta-item"><span>RESOURCES</span><strong>${resources.length}</strong></div>
               <div class="domain-meta-item"><span>UPDATED</span><strong>${formatDate(CFG.updated || "2026-11-10")}</strong></div>
               <div class="domain-topics-inline">
-                ${domain.topics.map(topic => `<span>${esc(topic)}</span>`).join("")}
+                ${domain.routes.map(route => `<span>${esc(route.name)}</span>`).join("")}
               </div>
             </div>
           </div>
@@ -900,9 +950,10 @@
             </div>
             <aside class="domain-aside">
               <div class="aside-card">
-                <div class="aside-card-head"><span>KEY TOPICS</span><span>${padded(domain.topics.length)}</span></div>
-                <ol class="topic-list">
-                  ${domain.topics.map((topic, index) => `<li><span>${padded(index + 1)}</span>${esc(topic)}</li>`).join("")}
+                <div class="aside-card-head"><span>TECH ROUTES</span><span>${padded(domain.routes.length)}</span></div>
+                <ol class="topic-list route-index-list">
+                  ${domain.routes.map((route, index) => `
+                    <li><span>${padded(index + 1)}</span><a href="${routeHref(domain, route)}">${esc(route.name)}</a><b>${routeEntries(domain.id, route.id).length}</b></li>`).join("")}
                 </ol>
               </div>
               <div class="aside-note">
@@ -913,36 +964,66 @@
             </aside>
           </section>
 
-          <section class="milestones-section">
+          <section class="domain-routes">
             <div class="entry-section-head">
               <span class="section-index">02</span>
-              <h2>时间线</h2>
-              <span class="section-tag">${entries.length} 个词条中的关键节点</span>
+              <h2>技术路线</h2>
+              <span class="section-tag">${domain.routes.length} 条路线 / ${entries.length} 个词条</span>
             </div>
-            <div class="milestone-track">
-              ${(domain.milestones || []).map((item, index) => {
-                const target = item.entry && byId(item.entry);
+            <div class="route-grid">
+              ${domain.routes.map((route, index) => {
+                const routeItems = routeEntries(domain.id, route.id);
                 return `
-                  <article class="milestone" style="--delay:${index * 70}ms">
-                    <span class="milestone-year">${esc(item.year)}</span>
-                    <span class="milestone-dot" style="background:${domain.accent}"></span>
-                    ${target ? `<a href="#/entry/${target.id}">` : `<div>`}
-                      <h3>${esc(item.title)}</h3>
-                      <p>${esc(item.text)}</p>
-                      ${target ? `<span class="milestone-link">${target.subtitle} ${smallArrow()}</span>` : ""}
-                    ${target ? `</a>` : `</div>`}
+                  <article class="route-card" style="--delay:${index * 45}ms">
+                    <a class="route-card-head" href="${routeHref(domain, route)}">
+                      <span class="route-card-num">${padded(index + 1)}</span>
+                      <span class="route-card-copy">
+                        <small>${esc(route.en)}</small>
+                        <strong>${esc(route.name)}</strong>
+                      </span>
+                      <span class="route-card-arrow">${arrowIcon()}</span>
+                    </a>
+                    <p class="route-card-desc">${esc(route.summary)}</p>
+                    <div class="route-card-tags">${route.tags.map(tag => `<span>${esc(tag)}</span>`).join("")}</div>
+                    <div class="route-card-entries">
+                      <span class="route-card-label">REPRESENTATIVE</span>
+                      ${routeItems.slice(0, 3).map(entry => `
+                        <a href="#/entry/${entry.id}">
+                          <span>${esc(entry.title)}</span>
+                          <small>${entry.year}</small>
+                        </a>`).join("")}
+                      ${routeItems.length > 3 ? `<a class="route-card-more" href="${routeHref(domain, route)}">还有 ${routeItems.length - 3} 个词条 ${smallArrow()}</a>` : ""}
+                    </div>
+                    <div class="route-card-foot">
+                      <span>${routeItems.length} 个词条</span>
+                      <a href="${routeHref(domain, route)}">进入路线 ${smallArrow()}</a>
+                    </div>
                   </article>`;
               }).join("")}
             </div>
           </section>
 
-          <section class="domain-entries">
+          <section class="domain-resources">
             <div class="entry-section-head">
               <span class="section-index">03</span>
-              <h2>本领域词条</h2>
-              <span class="section-tag">按推荐顺序</span>
+              <h2>常用数据集与基准</h2>
+              <span class="section-tag">${resources.length} 个资源</span>
             </div>
-            ${entryGridMarkup(entries)}
+            <div class="resource-columns">
+              <div class="resource-group">
+                <div class="resource-group-head"><span>DATASETS</span><span>${padded(datasets.length)}</span></div>
+                <div class="resource-list">
+                  ${datasets.length ? datasets.map(resourceMarkup).join("") : `<p class="resource-empty">这个领域暂未整理独立数据集。</p>`}
+                </div>
+              </div>
+              <div class="resource-group">
+                <div class="resource-group-head"><span>BENCHMARKS</span><span>${padded(benchmarks.length)}</span></div>
+                <div class="resource-list">
+                  ${benchmarks.length ? benchmarks.map(resourceMarkup).join("") : `<p class="resource-empty">这个领域暂未整理独立 benchmark。</p>`}
+                </div>
+              </div>
+            </div>
+            <p class="resources-note">资源按领域交叉收录；同一个数据集可能同时服务于操作、仿真与数据路线。标注「站内词条」的条目可直接阅读详细导读。</p>
           </section>
 
           <section class="domain-next">
@@ -966,13 +1047,83 @@
               <h2>这个领域，还缺什么？</h2>
             </div>
             <div class="domain-contribute-actions">
-              <p>一篇漏掉的关键工作、一段复现经验、一个被高估的结论，都值得被写下来。</p>
+              <p>一条路线、一篇漏掉的关键工作、一段复现经验，或者一个被高估的结论，都值得被写下来。</p>
               <div>
                 <button class="button button--dark" type="button" data-open-contribute data-prefill-domain="${domain.id}">添加词条 ${smallArrow()}</button>
                 <button class="button button--outline" type="button" data-open-contribute data-fix-domain="${domain.id}">提出修订</button>
               </div>
             </div>
           </section>
+        </div>
+      </div>`;
+  }
+
+  /* -------------------------------------------------------------------- route */
+
+  function renderRoutePage(domain, route) {
+    const items = routeEntries(domain.id, route.id);
+    const relatedRoutes = domain.routes.filter(item => item.id !== route.id);
+    return `
+      <div class="view view--route" style="--accent:${domain.accent};--tint:${domain.tint}">
+        <section class="route-hero">
+          <div class="wrap">
+            <nav class="breadcrumbs breadcrumbs--on-tint" aria-label="面包屑">
+              <a href="#/">EAI WIKI</a><span>/</span><a href="#/domain/${domain.id}">${esc(domain.name)}</a><span>/</span><span>${esc(route.name)}</span>
+            </nav>
+            <div class="route-hero-grid">
+              <div>
+                <p class="domain-hero-en">${esc(domain.en)} / ${esc(route.en)}</p>
+                <h1>${esc(route.name)}</h1>
+                <p class="route-hero-summary">${esc(route.summary)}</p>
+                <div class="route-hero-tags">${route.tags.map(tag => `<span>${esc(tag)}</span>`).join("")}</div>
+              </div>
+              <div class="route-question">
+                <span class="mono">ROUTE QUESTION</span>
+                <p>${esc(route.question)}</p>
+                <a class="text-link" href="#/domain/${domain.id}">返回领域地图 ${smallArrow()}</a>
+              </div>
+            </div>
+            <div class="route-hero-meta">
+              <div class="domain-meta-item"><span>AREA</span><strong>${esc(domain.name)}</strong></div>
+              <div class="domain-meta-item"><span>ENTRIES</span><strong>${items.length}</strong></div>
+              <div class="domain-meta-item"><span>UPDATED</span><strong>${formatDate(CFG.updated || "2026-11-10")}</strong></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="wrap route-body">
+          <div class="route-main">
+            <section class="domain-entries route-entries-section">
+              <div class="entry-section-head">
+                <span class="section-index">01</span>
+                <h2>这条路线上的工作</h2>
+                <span class="section-tag">按时间顺序 · 可继续补充</span>
+              </div>
+              ${entryGridMarkup(items, "这条路线还没有词条。你可以成为第一个补上它的人。")}
+            </section>
+
+            <div class="revision-note route-contribute-note">
+              <div>
+                <span class="mono">OPEN ROUTE</span>
+                <p>路线本身也会被修订：可能新增一条分支，也可能把两篇工作重新归位。欢迎在 GitHub 中提出。</p>
+              </div>
+              <button class="button button--outline" type="button" data-open-contribute data-prefill-domain="${domain.id}" data-prefill-route="${route.id}">补充这条路线 ${smallArrow()}</button>
+            </div>
+          </div>
+
+          <aside class="route-aside">
+            <div class="aside-card">
+              <div class="aside-card-head"><span>OTHER ROUTES / ${esc(domain.short)}</span><span>${padded(relatedRoutes.length)}</span></div>
+              <div class="route-aside-list">
+                ${relatedRoutes.map(item => `<a href="${routeHref(domain, item)}"><span>${esc(item.name)}</span><small>${routeEntries(domain.id, item.id).length} 个词条</small></a>`).join("")}
+              </div>
+            </div>
+            <div class="aside-note">
+              <span class="mono">HOW TO READ</span>
+              <p>先把路线问题读一遍，再看代表工作的证据与边界。不要用一篇论文替代整条路线。</p>
+              <a class="text-link" href="#/domain/${domain.id}">回到${esc(domain.name)}领域 ${smallArrow()}</a>
+            </div>
+          </aside>
         </div>
       </div>`;
   }
@@ -1077,7 +1228,8 @@
 
   function renderEntry(entry) {
     const domain = domainOf(entry);
-    const siblings = entriesByDomain.get(entry.domain) || [];
+    const route = routeOf(entry);
+    const siblings = routeEntries(entry.domain, entry.route);
     const index = siblings.findIndex(item => item.id === entry.id);
     const previous = index > 0 ? siblings[index - 1] : siblings[siblings.length - 1];
     const next = index < siblings.length - 1 ? siblings[index + 1] : siblings[0];
@@ -1093,12 +1245,14 @@
       <div class="view view--entry" style="--accent:${domain.accent};--tint:${domain.tint}">
         <section class="entry-hero wrap">
           <nav class="breadcrumbs" aria-label="面包屑">
-            <a href="#/">EAI WIKI</a><span>/</span><a href="#/entries">词条库</a><span>/</span><a href="#/domain/${domain.id}">${esc(domain.short)}</a><span>/</span><span>${esc(entry.title)}</span>
+            <a href="#/">EAI WIKI</a><span>/</span><a href="#/domain/${domain.id}">${esc(domain.name)}</a><span>/</span><a href="${routeHref(domain, route)}">${esc(route.name)}</a><span>/</span><span>${esc(entry.title)}</span>
           </nav>
           <header class="entry-header">
             <div class="entry-overline">
               ${typeChip(entry.type)}
               <a href="#/domain/${domain.id}">${domain.num} / ${esc(domain.name)}</a>
+              <span>·</span>
+              <a href="${routeHref(domain, route)}">${esc(route.name)}</a>
               <span>${entry.year}</span>
               <span class="entry-readtime">${readTime(entry)} 分钟阅读</span>
             </div>
@@ -1200,7 +1354,7 @@
                     const itemDomain = domainOf(item);
                     return `
                       <a class="related-entry-card" href="#/entry/${item.id}" style="--accent:${itemDomain.accent}">
-                        <span class="related-entry-meta">${itemDomain.num} / ${esc(itemDomain.short)} · ${typeLabel(item.type)}</span>
+                        <span class="related-entry-meta">${esc(itemDomain.short)} / ${esc(routeOf(item)?.name || "")} · ${typeLabel(item.type)}</span>
                         <strong>${esc(item.title)}</strong>
                         <span>${esc(item.subtitle)}</span>
                         <i>${arrowIcon()}</i>
@@ -1230,6 +1384,7 @@
                 <div class="fact-card-head"><span>AT A GLANCE</span><span>${typeLabel(entry.type)}</span></div>
                 <dl>
                   <div><dt>领域</dt><dd><a href="#/domain/${domain.id}">${domain.num} / ${esc(domain.name)}</a></dd></div>
+                  <div><dt>路线</dt><dd><a href="${routeHref(domain, route)}">${esc(route.name)}</a></dd></div>
                   <div><dt>年份</dt><dd>${entry.year}</dd></div>
                   <div><dt>发表</dt><dd>${esc(entry.venue)}</dd></div>
                   <div><dt>机构</dt><dd>${esc(entry.org)}</dd></div>
@@ -1264,12 +1419,12 @@
         <nav class="entry-pagination wrap" aria-label="相邻词条">
           ${previous ? `
             <a class="pagination-card pagination-card--prev" href="#/entry/${previous.id}">
-              <span>← 上一篇 / ${esc(domain.short)}</span>
+              <span>← 上一篇 / ${esc(route.name)}</span>
               <strong>${esc(previous.title)}</strong>
             </a>` : ""}
           ${next ? `
             <a class="pagination-card pagination-card--next" href="#/entry/${next.id}">
-              <span>下一篇 / ${esc(domain.short)} →</span>
+              <span>下一篇 / ${esc(route.name)} →</span>
               <strong>${esc(next.title)}</strong>
             </a>` : ""}
         </nav>
@@ -1386,28 +1541,12 @@
   /* ------------------------------------------------------------------- graph */
 
   const GRAPH_ABBR = {
-    vla: "VLA",
-    "world-models": "WM",
-    "policy-learning": "POL",
-    manipulation: "MAN",
     navigation: "NAV",
-    humanoids: "HUM",
+    manipulation: "MAN",
+    "loco-manipulation": "LOCO",
     simulation: "SIM",
-    perception: "PER",
-    "data-benchmarks": "DATA"
+    data: "DATA"
   };
-
-  function graphConnections() {
-    const pairs = new Set();
-    DOMAINS.forEach(domain => {
-      (domain.related || []).forEach(other => {
-        if (domainById.has(other) && other !== domain.id) {
-          pairs.add([domain.id, other].sort().join("--"));
-        }
-      });
-    });
-    return pairs.size;
-  }
 
   function graphPositions() {
     const cx = 450;
@@ -1463,10 +1602,10 @@
           ${positions.map(position => `<line x1="450" y1="338" x2="${position.x.toFixed(1)}" y2="${position.y.toFixed(1)}"/>`).join("")}
         </g>
         <g class="graph-center">
-          <circle cx="450" cy="338" r="68" fill="#f2efe6"/>
-          <text x="450" y="331" class="graph-center-title" text-anchor="middle">EAI</text>
+          <circle cx="450" cy="338" r="72" fill="#f2efe6"/>
+          <text x="450" y="330" class="graph-center-title" text-anchor="middle">EAI</text>
           <text x="450" y="349" class="graph-center-sub" text-anchor="middle">OPEN WIKI</text>
-          <text x="450" y="367" class="graph-center-micro" text-anchor="middle">EST. 2026</text>
+          <text x="450" y="367" class="graph-center-micro" text-anchor="middle">${TOTAL_ROUTES} ROUTES</text>
         </g>
         ${positions.map(position => {
           const d = position.domain;
@@ -1475,13 +1614,13 @@
           return `
             <g class="graph-node ${active ? "is-selected" : ""}" transform="translate(${position.x.toFixed(1)} ${position.y.toFixed(1)})"
                data-graph-domain="${d.id}" tabindex="0" role="button" aria-label="选择${esc(d.name)}领域" aria-pressed="${active}">
-              ${active ? `<circle class="node-active-ring" r="60" fill="none" stroke="${d.accent}" stroke-width="1.5" stroke-dasharray="3 5"/>` : ""}
-              <circle class="node-disc" r="49" fill="${d.accent}" stroke="${active ? "#f2efe6" : "rgba(242,239,230,.36)"}" stroke-width="${active ? 2 : 1}"/>
-              <text y="-8" class="graph-node-index" text-anchor="middle" fill="${ink}">${d.num}</text>
-              <text y="10" class="graph-node-abbr" text-anchor="middle" fill="${ink}">${GRAPH_ABBR[d.id]}</text>
-              <circle cy="-25" r="3" fill="${ink}" opacity=".7"/>
-              <text y="72" class="graph-node-label" text-anchor="middle">${NODE_LABELS[d.id]}</text>
-              <text y="89" class="graph-node-count" text-anchor="middle">${countDomainEntries(d.id)} ENTRIES</text>
+              ${active ? `<circle class="node-active-ring" r="67" fill="none" stroke="${d.accent}" stroke-width="1.5" stroke-dasharray="3 5"/>` : ""}
+              <circle class="node-disc" r="56" fill="${d.accent}" stroke="${active ? "#f2efe6" : "rgba(242,239,230,.36)"}" stroke-width="${active ? 2 : 1}"/>
+              <text y="-9" class="graph-node-index" text-anchor="middle" fill="${ink}">${d.num}</text>
+              <text y="12" class="graph-node-abbr" text-anchor="middle" fill="${ink}">${GRAPH_ABBR[d.id]}</text>
+              <circle cy="-28" r="3" fill="${ink}" opacity=".7"/>
+              <text y="82" class="graph-node-label" text-anchor="middle">${NODE_LABELS[d.id]}</text>
+              <text y="99" class="graph-node-count" text-anchor="middle">${d.routes.length} ROUTES · ${countDomainEntries(d.id)} ENTRIES</text>
             </g>`;
         }).join("")}
         <g class="graph-legend">
@@ -1495,13 +1634,12 @@
   }
 
   function graphPanelMarkup(domain) {
-    const entries = (entriesByDomain.get(domain.id) || []).slice(0, 3);
     const related = (domain.related || []).map(id => domainById.get(id)).filter(Boolean);
     return `
       <div class="graph-panel-top">
         <span class="graph-panel-index">${domain.num}</span>
         <span class="mono">SELECTED DOMAIN</span>
-        <span class="graph-panel-count">${countDomainEntries(domain.id)} ENTRIES</span>
+        <span class="graph-panel-count">${domain.routes.length} ROUTES</span>
       </div>
       <p class="graph-panel-en">${esc(domain.en)} / ${esc(domain.short)}</p>
       <h2>${esc(domain.name)}</h2>
@@ -1510,12 +1648,13 @@
         <span>THE BIG QUESTION</span>
         <p>${esc(domain.question)}</p>
       </div>
-      <div class="graph-panel-entries">
-        <span class="mono">REPRESENTATIVE ENTRIES</span>
-        ${entries.map(entry => `
-          <a href="#/entry/${entry.id}">
-            <span>${esc(entry.title)}</span>
-            <small>${typeLabel(entry.type)} · ${entry.year}</small>
+      <div class="graph-panel-routes">
+        <span class="mono">TECH ROUTES</span>
+        ${domain.routes.map((route, index) => `
+          <a href="${routeHref(domain, route)}">
+            <span class="graph-route-index">${padded(index + 1)}</span>
+            <span>${esc(route.name)}</span>
+            <small>${routeEntries(domain.id, route.id).length}</small>
             <i>${arrowIcon()}</i>
           </a>`).join("")}
       </div>
@@ -1525,7 +1664,7 @@
           ${related.map(item => `<button type="button" data-graph-domain="${item.id}" style="--accent:${item.accent}">${esc(item.name)}</button>`).join("")}
         </div>
       </div>
-      <a class="graph-panel-cta" href="#/domain/${domain.id}">进入领域词条 ${smallArrow()}</a>`;
+      <a class="graph-panel-cta" href="#/domain/${domain.id}">进入领域地图 ${smallArrow()}</a>`;
   }
 
   function renderGraph() {
@@ -1542,10 +1681,10 @@
               <h1>知识网络<em>Graph</em></h1>
             </div>
             <div class="page-hero-aside">
-              <p>领域之间不是并列关系。VLA 借走世界模型的预测能力，仿真给策略学习提供数据，评测又不断重写「通用」的定义。</p>
+              <p>五个领域不是并列的抽屉，领域内部也不是平铺的论文列表。选中一个节点，沿技术路线进入具体工作。</p>
               <div class="graph-summary">
                 <div><strong>${padded(DOMAINS.length)}</strong><span>领域节点</span></div>
-                <div><strong>${padded(graphConnections())}</strong><span>相邻连接</span></div>
+                <div><strong>${padded(TOTAL_ROUTES)}</strong><span>技术路线</span></div>
                 <div><strong>${padded(ENTRIES.length)}</strong><span>词条入口</span></div>
               </div>
             </div>
@@ -1567,8 +1706,8 @@
               </div>
               <div class="graph-canvas-scroll">${graphSvgMarkup()}</div>
               <div class="graph-card-foot">
-                <span>SELECT A NODE TO EXPLORE</span>
-                <span>N = ${DOMAINS.length} / E = ${graphConnections()}</span>
+                <span>SELECT A NODE TO EXPLORE ROUTES</span>
+                <span>N = ${DOMAINS.length} / R = ${TOTAL_ROUTES}</span>
               </div>
             </div>
             <aside class="graph-panel" id="graph-panel" aria-live="polite">
@@ -1604,7 +1743,7 @@
       if (active && !existing) {
         const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         ring.setAttribute("class", "node-active-ring");
-        ring.setAttribute("r", "60");
+        ring.setAttribute("r", "67");
         ring.setAttribute("fill", "none");
         ring.setAttribute("stroke", domain.accent);
         ring.setAttribute("stroke-width", "1.5");
@@ -1630,7 +1769,10 @@
 （例如：Diffusion Policy）
 
 ## 所属领域
-VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机器人 / 仿真与 Sim2Real / 具身感知 / 数据与评测
+${DOMAINS.map(domain => domain.name).join(" / ")}
+
+## 技术路线
+从该领域已有的路线中选择；如果是新路线，请说明它和现有路线的关系。
 
 ## 类型
 论文 / 系统 / 概念 / 数据集 / 基准
@@ -1687,7 +1829,7 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
             <p class="eyebrow">WHY A WIKI</p>
             <div class="prose prose--large">
               <p>具身智能的论文增长得比任何人的阅读速度都快。搜索结果给你的是「有哪些」，但很少回答「应该先读哪篇」「这个结果可信吗」「它和那篇工作到底是什么关系」。</p>
-              <p>Wiki 的价值不在完整，而在<strong>有判断的连接</strong>：把一篇论文放回它的问题史里，把一句 demo 放回它的评测条件里，把一次失败写进下一个人能看到的地方。</p>
+              <p>Wiki 的价值不在完整，而在<strong>有判断的连接</strong>：先把它放回领域的技术路线，再把路线放回它的问题史，最后把一句 demo 放回它的评测条件里。</p>
             </div>
           </div>
 
@@ -1715,7 +1857,7 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
               <article class="way-card way-card--accent">
                 <span class="way-num">03</span>
                 <h3>贡献一个新词条</h3>
-                <p>用统一模板写一篇论文、系统或概念。从一个清楚的「为什么重要」开始，再给出机制、证据与边界。</p>
+                <p>用统一模板写一篇论文、系统或概念，并把它放进正确的领域与技术路线。从一个清楚的「为什么重要」开始。</p>
                 <button class="text-link" type="button" data-open-contribute>开始写词条 ${smallArrow()}</button>
               </article>
             </div>
@@ -1806,9 +1948,9 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
                 <div class="aside-card-head"><span>BEFORE YOU SUBMIT</span><span>CHECK</span></div>
                 <ul class="check-list">
                   <li>一手来源链接可访问</li>
+                  <li>领域与技术路线已归位</li>
                   <li>数字带有评测条件</li>
                   <li>事实与判断已区分</li>
-                  <li>没有编造的引用或作者</li>
                   <li>已说明 AI 参与程度</li>
                 </ul>
               </div>
@@ -1835,7 +1977,7 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
               <div class="roadmap-item is-current">
                 <span class="roadmap-phase">NOW / v0.1</span>
                 <h3>种子发布</h3>
-                <p>9 个领域、${ENTRIES.length} 个基础词条、统一模板与讨论入口。内容为 AI 辅助起草，等待领域编辑审校。</p>
+                <p>${DOMAINS.length} 个领域、${TOTAL_ROUTES} 条技术路线、${ENTRIES.length} 个基础词条与 ${RESOURCES.length} 个数据/基准资源。内容为 AI 辅助起草，等待领域编辑审校。</p>
                 <span class="roadmap-status">进行中</span>
               </div>
               <div class="roadmap-item">
@@ -1896,13 +2038,25 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
       title: domain.name,
       subtitle: `${domain.en} · ${domain.tagline}`,
       href: `#/domain/${domain.id}`,
-      meta: `${countDomainEntries(domain.id)} 个词条`,
+      meta: `${domain.routes.length} 条路线 · ${countDomainEntries(domain.id)} 个词条`,
       year: 2026,
       domainName: domain.name,
-      haystack: [domain.name, domain.en, domain.short, domain.description, domain.tagline, domain.question, ...(domain.topics || [])].join(" ").toLowerCase()
+      haystack: [domain.name, domain.en, domain.short, domain.description, domain.tagline, domain.question, ...domain.routes.flatMap(route => [route.name, route.en, ...route.tags])].join(" ").toLowerCase()
     })),
+    ...DOMAINS.flatMap(domain => domain.routes.map(route => ({
+      kind: "route",
+      id: `${domain.id}:${route.id}`,
+      title: route.name,
+      subtitle: `${domain.name} · ${route.en}`,
+      href: routeHref(domain, route),
+      meta: `${routeEntries(domain.id, route.id).length} 个词条`,
+      year: 2026,
+      domainName: domain.name,
+      haystack: [domain.name, route.name, route.en, route.summary, route.question, ...route.tags].join(" ").toLowerCase()
+    }))),
     ...ENTRIES.map(entry => {
       const domain = domainOf(entry);
+      const route = routeOf(entry);
       return {
         kind: "entry",
         id: entry.id,
@@ -1915,8 +2069,25 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
         domainName: domain.name,
         haystack: [
           entry.title, entry.subtitle, entry.tldr, entry.org, entry.authors, entry.venue,
-          entry.year, entry.id, ...(entry.tags || []), domain.name, domain.en, domain.short
+          entry.year, entry.id, ...(entry.tags || []), domain.name, domain.en, domain.short,
+          route?.name || "", route?.en || ""
         ].join(" ").toLowerCase()
+      };
+    }),
+    ...RESOURCES.filter(resource => !resource.entryId).map(resource => {
+      const domainNames = resource.domains.map(id => domainById.get(id)?.name).filter(Boolean).join(" / ");
+      return {
+        kind: "resource",
+        id: resource.id,
+        title: resource.name,
+        subtitle: resource.summary,
+        href: resource.url,
+        external: true,
+        meta: `${typeLabel(resource.type)} · ${resource.year}`,
+        year: resource.year,
+        type: resource.type,
+        domainName: domainNames,
+        haystack: [resource.name, resource.summary, resource.scale, typeLabel(resource.type), domainNames].join(" ").toLowerCase()
       };
     })
   ];
@@ -1952,9 +2123,12 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
 
   function searchResultMarkup(doc, index, selected) {
     const isDomain = doc.kind === "domain";
+    const isRoute = doc.kind === "route";
+    const isResource = doc.kind === "resource";
+    const kindLabel = isDomain ? "领域" : isRoute ? "路线" : isResource ? typeLabel(doc.type) : typeLabel(doc.type);
     return `
-      <a class="search-result ${selected ? "is-selected" : ""}" href="${doc.href}" data-search-index="${index}" id="search-result-${index}" ${isDomain ? "" : 'data-search-entry="true"'}>
-        <span class="search-result-kind ${isDomain ? "is-domain" : ""}">${isDomain ? "领域" : typeLabel(doc.type)}</span>
+      <a class="search-result ${selected ? "is-selected" : ""}" href="${doc.href}" ${doc.external ? 'target="_blank" rel="noopener"' : ""} data-search-index="${index}" id="search-result-${index}">
+        <span class="search-result-kind ${isDomain ? "is-domain" : ""} ${isRoute ? "is-route" : ""} ${isResource ? "is-resource" : ""}">${kindLabel}</span>
         <span class="search-result-copy">
           <strong>${esc(doc.title)}</strong>
           <small>${esc(doc.subtitle)}</small>
@@ -1985,7 +2159,7 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
             return searchResultMarkup(doc, index, false);
           }).join("")}
         </div>
-        <div class="search-section-label search-section-label--domains"><span>DOMAINS</span><span>9 FIELDS</span></div>
+        <div class="search-section-label search-section-label--domains"><span>DOMAINS</span><span>${DOMAINS.length} AREAS / ${TOTAL_ROUTES} ROUTES</span></div>
         <div class="search-domain-grid">
           ${DOMAINS.map(domain => `<a href="#/domain/${domain.id}" style="--accent:${domain.accent}"><span>${domain.num}</span>${esc(domain.name)}</a>`).join("")}
         </div>
@@ -1997,7 +2171,7 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
     const resultsNode = document.getElementById("search-results");
     const countNode = document.getElementById("search-count");
     const totalNode = document.getElementById("search-total");
-    if (totalNode) totalNode.textContent = ENTRIES.length;
+    if (totalNode) totalNode.textContent = ENTRIES.length + externalResourceCount();
     if (!resultsNode) return;
     if (!query.trim()) {
       resultsNode.innerHTML = searchSuggestionsMarkup();
@@ -2014,7 +2188,7 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
       resultsNode.innerHTML = `<div class="search-empty">
         <span class="search-empty-mark">∅</span>
         <h3>没有找到「${esc(query)}」</h3>
-        <p>试试论文名、作者、领域或更短的关键词。</p>
+        <p>试试论文名、作者、领域、技术路线或更短的关键词。</p>
         <button class="button button--outline" type="button" data-open-contribute>把它作为一个新词条提出来 ${smallArrow()}</button>
       </div>`;
       return;
@@ -2074,6 +2248,14 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
 
   const INTENT_LABELS = { entry: "新词条", fix: "修订 / 纠错", comment: "讨论 / 补充" };
 
+  function routeOptionsMarkup(domainId, selectedRoute = "") {
+    const domain = domainById.get(domainId);
+    if (!domain) return `<option value="">先选择领域</option>`;
+    return `<option value="">待判断 / 新路线</option>${domain.routes
+      .map(route => `<option value="${route.id}" ${route.id === selectedRoute ? "selected" : ""}>${esc(route.name)}</option>`)
+      .join("")}`;
+  }
+
   function openContribute(options = {}) {
     const dialog = document.getElementById("contribute-dialog");
     const shell = document.getElementById("contribute-shell");
@@ -2084,6 +2266,7 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
     const intent = options.intent || "entry";
     const entry = options.entry || null;
     const domainId = options.domain || entry?.domain || "all";
+    const prefillRoute = options.route || entry?.route || "";
     const prefillName = entry?.title || "";
     const prefillLink = entry ? (primarySource(entry)?.url || "") : "";
     const prefillType = entry?.type || "paper";
@@ -2121,12 +2304,18 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
             <input name="name" type="text" required maxlength="120" value="${esc(prefillName)}" placeholder="例如：Diffusion Policy">
           </label>
         </div>
-        <div class="field-grid field-grid--two">
+        <div class="field-grid field-grid--three">
           <label class="field">
             <span>所属领域 <em>*</em></span>
-            <select name="domain" required>
+            <select name="domain" data-contribution-domain required>
               <option value="" ${domainId === "all" ? "selected" : ""} disabled>选择一个领域</option>
               ${DOMAINS.map(domain => `<option value="${domain.id}" ${domain.id === domainId ? "selected" : ""}>${esc(domain.name)}</option>`).join("")}
+            </select>
+          </label>
+          <label class="field">
+            <span>技术路线</span>
+            <select name="route" data-contribution-route>
+              ${routeOptionsMarkup(domainId, prefillRoute)}
             </select>
           </label>
           <label class="field">
@@ -2172,6 +2361,11 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
       </form>`;
 
     const form = document.getElementById("contribution-form");
+    const domainSelect = form.querySelector("[data-contribution-domain]");
+    const routeSelect = form.querySelector("[data-contribution-route]");
+    domainSelect?.addEventListener("change", () => {
+      if (routeSelect) routeSelect.innerHTML = routeOptionsMarkup(domainSelect.value, "");
+    });
     form.addEventListener("submit", event => {
       event.preventDefault();
       if (!form.reportValidity()) return;
@@ -2211,6 +2405,7 @@ VLA / 世界模型 / 策略学习 / 灵巧操作 / 导航与移动 / 人形机�
     const data = new FormData(form);
     const value = key => String(data.get(key) || "").trim();
     const domain = domainById.get(value("domain"));
+    const route = domain ? routeInfo(domain, value("route")) : null;
     const intent = value("intent");
     return `### 贡献类型
 ${INTENT_LABELS[intent] || intent}
@@ -2220,6 +2415,9 @@ ${value("name")}
 
 ### 所属领域
 ${domain ? domain.name : "待定"}
+
+### 技术路线
+${route ? route.name : "待判断 / 新路线"}
 
 ### 词条类型
 ${typeLabel(value("entryType"))}
@@ -2292,6 +2490,12 @@ ${value("contributor") || "匿名 / 待联系"}
       if (domain) return { name: "domain", domain, raw };
       return { name: "notfound", raw };
     }
+    if (parts[0] === "route" && parts[1] && parts[2]) {
+      const domain = domainById.get(decodeURIComponent(parts[1]));
+      const route = domain ? routeInfo(domain, decodeURIComponent(parts[2])) : null;
+      if (domain && route) return { name: "route", domain, route, raw };
+      return { name: "notfound", raw };
+    }
     if (parts[0] === "graph" && !parts[1]) return { name: "graph", raw };
     if (parts[0] === "contribute" && !parts[1]) return { name: "contribute", raw };
     return { name: "notfound", raw };
@@ -2301,20 +2505,26 @@ ${value("contributor") || "匿名 / 待联系"}
     if (route.name === "home") {
       return {
         title: "EAI Wiki · 具身智能开放知识库",
-        description: "EAI Wiki 是一个由社区共建的具身智能知识库：领域地图、论文与系统词条、阅读路径、知识网络与开放讨论。"
+        description: "EAI Wiki 是一个由社区共建的具身智能知识库：导航、操作、移动操作、仿真器、数据与评测五大领域，按技术路线整理论文、数据集与 benchmark。"
       };
     }
     if (route.name === "catalog") {
-      return { title: "词条库 · EAI Wiki", description: `浏览 ${ENTRIES.length} 个具身智能词条：论文、系统、概念、数据集与基准。` };
+      return { title: "词条库 · EAI Wiki", description: `浏览 ${ENTRIES.length} 个具身智能词条与 ${RESOURCES.length} 个数据集/基准，按 ${DOMAINS.length} 个领域和 ${TOTAL_ROUTES} 条技术路线组织。` };
     }
     if (route.name === "domain") {
       return { title: `${route.domain.name} · EAI Wiki`, description: route.domain.description };
+    }
+    if (route.name === "route") {
+      return {
+        title: `${route.route.name} · ${route.domain.name} · EAI Wiki`,
+        description: `${route.route.summary} — ${routeEntries(route.domain.id, route.route.id).length} 个相关词条。`
+      };
     }
     if (route.name === "entry") {
       return { title: `${route.entry.title} · EAI Wiki`, description: route.entry.tldr };
     }
     if (route.name === "graph") {
-      return { title: "知识网络 · EAI Wiki", description: "以图的方式浏览具身智能各领域之间的关联。" };
+      return { title: "知识网络 · EAI Wiki", description: "以图的方式浏览导航、操作、移动操作、仿真器与数据评测五个领域及其技术路线。" };
     }
     if (route.name === "contribute") {
       return { title: "共建指南 · EAI Wiki", description: "如何为 EAI Wiki 提交词条、提出修订与参与讨论。" };
@@ -2334,7 +2544,7 @@ ${value("contributor") || "匿名 / 待联系"}
 
   function updateNav(route) {
     let active = "home";
-    if (route.name === "catalog" || route.name === "domain" || route.name === "entry") active = "entries";
+    if (route.name === "catalog" || route.name === "domain" || route.name === "route" || route.name === "entry") active = "entries";
     if (route.name === "graph") active = "graph";
     if (route.name === "contribute") active = "contribute";
     document.querySelectorAll("[data-nav]").forEach(link => {
@@ -2353,6 +2563,7 @@ ${value("contributor") || "匿名 / 待联系"}
     if (route.name === "home") html = renderHome();
     else if (route.name === "catalog") html = renderCatalog();
     else if (route.name === "domain") html = renderDomain(route.domain);
+    else if (route.name === "route") html = renderRoutePage(route.domain, route.route);
     else if (route.name === "entry") html = renderEntry(route.entry);
     else if (route.name === "graph") html = renderGraph();
     else if (route.name === "contribute") html = renderContribute();
@@ -2470,12 +2681,14 @@ ${value("contributor") || "匿名 / 待联系"}
   }
 
   function resetCatalog() {
-    state.catalog = { q: "", type: "all", domain: "all", sort: "featured", bookmarksOnly: false };
+    state.catalog = { q: "", type: "all", domain: "all", route: "all", sort: "featured", bookmarksOnly: false };
     const search = document.getElementById("catalog-search");
     const domain = document.getElementById("catalog-domain");
+    const route = document.getElementById("catalog-route");
     const sort = document.getElementById("catalog-sort");
     if (search) search.value = "";
     if (domain) domain.value = "all";
+    if (route) route.value = "all";
     if (sort) sort.value = "featured";
     renderCatalogResults();
   }
@@ -2533,10 +2746,11 @@ ${value("contributor") || "匿名 / 待联系"}
       const fixEntryId = contributionTrigger.dataset.fixEntry;
       const fixDomainId = contributionTrigger.dataset.fixDomain;
       const prefillDomain = contributionTrigger.dataset.prefillDomain;
+      const prefillRouteId = contributionTrigger.dataset.prefillRoute;
       let options = {};
-      if (fixEntryId) options = { intent: "fix", entry: byId(fixEntryId), domain: byId(fixEntryId)?.domain };
+      if (fixEntryId) options = { intent: "fix", entry: byId(fixEntryId), domain: byId(fixEntryId)?.domain, route: byId(fixEntryId)?.route };
       else if (fixDomainId) options = { intent: "fix", domain: fixDomainId };
-      else if (prefillDomain) options = { intent: "entry", domain: prefillDomain };
+      else if (prefillDomain) options = { intent: "entry", domain: prefillDomain, route: prefillRouteId };
       else if (contributionTrigger.dataset.intent) options = { intent: contributionTrigger.dataset.intent };
       else if (contributionTrigger.dataset.issue === "fix") options = { intent: "fix" };
       else options = { intent: "entry" };
@@ -2597,10 +2811,14 @@ ${value("contributor") || "匿名 / 待联系"}
     const tagJump = target.closest("[data-tag-jump]");
     if (tagJump) {
       event.preventDefault();
-      state.catalog.q = tagJump.dataset.tagJump;
+      state.catalog = { q: tagJump.dataset.tagJump, type: "all", domain: "all", route: "all", sort: "featured", bookmarksOnly: false };
       if (state.route.name === "catalog") {
         const input = document.getElementById("catalog-search");
+        const domain = document.getElementById("catalog-domain");
+        const route = document.getElementById("catalog-route");
         if (input) input.value = state.catalog.q;
+        if (domain) domain.value = "all";
+        if (route) route.value = "all";
         renderCatalogResults();
       } else {
         window.location.hash = "#/entries";
@@ -2693,6 +2911,13 @@ ${value("contributor") || "匿名 / 待联系"}
     if (!(target instanceof HTMLSelectElement)) return;
     if (target.id === "catalog-domain") {
       state.catalog.domain = target.value;
+      state.catalog.route = "all";
+      const route = document.getElementById("catalog-route");
+      if (route) route.value = "all";
+      renderCatalogResults();
+    }
+    if (target.id === "catalog-route") {
+      state.catalog.route = target.value;
       renderCatalogResults();
     }
     if (target.id === "catalog-sort") {

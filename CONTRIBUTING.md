@@ -25,7 +25,15 @@
 - 点击任意「贡献一个词条」按钮，填写站内表单。
 - 或使用 GitHub 的 **提交一个新词条** Issue 表单。
 - 建议先搜索现有词条，避免重复。
+- 必须选择所属领域与技术路线；如果是新路线，请解释它与现有路线的关系。
 - 如果愿意直接改仓库，请阅读下方的数据结构与 PR 流程。
+
+### 4. 补充数据集或 benchmark
+
+- 在 Issue 中说明名称、年份、规模、适用路线与一手链接。
+- 数据集需要说明采集方式、机器人/场景覆盖与许可。
+- benchmark 需要说明任务、指标与典型使用方式。
+- 如果希望拥有站内详情页，可以另外提交一个 `type: "dataset"` 或 `type: "benchmark"` 的词条。
 
 ---
 
@@ -92,12 +100,15 @@
 
 ## 在仓库中直接编辑
 
-全部内容在 [`assets/js/data.js`](assets/js/data.js)。一个条目形如：
+全部内容在 [`assets/js/data.js`](assets/js/data.js)。层级是 **领域 → 技术路线 → 词条**。
+
+一个条目形如：
 
 ```js
 {
   id: "openvla",
-  domain: "vla",
+  domain: "manipulation", // DOMAINS 中的领域 id
+  route: "vla",           // 该领域 routes 中的路线 id
   type: "paper",
   title: "OpenVLA",
   subtitle: "开源视觉-语言-动作模型",
@@ -122,29 +133,54 @@
 
 - [ ] `id` 唯一，只用小写字母、数字和连字符。
 - [ ] `domain` 是 `DOMAINS` 中存在的 id。
+- [ ] `route` 是该领域 `routes` 中存在的 id；不是硬塞一个不相关的路线。
 - [ ] `related` 里的每一个 id 都存在，且确实相关。
 - [ ] `links` 至少有一个一手来源，URL 可访问。
 - [ ] `featured` 不要滥用；首页只放少量真正有代表性的词条。
 - [ ] 所有数字均能在来源中找到，且注明评测条件。
 - [ ] 至少写出一条边界或开放问题。
-- [ ] 本地预览无 JS 报错，词条页与搜索中都能正常显示。
+- [ ] 本地预览无 JS 报错，领域页、路线页、词条页与搜索中都能正常显示。
+
+### 新增数据集 / benchmark
+
+`RESOURCES` 中一条资源形如：
+
+```js
+{
+  id: "res-calvin",
+  name: "CALVIN",
+  type: "benchmark",
+  year: 2022,
+  domains: ["manipulation", "data"],
+  scale: "34 个任务 / 长程指令",
+  summary: "面向长程语言条件操作的仿真 benchmark……",
+  url: "https://calvin.cs.uni-freiburg.de/",
+  entryId: "optional-entry-id"
+}
+```
+
+- `domains` 可以包含多个领域，但至少一个。
+- 有站内详情页时填写 `entryId`，卡片会跳转内部词条；否则直接链接外部资源。
+- 不要为了凑数重复添加同一个资源；优先扩展现有资源的适用领域。
 
 ### 本地检查
 
 ```bash
 node scripts/serve.mjs 4173
+node scripts/validate-content.mjs
 ```
 
 打开 `http://127.0.0.1:4173/`，重点检查：
 
-- 首页领域网格与精选区
+- 首页五个领域卡片与精选区
+- 对应领域页的路线目录与资源列表
+- `#/route/<domain>/<route>` 中的论文顺序
 - `#/entry/<你的 id>`
-- 搜索你的词条
+- 搜索领域、路线、论文与资源
 - 移动端（390px 宽）
-- 词条底部的本地评论预览
-- 引用弹窗与收藏
+- 词条底部的本地评论预览、引用与收藏
 
-没有自动化构建。修改 `data.js` 后刷新即可。
+没有自动化构建。修改 `data.js` 后刷新即可。`validate-content.mjs` 会检查领域、路线、`related`、`link`、`entryId` 与每个领域的数据/基准覆盖。
 
 ---
 
@@ -152,7 +188,7 @@ node scripts/serve.mjs 4173
 
 1. Fork 仓库，创建分支：`content/add-my-entry`。
 2. 修改 `assets/js/data.js` 或相关文件。
-3. 在 PR 描述中说明：新增/修改了什么、来源、AI 参与程度。
+3. 在 PR 描述中说明：新增/修改了什么、所属领域与路线、来源、AI 参与程度。
 4. 附上桌面与移动端截图（如改动界面）。
 5. 回应编辑的核对意见。
 

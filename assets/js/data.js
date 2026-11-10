@@ -5,221 +5,285 @@
 window.EAI_DATA = (() => {
   const DOMAINS = [
     {
-      id: "vla",
-      num: "01",
-      name: "视觉-语言-动作模型",
-      en: "Vision–Language–Action",
-      short: "VLA",
-      accent: "#ff4b1f",
-      tint: "#ffe2d7",
-      dark: true,
-      tagline: "让语言理解直接落在动作上",
-      description: "把视觉观察、语言指令与机器人动作压进同一个模型，追求跨任务、跨本体的通用控制。",
-      question: "如何把互联网规模的多模态语义知识，转化为不同机器人本体上可靠、实时的连续动作？",
-      topics: ["动作分词", "跨本体迁移", "双系统架构", "流匹配", "链式思考"],
-      intro: [
-        "VLA 的出发点很直接：既然视觉语言模型已经读过互联网，能不能让它顺便学会控制机器人？答案不是简单地「让 GPT 输出关节角」，而是把动作变成与图像、文本同构的建模对象，再用机器人轨迹把语义知识锚定到物理世界。",
-        "这条路线带来了前所未有的语义泛化，也暴露了端到端模型的硬边界——控制频率、动作精度、长程稳定性与安全。今天的 VLA 正在分裂为离散动作 token、连续生成式动作头、以及「慢思考 + 快执行」的分层系统三条路线。"
-      ],
-      milestones: [
-        { year: "2022", title: "SayCan", text: "LLM 调度技能库", entry: "saycan" },
-        { year: "2023", title: "RT-2", text: "动作变成 token", entry: "rt2" },
-        { year: "2024", title: "OpenVLA / π0", text: "开源与连续控制", entry: "openvla" },
-        { year: "2025", title: "Gemini Robotics 1.5", text: "先思考，再行动", entry: "gemini-robotics-15" }
-      ],
-      related: ["world-models", "policy-learning", "data-benchmarks"]
-    },
-    {
-      id: "world-models",
-      num: "02",
-      name: "世界模型",
-      en: "World Models",
-      short: "WORLD",
-      accent: "#3155ff",
-      tint: "#e2e7ff",
-      dark: false,
-      tagline: "在行动之前，先在脑中预演",
-      description: "学习环境如何随动作演化，让智能体在想象中预测、规划与评估行动后果。",
-      question: "如何学到可交互、长时一致、遵守物理规律，并且真正服务于控制的 world model？",
-      topics: ["潜空间预测", "视频生成", "交互式模拟", "长时一致性", "想象中规划"],
-      intro: [
-        "世界模型试图回答一个比「识别」更深的问题：如果我现在这样做，下一秒世界会变成什么样？它可以是压缩的潜空间动力学（Dreamer），也可以是可直接观看、可实时交互的生成式环境（Genie）。前者服务于策略优化，后者更像一个可探索的想象沙盒。",
-        "真正的难点不在生成漂亮的画面，而在动作条件、因果一致、长时记忆与物理正确性。一个不能分辨「杯子被推下去」和「杯子飘起来」的世界模型，无法成为机器人规划的基础。"
-      ],
-      milestones: [
-        { year: "2019", title: "Dreamer", text: "潜空间想象训练", entry: "world-model" },
-        { year: "2023", title: "DreamerV3", text: "一套超参数跨域", entry: "dreamer-v3" },
-        { year: "2024", title: "Genie", text: "生成式可玩世界", entry: "genie-3" },
-        { year: "2025", title: "Genie 3", text: "实时、长时、可提示", entry: "genie-3" }
-      ],
-      related: ["vla", "policy-learning", "simulation"]
-    },
-    {
-      id: "policy-learning",
-      num: "03",
-      name: "策略学习",
-      en: "Robot Learning",
-      short: "POLICY",
-      accent: "#a5c92c",
-      tint: "#eff7cf",
-      dark: false,
-      tagline: "从示教、试错和生成中学会控制",
-      description: "覆盖模仿学习、强化学习与生成式动作建模，研究机器人如何从数据中获得可执行的控制策略。",
-      question: "在数据稀缺、分布偏移和真机成本约束下，什么样的策略表示既能泛化，又能可靠执行？",
-      topics: ["模仿学习", "扩散策略", "动作分块", "离线强化学习", "预训练与微调"],
-      intro: [
-        "策略学习是具身智能最工程化的一面：损失函数怎么写、动作怎么表示、观测延迟如何处理、示教中的多模态如何建模。它也最容易被「大模型」叙事掩盖——再强的语义理解，最后仍要落到一个在 30Hz 控制循环里稳定的策略。",
-        "从行为克隆到 Diffusion Policy，从 ACT 的动作分块到 Octo 的通用策略，核心问题始终是同一个：如何用有限数据覆盖一个多模态、长时程、会发生分布偏移的动作分布。"
-      ],
-      milestones: [
-        { year: "2023", title: "Diffusion Policy", text: "生成式动作建模", entry: "diffusion-policy" },
-        { year: "2023", title: "ACT / ALOHA", text: "动作分块与低成本双臂", entry: "act-aloha" },
-        { year: "2024", title: "Octo", text: "开源通用策略", entry: "octo" },
-        { year: "2024", title: "OpenVLA", text: "预训练 + 微调范式", entry: "openvla" }
-      ],
-      related: ["vla", "manipulation", "simulation"]
-    },
-    {
-      id: "manipulation",
-      num: "04",
-      name: "灵巧操作",
-      en: "Dexterous Manipulation",
-      short: "MANIP",
-      accent: "#e5a400",
-      tint: "#fff0c4",
-      dark: false,
-      tagline: "接触、形变与长程依赖的试金石",
-      description: "从双臂协作到灵巧手，研究接触丰富、精细且长程的真实操作能力。",
-      question: "如何在接触、形变、遮挡与长程依赖下，实现可泛化、可恢复的精细操作？",
-      topics: ["双臂协作", "灵巧手", "触觉反馈", "接触规划", "数据采集硬件"],
-      intro: [
-        "操作是具身智能最难被语言捷径绕开的领域。抓取一个透明杯子、把拉链拉上、把电池插进槽里——这些任务对视觉、触觉、力控和时序都有精确要求，语言模型的世界知识只能提供先验，不能替代物理交互。",
-        "近年来最值得关注的是「硬件—数据—模型」的共同设计：ALOHA 降低双臂数据采集成本，UMI 让数据采集摆脱机器人本体，RDT-1B 则尝试用十亿参数基础模型吸收这些异构数据。"
-      ],
-      milestones: [
-        { year: "2023", title: "ALOHA / ACT", text: "低成本双臂与动作分块", entry: "act-aloha" },
-        { year: "2024", title: "UMI", text: "手持夹爪采集可迁移数据", entry: "umi" },
-        { year: "2024", title: "RDT-1B", text: "十亿参数双臂基础模型", entry: "rdt-1b" }
-      ],
-      related: ["policy-learning", "perception", "data-benchmarks"]
-    },
-    {
       id: "navigation",
-      num: "05",
-      name: "导航与移动",
-      en: "Navigation & Mobility",
+      num: "01",
+      name: "导航",
+      en: "Navigation",
       short: "NAV",
       accent: "#008f78",
       tint: "#d8f3ec",
       dark: false,
-      tagline: "在真实空间里定位、探索与共处",
-      description: "从 ObjectNav 到社交导航，让智能体在陌生、动态、有人类活动的空间中自主移动。",
-      question: "局部感知与全局语义如何结合，才能在动态、拥挤的真实环境里保持长期自主？",
-      topics: ["ObjectNav", "语义建图", "主动探索", "社交导航", "视觉语言导航"],
+      feature: false,
+      tagline: "在空间里定位、理解与抵达",
+      description: "从几何建图到语义目标，从视觉语言导航到社交导航，研究机器人在未知、动态环境中的长期自主。",
+      question: "当环境未见过、人类会移动、目标只有一句描述时，机器人如何建立可维护的空间信念，并做出可解释的决策？",
       intro: [
-        "导航看起来比操作简单，但它把具身智能的时间尺度拉长了：智能体要记住走过的路、推断没看见的房间、在被人挡住时重新规划。这里的核心表征不是一张图，而是一张随着探索不断更新的信念状态。",
-        "Habitat 系列把真实室内扫描、人形化身和机器人放进同一仿真，让「人类作为动态社会性存在」进入评测。这比在静态迷宫里算最短路径更接近家庭机器人的真实处境。"
+        "导航是具身智能中最接近「行动中的感知」的问题。机器人必须在移动中建图、在不确定中探索、在目标只有类别或一句话时决定下一步。它没有一张完整的地图，只有不断被观测修正的信念状态。",
+        "这条研究线从经典 SLAM 与路径规划出发，逐渐分裂出语义目标导航、视觉语言导航、数据驱动的导航基础模型，以及把人当作动态社会性存在的社交导航。它们共享「空间信念」，但对表示、数据和评价的取舍完全不同。"
       ],
-      milestones: [
-        { year: "2021", title: "ObjectNav", text: "语义目标导航任务", entry: "objectnav" },
-        { year: "2023", title: "Habitat 3.0", text: "人机共处仿真", entry: "habitat-3" }
+      routes: [
+        {
+          id: "semantic-nav",
+          name: "语义导航与 ObjectNav",
+          en: "Semantic Navigation",
+          summary: "给定物体类别或语义目标，在未知环境中探索、建图、确认目标并抵达。",
+          question: "语义先验、主动探索与长期记忆如何协同，才能既找得快又找得对？",
+          tags: ["ObjectNav", "语义地图", "主动探索"]
+        },
+        {
+          id: "vln",
+          name: "视觉-语言导航",
+          en: "Vision-Language Navigation",
+          summary: "把自然语言路线指令 grounding 到可执行的空间决策，覆盖离散图与连续环境。",
+          question: "当语言给出的是「经过厨房右转」而不是坐标，模型如何把指令、历史和视觉观察对齐？",
+          tags: ["R2R", "指令 grounding", "零样本"]
+        },
+        {
+          id: "nav-models",
+          name: "导航基础模型",
+          en: "Navigation Foundation Models",
+          summary: "用大规模机器人轨迹预训练通用视觉导航策略，以目标图像或语言作为条件。",
+          question: "导航能否像视觉一样获得一个可微调、可组合、跨本体的基础模型？",
+          tags: ["ViNT", "NoMaD", "目标条件"]
+        },
+        {
+          id: "social-nav",
+          name: "社交与动态导航",
+          en: "Social & Dynamic Navigation",
+          summary: "在有人类活动的空间中预测运动、遵守社交规范，并完成导航或重排任务。",
+          question: "当人不是静态障碍物，而是有目标、会改变计划的行动者，机器人应该如何通行？",
+          tags: ["人机共处", "动态障碍", "社会规范"]
+        }
       ],
-      related: ["perception", "simulation", "humanoids"]
+      related: ["manipulation", "simulation", "data"]
     },
     {
-      id: "humanoids",
-      num: "06",
-      name: "人形机器人",
-      en: "Humanoids",
-      short: "HUMANOID",
-      accent: "#d0492e",
-      tint: "#ffe4dc",
-      dark: false,
-      tagline: "把基础模型装进人的身体",
-      description: "协调行走、平衡、操作与全身控制，探索高维欠驱动系统上的通用具身智能。",
-      question: "高维、欠驱动、接触切换频繁的人形系统，如何获得类似基础模型的泛化能力？",
-      topics: ["全身控制", "双系统模型", "Sim2Real", "运动先验", "人形数据金字塔"],
+      id: "manipulation",
+      num: "02",
+      name: "操作",
+      en: "Manipulation",
+      short: "MANIP",
+      accent: "#ff4b1f",
+      tint: "#ffe2d7",
+      dark: true,
+      feature: true,
+      tagline: "让手、物与环境发生可靠接触",
+      description: "从模仿学习、强化学习到 VLA、WAM 与代码策略，研究接触丰富任务中的通用操作能力。",
+      question: "当数据有限、接触复杂、误差会累积时，哪一层应该由学习承担，哪一层应该由结构与控制保证？",
       intro: [
-        "人形机器人是具身智能最激进的赌注：如果世界是为人类身体设计的，那么最通用的机器人也应该是人形的。代价是控制难度陡增——几十个自由度、频繁的接触切换、随时可能摔倒的平衡约束。",
-        "当前最有影响力的路线是分层：上层用 VLM 理解任务，下层用全身控制（WBC）保证物理可行；中间用大规模仿真和运动先验填补数据缺口。GR00T N1 把这条路线包装成开放基础模型与工具链。"
+        "操作是具身智能最难被语言捷径绕开的领域。抓取透明杯子、拉上拉链、把电池插进槽里——这些任务要求视觉、触觉、力控与长时序协同，语言模型的先验只能加速，不能替代物理交互。",
+        "这棵技术树的分支并不互斥。模仿学习提供可复现的技能采集，强化学习探索人类示教难以覆盖的动态行为，VLA 把语义泛化带进控制，WAM 让模型先预演未来，代码即策略把高层规划变成可检查的程序，而 Harness 负责把这些能力组装成一个稳定运行的系统。"
       ],
-      milestones: [
-        { year: "2023", title: "WBC", text: "从运动控制到操作", entry: "wbc" },
-        { year: "2025", title: "GR00T N1", text: "人形基础模型", entry: "groot-n1" }
+      routes: [
+        {
+          id: "imitation",
+          name: "模仿学习",
+          en: "Imitation Learning",
+          summary: "从人类示教直接学习策略，覆盖行为克隆、动作分块、扩散与流匹配。",
+          question: "在示教有限且多模态的情况下，如何让策略既平滑又不过度自信？",
+          tags: ["行为克隆", "扩散策略", "动作分块"]
+        },
+        {
+          id: "rl",
+          name: "强化学习",
+          en: "Reinforcement Learning",
+          summary: "通过试错与奖励学习灵巧控制，常在仿真中大规模训练再迁移真机。",
+          question: "没有人类示教时，奖励设计与仿真到现实的落差能否被系统性地克服？",
+          tags: ["PPO", "域随机化", "灵巧手"]
+        },
+        {
+          id: "vla",
+          name: "视觉-语言-动作模型",
+          en: "Vision-Language-Action",
+          summary: "把视觉、语言与动作统一建模，用多模态预训练获得语义泛化。",
+          question: "语义泛化、动作精度与控制频率之间，端到端模型应该如何取舍？",
+          tags: ["动作 token", "跨本体", "双系统"]
+        },
+        {
+          id: "wam",
+          name: "世界-动作模型",
+          en: "World-Action Models",
+          summary: "从世界模型演进到世界-动作模型：先学习预测世界，再让未来预测与动作生成联合训练，用想象反哺策略与规划。",
+          question: "预测未来画面，究竟能否转化为更好的动作，而不只是好看的视频？",
+          tags: ["WorldVLA", "生成式世界", "动作条件"]
+        },
+        {
+          id: "code-policy",
+          name: "代码即策略",
+          en: "Code as Policy",
+          summary: "让 LLM 生成程序、调用感知与控制 API，把语言规划变成结构化、可检查的策略代码。",
+          question: "程序化策略的可解释性，能否抵消它对底层 API 与感知质量的依赖？",
+          tags: ["LLM 规划", "程序合成", "3D 价值图"]
+        },
+        {
+          id: "harness",
+          name: "具身智能体 Harness",
+          en: "Embodied Agent Harness",
+          summary: "在模型之外组织技能、记忆、状态机、安全护栏与恢复逻辑的系统层。",
+          question: "当模型能力足够强，系统层的工程是否会被模型吞掉，还是反而更加重要？",
+          tags: ["Agent scaffold", "工具调用", "闭环执行"]
+        }
       ],
-      related: ["manipulation", "simulation", "policy-learning"]
+      related: ["navigation", "loco-manipulation", "data"]
+    },
+    {
+      id: "loco-manipulation",
+      num: "03",
+      name: "移动操作",
+      en: "Loco-Manipulation",
+      short: "LOCO",
+      accent: "#3155ff",
+      tint: "#e2e7ff",
+      dark: false,
+      feature: false,
+      tagline: "行走、平衡与操作，同时发生",
+      description: "把移动、全身控制与操作放进同一个闭环，覆盖四足、人形与移动机械臂平台。",
+      question: "高维、欠驱动、接触频繁切换的身体，如何承载通用操作？上层任务意图和下层全身控制之间的接口应该长什么样？",
+      intro: [
+        "移动操作把「走到那里」和「把事做完」合并成同一个控制问题。机器人不能先站稳再伸手：伸手会改变重心，搬重物需要调整脚步，穿过窄门时手臂又是身体的一部分。",
+        "这条路线横跨传统全身控制（QP / MPC）、学习式运动先验、人形基础模型与人形 Sim2Real。核心矛盾始终是分层：上层希望用语言和视觉表达意图，下层必须把意图变成满足摩擦、力矩与平衡约束的关节命令。"
+      ],
+      routes: [
+        {
+          id: "wbc",
+          name: "全身控制",
+          en: "Whole-Body Control",
+          summary: "统一协调行走、平衡、手臂与接触，把任务目标变成全身关节或力矩指令。",
+          question: "当接触状态频繁切换，基于模型的控制与学习到的运动先验如何互补？",
+          tags: ["QP / MPC", "运动模仿", "统一控制"]
+        },
+        {
+          id: "loco-rl",
+          name: "学习式移动操作",
+          en: "Learning for Loco-Manipulation",
+          summary: "用强化学习或模仿学习获得四足、人形的移动操作技能，并与高层规划接口。",
+          question: "移动操作应该端到端学习，还是拆成运动、操作与任务规划三层？",
+          tags: ["四足", "人形", "移动操作"]
+        },
+        {
+          id: "humanoid-fm",
+          name: "人形基础模型",
+          en: "Humanoid Foundation Models",
+          summary: "把视觉语言理解、全身运动与操作放进统一基础模型，跨任务和本体泛化。",
+          question: "在人形真机数据仍然稀缺时，数据金字塔能否支撑一个通用基础模型？",
+          tags: ["双系统", "人形数据", "基础模型"]
+        },
+        {
+          id: "loco-sim2real",
+          name: "人形 Sim2Real",
+          en: "Humanoid Sim2Real",
+          summary: "缩小仿真与真机动力学差异，让人形的高动态技能稳定迁移。",
+          question: "当动作越来越敏捷，域随机化是否足够，还是必须在线辨识真实动力学？",
+          tags: ["系统辨识", "残差学习", "域随机化"]
+        }
+      ],
+      related: ["manipulation", "simulation", "data"]
     },
     {
       id: "simulation",
-      num: "07",
-      name: "仿真与 Sim2Real",
-      en: "Simulation & Sim2Real",
+      num: "04",
+      name: "仿真器",
+      en: "Simulation",
       short: "SIM",
       accent: "#008fe8",
       tint: "#dcefff",
       dark: false,
+      feature: false,
       tagline: "让规模定律进入物理世界",
-      description: "GPU 并行仿真、合成数据与迁移方法，是机器人学习规模化的基础设施。",
-      question: "如何缩小仿真与真实之间的物理、感知与任务分布差距，并证明迁移真的有效？",
-      topics: ["GPU 并行仿真", "域随机化", "系统辨识", "合成数据", "数字孪生"],
+      description: "GPU 物理仿真、场景级模拟、神经重建与 Sim2Real，构成机器人学习的基础设施层。",
+      question: "如何让仿真既足够快、又足够真，并明确知道它究竟在哪里不真？",
       intro: [
-        "机器人数据昂贵、慢、难以覆盖长尾。仿真提供了另一种可能：并行生成百万级交互，在虚拟世界里试错、随机化、失败，再把学到的先验带回真实。Isaac Lab 这类 GPU 框架让这件事第一次具备「基础设施」形态。",
-        "但仿真不是免费的午餐。视觉逼真不等于物理正确，物理正确也不等于任务分布正确。Sim2Real 的核心工作，是明确差距在哪里，并用系统辨识、域随机化和真机微调逐项对齐。"
+        "机器人数据昂贵、慢、难以覆盖长尾，仿真提供了另一种可能：并行生成百万级交互，在虚拟世界里试错、随机化、失败，再把学到的先验带回真实。Isaac Lab 这类 GPU 框架让「基础设施」第一次成为可能。",
+        "但仿真不是免费午餐。视觉逼真不等于物理正确，物理正确也不等于任务分布正确。一条完整的仿真技术栈至少包含物理引擎、场景与任务、Real2Sim 重建，以及最后的 Sim2Real 迁移。"
       ],
-      milestones: [
-        { year: "2023", title: "Habitat 3.0", text: "复杂社会性仿真", entry: "habitat-3" },
-        { year: "2024", title: "Isaac Lab", text: "GPU 并行机器人学习", entry: "isaac-lab" },
-        { year: "2024", title: "UMI", text: "绕过机器人的真机数据", entry: "umi" }
+      routes: [
+        {
+          id: "gpu-sim",
+          name: "GPU 并行仿真",
+          en: "GPU-Accelerated Simulation",
+          summary: "大规模向量化物理环境与并行管线，把交互数据生成速度提升几个量级。",
+          question: "在接触精度与吞吐量之间，GPU 仿真器应该如何做取舍？",
+          tags: ["Isaac Lab", "MJX", "并行环境"]
+        },
+        {
+          id: "scene-sim",
+          name: "场景级仿真",
+          en: "Scene-Level Simulation",
+          summary: "包含家庭场景、物体交互与人类活动的任务级模拟器，而非单一刚体环境。",
+          question: "任务级仿真如何避免成为「只对某个 benchmark 有效的过拟合环境」？",
+          tags: ["RoboCasa", "Habitat", "任务基准"]
+        },
+        {
+          id: "real2sim",
+          name: "Real2Sim 与神经重建",
+          en: "Real2Sim & Neural Reconstruction",
+          summary: "用三维重建、3DGS 或数字孪生把真实场景搬进仿真与规划器。",
+          question: "重建出的场景如何保留物理、语义与可供性，而不只是外观？",
+          tags: ["3DGS", "SLAM", "数字孪生"]
+        },
+        {
+          id: "sim2real",
+          name: "Sim2Real 迁移",
+          en: "Sim2Real Transfer",
+          summary: "用域随机化、系统辨识、残差模型与真机微调缩小现实差距。",
+          question: "当仿真与真实不一致时，应该改仿真、改策略，还是改训练目标？",
+          tags: ["域随机化", "系统辨识", "真机微调"]
+        }
       ],
-      related: ["navigation", "humanoids", "data-benchmarks"]
+      related: ["navigation", "loco-manipulation", "data"]
     },
     {
-      id: "perception",
-      num: "08",
-      name: "具身感知",
-      en: "Embodied Perception",
-      short: "PERCEPTION",
-      accent: "#d43b6a",
-      tint: "#ffe2ea",
-      dark: false,
-      tagline: "构建可查询、可度量、可行动的空间",
-      description: "从 RGB-D 到 3D Gaussian Splatting，研究机器人如何理解三维场景、物体与可供性。",
-      question: "机器人需要怎样的三维表示，才能在开放世界中同时做到实时、精确和语义可检索？",
-      topics: ["三维重建", "语义地图", "可供性", "场景图", "主动感知"],
-      intro: [
-        "机器人感知不是「给图片打标签」。它需要知道物体在哪里、有多大、能不能抓、移开之后会露出什么——也就是把视觉转成可行动的空間表征。这要求几何精度、语义理解和实时性同时成立。",
-        "3D Gaussian Splatting 提供了一种新的折中：显式、可微、渲染快、训练快，正在从新视角合成走向机器人场景重建与仿真。Gaussian Splatting SLAM 进一步把它变成在线建图系统，ConceptGraphs 则把物体与关系组织成可查询的开放词汇场景图。"
-      ],
-      milestones: [
-        { year: "2023", title: "3D Gaussian Splatting", text: "实时显式三维表征", entry: "gaussian-splatting" },
-        { year: "2024", title: "Gaussian Splatting SLAM", text: "在线建图与定位", entry: "gs-slam" },
-        { year: "2024", title: "ConceptGraphs", text: "开放词汇场景图", entry: "conceptgraphs" }
-      ],
-      related: ["manipulation", "navigation", "simulation"]
-    },
-    {
-      id: "data-benchmarks",
-      num: "09",
+      id: "data",
+      num: "05",
       name: "数据与评测",
       en: "Data & Evaluation",
       short: "DATA",
-      accent: "#5b57e8",
-      tint: "#e8e5ff",
+      accent: "#7a5cff",
+      tint: "#eae5ff",
       dark: false,
+      feature: false,
       tagline: "没有可信评测，就没有真正的进步",
-      description: "数据集、评测协议与安全边界共同决定具身智能是否能从 demo 走向可复现的系统。",
-      question: "当每个实验室都用自己的任务与指标，如何建立可信、可复现、覆盖真实世界的评测？",
-      topics: ["跨本体数据", "基准设计", "真机评测", "安全与对齐", "数据许可"],
+      description: "从遥操作采集到跨本体数据、合成数据与分布式真机评测，研究具身智能如何积累证据。",
+      question: "当每个实验室都用自己的任务与指标，什么样的数据与评测协议能够让结果可比、可复现、可质疑？",
       intro: [
-        "具身智能最容易被高估的地方，是一个精心剪辑的 demo。真正困难的不是让机器人成功一次，而是说明它在什么条件下成功、失败模式是什么、别人能否复现。这就是数据与评测存在的意义。",
-        "Open X-Embodiment 用社区协作验证了跨本体数据的价值，LIBERO 把「迁移」变成可量化指标，DROID 则用跨机构、跨场景的采集逼近真实分布。它们共同把「通用机器人」从口号变成可检验的问题。"
+        "具身智能最容易被高估的地方，是一个精心剪辑的 demo。真正困难的不只是让机器人成功一次，而是说明它在什么条件下成功、失败模式是什么、别人能否复现。这就是数据与评测存在的意义。",
+        "数据路线从「怎么采」开始：遥操作、手持采集、人类视频与仿真合成。随后是「怎么合」：跨本体动作空间与标注协议。最后是「怎么证明」：固定基准、真机擂台、盲测与分布外评测。"
       ],
-      milestones: [
-        { year: "2023", title: "LIBERO", text: "终身学习基准", entry: "libero" },
-        { year: "2023", title: "Open X-Embodiment", text: "跨本体数据集合", entry: "open-x-embodiment" },
-        { year: "2024", title: "DROID", text: "跨机构真实操作数据", entry: "droid" }
+      routes: [
+        {
+          id: "teleop",
+          name: "遥操作与示教采集",
+          en: "Teleoperation & Demonstrations",
+          summary: "设计低成本、可迁移的采集硬件与协议，把人类技能变成机器人轨迹。",
+          question: "如何获得既真实又便宜、既多样又可复用的操作示教？",
+          tags: ["ALOHA", "UMI", "VR 遥操作"]
+        },
+        {
+          id: "cross-embodiment",
+          name: "跨本体数据",
+          en: "Cross-Embodiment Data",
+          summary: "统一异构机器人、传感器与动作空间，让数据在机构与本体之间流动。",
+          question: "不同本体的动作空间能否真正对齐，还是所有统一都是一种有损投影？",
+          tags: ["Open X", "DROID", "动作空间"]
+        },
+        {
+          id: "synthetic",
+          name: "合成数据与数据引擎",
+          en: "Synthetic Data & Data Engines",
+          summary: "用仿真、生成与演示变换扩大数据规模，并控制分布与质量。",
+          question: "合成数据的规模收益，什么时候会被分布偏差抵消？",
+          tags: ["MimicGen", "域随机化", "数据放大"]
+        },
+        {
+          id: "eval",
+          name: "评测与基准",
+          en: "Evaluation & Benchmarks",
+          summary: "从固定任务基准到分布式真机擂台，设计能区分泛化、鲁棒性与可复现性的协议。",
+          question: "在真机成本高、任务长尾严重的情况下，如何做出可信且可扩展的评测？",
+          tags: ["LIBERO", "RoboArena", "真机评测"]
+        }
       ],
-      related: ["vla", "policy-learning", "simulation"]
+      related: ["manipulation", "navigation", "simulation"]
     }
   ];
 
@@ -227,7 +291,8 @@ window.EAI_DATA = (() => {
     /* ------------------------------------------------------------------ VLA */
     {
       id: "saycan",
-      domain: "vla",
+      domain: "manipulation",
+      route: "code-policy",
       type: "paper",
       title: "SayCan",
       subtitle: "用大语言模型把语言指令锚定到可用技能",
@@ -265,7 +330,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "rt2",
-      domain: "vla",
+      domain: "manipulation",
+      route: "vla",
       type: "paper",
       title: "RT-2",
       subtitle: "把网页知识迁移到机器人控制",
@@ -303,7 +369,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "openvla",
-      domain: "vla",
+      domain: "manipulation",
+      route: "vla",
       type: "paper",
       title: "OpenVLA",
       subtitle: "开源视觉-语言-动作模型",
@@ -342,7 +409,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "pi0",
-      domain: "vla",
+      domain: "manipulation",
+      route: "vla",
       type: "paper",
       title: "π0",
       subtitle: "为通用机器人控制而生的流匹配 VLA",
@@ -380,7 +448,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "gemini-robotics-15",
-      domain: "vla",
+      domain: "manipulation",
+      route: "vla",
       type: "system",
       title: "Gemini Robotics 1.5",
       subtitle: "会「先想后做」的具身推理与动作模型",
@@ -417,7 +486,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "vla-paradigm",
-      domain: "vla",
+      domain: "manipulation",
+      route: "vla",
       type: "concept",
       title: "VLA 范式",
       subtitle: "从「感知→规划→控制」到端到端动作生成",
@@ -458,7 +528,8 @@ window.EAI_DATA = (() => {
     /* ---------------------------------------------------------- WORLD MODELS */
     {
       id: "dreamer-v3",
-      domain: "world-models",
+      domain: "manipulation",
+      route: "wam",
       type: "paper",
       title: "DreamerV3",
       subtitle: "一个超参数走天下：在世界模型中学习控制",
@@ -497,7 +568,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "genie-3",
-      domain: "world-models",
+      domain: "manipulation",
+      route: "wam",
       type: "system",
       title: "Genie 3",
       subtitle: "可实时交互、可提示事件的生成式世界模型",
@@ -534,7 +606,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "world-model",
-      domain: "world-models",
+      domain: "manipulation",
+      route: "wam",
       type: "concept",
       title: "世界模型",
       subtitle: "智能体的内部模拟器",
@@ -574,7 +647,8 @@ window.EAI_DATA = (() => {
     /* ---------------------------------------------------------------- POLICY */
     {
       id: "diffusion-policy",
-      domain: "policy-learning",
+      domain: "manipulation",
+      route: "imitation",
       type: "paper",
       title: "Diffusion Policy",
       subtitle: "用动作扩散建模多模态示教分布",
@@ -612,7 +686,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "octo",
-      domain: "policy-learning",
+      domain: "manipulation",
+      route: "imitation",
       type: "system",
       title: "Octo",
       subtitle: "开源通用机器人策略与数据配方",
@@ -650,7 +725,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "act-aloha",
-      domain: "policy-learning",
+      domain: "manipulation",
+      route: "imitation",
       type: "paper",
       title: "ACT / ALOHA",
       subtitle: "低成本双臂遥操作 + 动作分块 Transformer",
@@ -688,7 +764,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "action-chunking",
-      domain: "policy-learning",
+      domain: "manipulation",
+      route: "imitation",
       type: "concept",
       title: "动作分块",
       subtitle: "一次预测一小段动作，而不是一步",
@@ -729,6 +806,7 @@ window.EAI_DATA = (() => {
     {
       id: "rdt-1b",
       domain: "manipulation",
+      route: "imitation",
       type: "paper",
       title: "RDT-1B",
       subtitle: "十亿参数的双臂扩散基础模型",
@@ -766,7 +844,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "umi",
-      domain: "manipulation",
+      domain: "data",
+      route: "teleop",
       type: "system",
       title: "UMI",
       subtitle: "用手持夹爪采集可迁移的操作数据",
@@ -807,6 +886,7 @@ window.EAI_DATA = (() => {
     {
       id: "habitat-3",
       domain: "navigation",
+      route: "social-nav",
       type: "benchmark",
       title: "Habitat 3.0",
       subtitle: "人、化身与机器人共处的社交导航基准",
@@ -845,6 +925,7 @@ window.EAI_DATA = (() => {
     {
       id: "objectnav",
       domain: "navigation",
+      route: "semantic-nav",
       type: "concept",
       title: "ObjectNav",
       subtitle: "在陌生环境中寻找并抵达目标物体",
@@ -883,7 +964,8 @@ window.EAI_DATA = (() => {
     /* --------------------------------------------------------------- HUMANOID */
     {
       id: "groot-n1",
-      domain: "humanoids",
+      domain: "loco-manipulation",
+      route: "humanoid-fm",
       type: "system",
       title: "GR00T N1",
       subtitle: "面向通用人形机器人的开放基础模型",
@@ -921,7 +1003,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "wbc",
-      domain: "humanoids",
+      domain: "loco-manipulation",
+      route: "wbc",
       type: "concept",
       title: "全身控制 WBC",
       subtitle: "让行走、平衡与操作同时发生",
@@ -961,6 +1044,7 @@ window.EAI_DATA = (() => {
     {
       id: "isaac-lab",
       domain: "simulation",
+      route: "gpu-sim",
       type: "system",
       title: "Isaac Lab",
       subtitle: "GPU 并行的机器人学习仿真框架",
@@ -999,6 +1083,7 @@ window.EAI_DATA = (() => {
     {
       id: "sim2real",
       domain: "simulation",
+      route: "sim2real",
       type: "concept",
       title: "Sim2Real",
       subtitle: "把仿真中学到的策略搬进真实世界",
@@ -1037,7 +1122,8 @@ window.EAI_DATA = (() => {
     /* ------------------------------------------------------------- PERCEPTION */
     {
       id: "gaussian-splatting",
-      domain: "perception",
+      domain: "simulation",
+      route: "real2sim",
       type: "paper",
       title: "3D Gaussian Splatting",
       subtitle: "实时可微渲染的三维场景表示",
@@ -1076,7 +1162,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "gs-slam",
-      domain: "perception",
+      domain: "simulation",
+      route: "real2sim",
       type: "paper",
       title: "Gaussian Splatting SLAM",
       subtitle: "用 3D 高斯做实时单目 SLAM",
@@ -1114,7 +1201,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "conceptgraphs",
-      domain: "perception",
+      domain: "navigation",
+      route: "semantic-nav",
       type: "paper",
       title: "ConceptGraphs",
       subtitle: "开放词汇的三维场景图，用于感知与规划",
@@ -1154,7 +1242,8 @@ window.EAI_DATA = (() => {
     /* ------------------------------------------------------------------- DATA */
     {
       id: "open-x-embodiment",
-      domain: "data-benchmarks",
+      domain: "data",
+      route: "cross-embodiment",
       type: "dataset",
       title: "Open X-Embodiment",
       subtitle: "把 22 种机器人数据汇成一座训练场",
@@ -1192,7 +1281,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "libero",
-      domain: "data-benchmarks",
+      domain: "data",
+      route: "eval",
       type: "benchmark",
       title: "LIBERO",
       subtitle: "评测终身学习与知识迁移的操作基准",
@@ -1230,7 +1320,8 @@ window.EAI_DATA = (() => {
     },
     {
       id: "droid",
-      domain: "data-benchmarks",
+      domain: "data",
+      route: "cross-embodiment",
       type: "dataset",
       title: "DROID",
       subtitle: "跨机构、跨场景的真实机器人操作数据集",
@@ -1266,35 +1357,820 @@ window.EAI_DATA = (() => {
         { label: "项目页", url: "https://droid-dataset.github.io/" }
       ]
     }
+,
+    {
+      id: "nomad",
+      domain: "navigation",
+      route: "nav-models",
+      type: "paper",
+      title: "NoMaD",
+      subtitle: "用目标掩码扩散策略统一导航与探索",
+      year: 2023,
+      venue: "ICRA 2024",
+      org: "UC Berkeley",
+      authors: "Dhruv Shah, Ajay Sridhar, Arjun Bhorkar 等",
+      featured: false,
+      tags: ["导航基础模型", "扩散策略", "探索", "目标条件"],
+      tldr: "一个目标掩码扩散策略，同时处理「去目标」和「主动探索」两种模式；无需单独训练探索模块，就能在陌生环境中构建拓扑记忆并选择前沿。",
+      why: "把目标条件导航与探索统一进一个生成式策略，说明导航基础模型可以从数据中同时学到「利用」与「探索」。",
+      intro: [
+        "传统导航系统往往把目标导航和探索拆成两个模块：一个负责朝目标走，一个负责在没目标时找前沿。NoMaD 用目标掩码把两者统一：给目标图像时条件在目标上，探索时把目标 mask 掉，模型转而依赖视觉上下文和历史。",
+        "策略采用扩散模型生成动作序列，支持多模态路径。系统还维护一个拓扑记忆，把走过的观测组织成可复用的图，从而在长时探索中可以回到已知位置，而不是依赖逐步的局部反应。"
+      ],
+      method: [
+        { title: "目标掩码训练", text: "训练时随机遮蔽目标图像，使同一策略既能做目标条件导航，也能在没有目标时探索。" },
+        { title: "扩散动作生成", text: "从噪声生成多步动作序列，保留路径的多模态性，适合存在多条可行路线的环境。" },
+        { title: "拓扑记忆", text: "把关键观测组织成图节点，用图像检索与图搜索支撑长时导航和返回。" }
+      ],
+      evidence: [
+        { value: "统一", label: "导航与探索共用一个策略", text: "目标掩码让探索成为「无目标条件」的特例，减少模块之间的接口误差。" },
+        { value: "真机", label: "跨场景导航与探索", text: "在真实室内外环境中验证了目标导航与主动探索。" }
+      ],
+      limits: [
+        "依赖高质量的拓扑记忆与图像检索，长期动态环境仍会造成漂移。",
+        "扩散推理带来延迟，实时高频控制需要工程优化。",
+        "没有显式的三维几何或语义地图，精细空间约束能力有限。"
+      ],
+      related: ["objectnav", "navgpt", "conceptgraphs"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2310.07896" },
+        { label: "项目页", url: "https://nomad-models.github.io/" }
+      ]
+    },
+    {
+      id: "navgpt",
+      domain: "navigation",
+      route: "vln",
+      type: "paper",
+      title: "NavGPT",
+      subtitle: "用大语言模型显式推理视觉语言导航",
+      year: 2023,
+      venue: "AAAI 2024",
+      org: "University of Adelaide",
+      authors: "Gengze Zhou, Yicong Hong, Qi Wu",
+      featured: false,
+      tags: ["VLN", "LLM 推理", "零样本", "可解释性"],
+      tldr: "把 VLN 的观测转成文本描述，让 LLM 在导航图上显式分解指令、维护历史并选择下一节点；无需任务特定训练，就能输出可读的推理过程。",
+      why: "它是「用通用推理模型做导航」的早期代表，把可解释性带回 VLN，同时暴露了离散文本接口丢失空间信息的问题。",
+      intro: [
+        "NavGPT 的核心选择是接口：不把视觉特征直接塞进策略，而是把可通行方向、物体与历史转成文本，让 LLM 在每一步进行指令分解、子目标判断与动作选择。这样导航过程可以被人类阅读和审计。",
+        "这种零样本方案的优势是泛化和可解释性，代价是信息瓶颈——连续空间、细粒度几何和视觉线索被压缩成文本。它更适合离散图上的 VLN，而不是低层连续控制。"
+      ],
+      method: [
+        { title: "文本化观测", text: "把当前可通行节点、可见物体与历史路径编码成结构化文本，供 LLM 推理。" },
+        { title: "显式推理链", text: "要求模型分析指令、回顾已走路径、判断子目标，再在候选节点中选择下一步。" },
+        { title: "零样本执行", text: "不进行 VLN 任务微调，直接依赖通用语言模型的指令理解与常识。" }
+      ],
+      evidence: [
+        { value: "Zero-shot", label: "无需任务特定训练", text: "在标准 VLN 设置中直接推理，展示了通用 LLM 的导航潜力。" },
+        { value: "可解释", label: "推理链可读", text: "每一步选择都有自然语言依据，便于分析失败原因。" }
+      ],
+      limits: [
+        "文本接口压缩掉大量空间与视觉信息，细粒度导航能力有限。",
+        "依赖底层离散图和候选动作生成，尚未覆盖连续控制。",
+        "LLM 推理延迟与成本较高，长程任务容易累积语言层面的错误。"
+      ],
+      related: ["objectnav", "nomad", "habitat-3"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2305.16986" },
+        { label: "代码", url: "https://github.com/GengzeZhou/NavGPT" }
+      ]
+    },
+    {
+      id: "openai-dexterous",
+      domain: "manipulation",
+      route: "rl",
+      type: "paper",
+      title: "Learning Dexterous In-Hand Manipulation",
+      subtitle: "用仿真强化学习训练灵巧手",
+      year: 2018,
+      venue: "arXiv 2018",
+      org: "OpenAI",
+      authors: "OpenAI Dactyl Team",
+      featured: false,
+      tags: ["灵巧手", "强化学习", "域随机化", "Sim2Real"],
+      tldr: "用 PPO + LSTM 在仿真中训练 Shadow 灵巧手，通过大规模域随机化和视觉位姿估计，把策略零样本迁移到真机完成物体在手内重定向。",
+      why: "它把「仿真里大规模试错 + 域随机化 + 真机零样本」变成了灵巧操作的标准工程范式，也暴露了视觉与触觉的长期瓶颈。",
+      intro: [
+        "OpenAI 的 Dactyl 工作把灵巧手当作一个控制与感知的联合问题。策略在仿真中接收关节角、物体位姿与本体感知，用 LSTM 处理历史，通过 PPO 学习如何连续改变手指接触来旋转物体。",
+        "真机迁移的关键不是某个网络结构，而是随机化：物体质量、摩擦、尺寸、传感器噪声、执行器延迟都被随机化，让策略见过足够多的「世界变体」。但物体位姿仍依赖外部视觉系统估计，遮挡和标定误差会直接破坏闭环。"
+      ],
+      method: [
+        { title: "大规模 PPO", text: "在并行仿真中训练 LSTM 策略，输入本体感知与物体状态，输出手指关节位置。" },
+        { title: "自动域随机化", text: "随机化物理参数、观测噪声与控制延迟，并自适应扩大难度，提升真机鲁棒性。" },
+        { title: "视觉位姿闭环", text: "用多相机视觉估计物体六自由度位姿，作为策略输入；位姿误差是实际系统的关键瓶颈。" }
+      ],
+      evidence: [
+        { value: "Zero-shot", label: "仿真到真机迁移", text: "策略未经真机微调即可在 Shadow 手上执行物体重定向。" },
+        { value: "多物体", label: "泛化到不同几何", text: "通过域随机化覆盖不同尺寸、形状和质量分布的物体。" }
+      ],
+      limits: [
+        "依赖外部视觉位姿估计，遮挡、反光和标定误差会显著降低成功率。",
+        "任务集中在手内重定向，尚未覆盖工具使用与长程操作。",
+        "算力与仿真调参成本高，策略可解释性弱。"
+      ],
+      related: ["daydreamer", "diffusion-policy", "sim2real"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/1808.00177" },
+        { label: "官方博客", url: "https://openai.com/index/learning-dexterity/" }
+      ]
+    },
+    {
+      id: "daydreamer",
+      domain: "manipulation",
+      route: "rl",
+      type: "paper",
+      title: "DayDreamer",
+      subtitle: "在真实机器人上用世界模型从零学习",
+      year: 2022,
+      venue: "CoRL 2022",
+      org: "UC Berkeley",
+      authors: "Philipp Wu, Alejandro Escontrela, Danijar Hafner 等",
+      featured: false,
+      tags: ["世界模型", "真机强化学习", "样本效率", "Dreamer"],
+      tldr: "把 Dreamer 的潜空间世界模型直接用在真实机器人上：四足行走、机械臂抓取与轮式导航都能在数小时真机交互内从零学会，不需要仿真器。",
+      why: "它证明世界模型不仅能降低仿真成本，也能让真机强化学习在有限交互预算内可行。",
+      intro: [
+        "真机强化学习的最大成本是交互次数。DayDreamer 不建高保真仿真，而是让机器人在真实世界里收集数据，学习一个潜空间世界模型，再在模型的想象中训练策略。这样每次真实交互都被最大化利用。",
+        "论文在四足、机械臂和轮式机器人上分别学习行走、抓取与导航，说明同一套算法可以跨越本体。但真机上的安全探索、模型误差与奖励设计仍是不可回避的问题。"
+      ],
+      method: [
+        { title: "在线世界模型", text: "用真实交互数据持续训练 RSSM，预测潜状态、奖励与终止信号。" },
+        { title: "想象中训练策略", text: "actor-critic 在世界模型滚动的潜轨迹上更新，减少真实机器人交互。" },
+        { title: "跨本体复用", text: "同一算法用于四足、机械臂与轮式平台，验证通用性。" }
+      ],
+      evidence: [
+        { value: "真机", label: "从零学习多种技能", text: "四足行走、机械臂抓取与轮式导航均在真实硬件上学习。" },
+        { value: "样本效率", label: "数小时级交互", text: "相比无模型的真机 RL，显著减少所需真实样本。" }
+      ],
+      limits: [
+        "真实世界的安全探索仍依赖人工重置与护栏。",
+        "世界模型误差会在长时任务中累积，奖励设计仍高度任务特定。",
+        "训练时间以小时计，离即插即用仍有距离。"
+      ],
+      related: ["openai-dexterous", "dreamer-v3", "world-model"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2206.14176" },
+        { label: "项目页", url: "https://danijar.com/project/daydreamer/" }
+      ]
+    },
+    {
+      id: "worldvla",
+      domain: "manipulation",
+      route: "wam",
+      type: "paper",
+      title: "WorldVLA",
+      subtitle: "把世界模型与动作模型装进同一个自回归框架",
+      year: 2025,
+      venue: "arXiv 2025",
+      org: "Alibaba Group 等",
+      authors: "Jun Cen, Chaohui Yu 等",
+      featured: false,
+      tags: ["WAM", "世界模型", "动作生成", "注意力掩码"],
+      tldr: "在同一个自回归模型里同时预测未来图像和动作：世界模型帮助动作理解物理，动作模型反过来改善视觉理解；再用注意力掩码缓解动作序列的自回归误差累积。",
+      why: "它是「世界-动作模型」这条新路线的代表尝试：不再把 world model 只当预训练工具，而是让预测未来与生成动作共享一个生成过程。",
+      intro: [
+        "WorldVLA 把 VLA 与世界模型放进一个自回归序列：模型既生成下一帧图像，也生成下一步动作。预测未来图像迫使模型学习动作与视觉后果之间的关系，而动作预测反过来提供更强的任务表征。",
+        "自回归生成动作会遇到误差传播：前一步动作错了，后面会继续错。论文提出一种注意力掩码策略，在生成当前动作时选择性屏蔽之前的动作 token，让每个动作更多依赖观测而不是错误历史。"
+      ],
+      method: [
+        { title: "联合序列建模", text: "把图像 token 与动作 token 放在同一自回归序列中，同时优化视觉预测与动作生成。" },
+        { title: "动作注意力掩码", text: "生成当前动作时屏蔽历史动作，减少自回归动作块中的误差传播。" },
+        { title: "互相增强", text: "世界模型提供物理先验，动作模型提供任务相关表征，二者共同训练。" }
+      ],
+      evidence: [
+        { value: "联合", label: "World model + action model", text: "单一框架同时做未来图像预测与动作生成，性能优于各自独立训练。" },
+        { value: "掩码", label: "缓解动作误差累积", text: "动作注意力掩码显著改善动作块生成，说明接口设计比单纯加参数更重要。" }
+      ],
+      limits: [
+        "视觉预测质量与动作精度之间并不总是正相关，可能出现「预测好但控制差」。",
+        "自回归推理速度有限，闭环实时性需要额外优化。",
+        "主要在较短的桌面任务上验证，长程与接触丰富任务仍待检验。"
+      ],
+      related: ["world-model", "vla-paradigm", "genie-3"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2506.21539" },
+        { label: "代码", url: "https://github.com/alibaba-damo-academy/WorldVLA" }
+      ]
+    },
+    {
+      id: "code-as-policies",
+      domain: "manipulation",
+      route: "code-policy",
+      type: "paper",
+      title: "Code as Policies",
+      subtitle: "让语言模型直接写机器人策略代码",
+      year: 2022,
+      venue: "ICRA 2023 · arXiv 2022",
+      org: "Google Research",
+      authors: "Jacky Liang, Wenlong Huang 等",
+      featured: false,
+      tags: ["LLM 编程", "策略代码", "层级代码生成", "少样本"],
+      tldr: "让代码 LLM 根据自然语言指令生成 Python 策略代码，组合感知 API 与控制 primitive；通过递归定义函数的层级代码生成，表达反馈循环、空间推理与精确参数。",
+      why: "它把「语言模型控制机器人」从输出单个动作，推进到输出可执行、可检查、可复用的程序。",
+      intro: [
+        "Code as Policies 不要求 LLM 直接理解关节动力学，而是让它写代码调用已有能力：物体检测、坐标变换、抓取原语、速度控制。语言模型负责组合逻辑，底层 API 负责物理执行。",
+        "这种接口的优势是可解释、可测试、可复用；缺点是能力上限被 API 锁死。如果环境里没有可调用的感知或控制原语，代码再漂亮也无法执行。"
+      ],
+      method: [
+        { title: "少样本代码提示", text: "给模型若干「指令注释 + 对应策略代码」示例，让它为新指令重新组合 API。" },
+        { title: "层级代码生成", text: "允许模型递归定义未实现的辅助函数，从而生成更复杂的策略结构。" },
+        { title: "策略表达", text: "代码可以表达反应式控制、路径点策略、空间几何运算与反馈循环。" }
+      ],
+      evidence: [
+        { value: "可执行", label: "多平台真机策略", text: "在多个真实机器人平台上演示抓放、轨迹控制与响应式行为。" },
+        { value: "可检查", label: "策略即程序", text: "生成的代码可以被阅读、调试、复用，而不是黑箱动作序列。" }
+      ],
+      limits: [
+        "能力受限于感知与控制 API 的表达力。",
+        "LLM 代码可能包含逻辑错误或对物理世界的错误假设。",
+        "复杂接触任务仍需底层控制器或学习策略兜底。"
+      ],
+      related: ["saycan", "voxposer", "embodied-harness"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2209.07753" },
+        { label: "项目页", url: "https://code-as-policies.github.io/" }
+      ]
+    },
+    {
+      id: "voxposer",
+      domain: "manipulation",
+      route: "code-policy",
+      type: "paper",
+      title: "VoxPoser",
+      subtitle: "用语言模型组合三维价值图，零样本合成轨迹",
+      year: 2023,
+      venue: "CoRL 2023",
+      org: "Stanford University",
+      authors: "Wenlong Huang, Chen Wang 等",
+      featured: true,
+      tags: ["3D 价值图", "LLM 规划", "零样本", "模型规划"],
+      tldr: "LLM 写代码调用 VLM，把语言指令分解成三维空间中的可供性与约束价值图；再用模型规划器在这些图上合成闭环轨迹，无需任务特定示教。",
+      why: "它在「语言规划」和「连续控制」之间加了一层显式的三维价值图，让代码策略第一次能处理开放词汇的精细空间约束。",
+      intro: [
+        "VoxPoser 的关键中间表示是三维价值图：语言模型把「把杯子推到桌边但别碰倒花瓶」拆成吸引、排斥、速度限制等约束，VLM 把这些约束 grounding 到三维空间，规划器在图上优化轨迹。",
+        "相比直接生成动作，价值图是可检查、可组合的。相比纯代码策略，它把连续空间的几何约束交给规划器，避免让 LLM 猜测精确坐标。"
+      ],
+      method: [
+        { title: "LLM 代码组合", text: "语言模型生成代码，调用 VLM 生成物体可供性、避障与运动约束。" },
+        { title: "三维价值图", text: "把约束写成体素空间中的标量场，支持吸引、排斥、速度与姿态项的组合。" },
+        { title: "闭环轨迹优化", text: "基于价值图优化末端轨迹，并在线重规划以应对动态扰动。" }
+      ],
+      evidence: [
+        { value: "Zero-shot", label: "开放词汇操作", text: "无需任务示教即可处理大量日常语言指令。" },
+        { value: "可组合", label: "约束即代码", text: "不同空间约束可以通过程序组合，而不是重新训练一个端到端策略。" }
+      ],
+      limits: [
+        "依赖 VLM 的空间 grounding 质量，物体属性与接触动力学仍可能误判。",
+        "规划循环计算成本高，动态环境需要频繁重规划。",
+        "对透明、反光、可变形物体的三维感知仍脆弱。"
+      ],
+      related: ["code-as-policies", "saycan", "vla-paradigm"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2307.05973" },
+        { label: "项目页", url: "https://voxposer.github.io/" }
+      ]
+    },
+    {
+      id: "embodied-harness",
+      domain: "manipulation",
+      route: "harness",
+      type: "concept",
+      title: "具身智能体 Harness",
+      subtitle: "包在模型外面的执行、记忆与安全层",
+      year: 2026,
+      venue: "概念词条",
+      org: "社区综合",
+      authors: "EAI Wiki 编辑组",
+      featured: false,
+      tags: ["Agent scaffold", "工具调用", "记忆", "安全护栏"],
+      tldr: "Harness 不是策略本身，而是把 VLM/策略、技能库、记忆、状态机、安全护栏与日志接成可运行智能体的系统层；它决定模型能力能否稳定落进物理闭环。",
+      why: "同一个基础模型换一套 harness，真机表现可能完全不同。随着模型趋同，系统层正在成为具身智能产品差异化的关键。",
+      intro: [
+        "具身 Harness 可以理解为机器人上的「agent runtime」：它把自然语言目标转成任务状态，选择技能或工具，调用低层控制器，监控执行结果，在失败时重试或降级，并把每次决策写入可审计的日志。",
+        "它不是新模型，而是一组接口与约束。一个最小 harness 至少包括技能注册表、状态与记忆、闭环执行器、安全检查和可观测性。它和 VLA、Code as Policy、世界模型不是替代关系，而是把它们组装起来的胶水层。"
+      ],
+      method: [
+        { title: "技能与工具注册", text: "把导航、抓取、放置、感知查询等能力包装成有前置条件与效果声明的接口。" },
+        { title: "状态与记忆", text: "维护任务进度、场景事实、失败历史与人类指令，避免每次决策都从零开始。" },
+        { title: "安全与恢复", text: "在执行前做可行性/碰撞/权限检查，失败后重试、回退或请求人类接管，并记录完整轨迹。" }
+      ],
+      evidence: [
+        { value: "系统", label: "模型能力的放大器", text: "工具调用、记忆与恢复逻辑能让有限模型完成更长程的任务。" },
+        { value: "可审计", label: "决策链可追踪", text: "把计划、调用参数与执行结果记录下来，才能定位失败发生在哪一层。" }
+      ],
+      limits: [
+        "概念边界尚未统一，容易变成把所有工程细节都装进去的筐。",
+        "缺乏标准 benchmark，难以比较不同 harness 的真实贡献。",
+        "过度工程会引入延迟与脆弱接口，甚至掩盖底层模型的能力边界。"
+      ],
+      related: ["saycan", "code-as-policies", "gemini-robotics-15"],
+      links: [
+        { label: "开源实例", url: "https://github.com/HenryLiu0405/Embodied-Harness" },
+        { label: "延伸：Code as Policies", url: "https://arxiv.org/abs/2209.07753" }
+      ]
+    },
+    {
+      id: "hover",
+      domain: "loco-manipulation",
+      route: "wbc",
+      type: "paper",
+      title: "HOVER",
+      subtitle: "一个统一多模态命令空间的人形全身控制器",
+      year: 2024,
+      venue: "ICRA 2025",
+      org: "NVIDIA · CMU · UC Berkeley 等",
+      authors: "Tairan He, Wenli Xiao 等",
+      featured: true,
+      tags: ["全身控制", "运动模仿", "多模式", "人形"],
+      tldr: "把全身运动模仿当作统一抽象，用策略蒸馏把导航、移动操作与桌面操作等不同控制模式合并成一个多模式人形控制器，避免每种命令空间重训一个策略。",
+      why: "它提供了一种「一个控制器覆盖多种接口」的工程答案，可能是人形机器人从专用技能走向通用身体中间件的关键。",
+      intro: [
+        "人形机器人不同任务需要不同控制接口：导航希望跟踪根速度，桌面操作希望跟踪上半身关节角，移动操作希望同时控制手和脚。HOVER 的洞察是：这些接口背后都可以还原为全身运动模仿。",
+        "方法先用运动捕捉数据训练一个通用的运动模仿教师，再把不同控制模式蒸馏进一个学生策略。学生可以在模式之间切换，而不需要为每种接口重新训练。"
+      ],
+      method: [
+        { title: "运动模仿作为共同抽象", text: "用全身运动跟踪提供统一的身体技能先验，覆盖平衡、行走与手臂姿态。" },
+        { title: "多模式策略蒸馏", text: "把导航、关节跟踪、移动操作等命令空间蒸馏进单一控制器，实现模式切换。" },
+        { title: "真机部署", text: "在真实人形上验证多模式控制与模式间的平滑切换。" }
+      ],
+      evidence: [
+        { value: "Multi-mode", label: "一个策略多种命令空间", text: "导航、全身操作与桌面操作共享同一个控制器，而非各自训练。" },
+        { value: "ICRA 2025", label: "真机全身控制", text: "在仿真与真实人形平台上评估运动跟踪和模式切换。" }
+      ],
+      limits: [
+        "依赖高质量运动捕捉与重定向数据，动作分布外的技能仍受限。",
+        "多模式蒸馏可能牺牲各模式的极限性能。",
+        "没有解决高层任务理解与长程操作规划。"
+      ],
+      related: ["wbc", "groot-n1", "omnih2o"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2410.21229" },
+        { label: "项目页", url: "https://hover-versatile-humanoid.github.io/" }
+      ]
+    },
+    {
+      id: "omnih2o",
+      domain: "loco-manipulation",
+      route: "loco-rl",
+      type: "paper",
+      title: "OmniH2O",
+      subtitle: "从人到人形的全身遥操作与技能学习",
+      year: 2024,
+      venue: "CoRL 2024",
+      org: "UT Austin · NVIDIA 等",
+      authors: "Tairan He, Zhengyi Luo 等",
+      featured: false,
+      tags: ["人形遥操作", "运动重定向", "全身控制", "灵巧手"],
+      tldr: "用人体姿态与 VR 接口把人映射到人形机器人，通过运动重定向和强化学习实现全身遥操作、灵巧手控制与移动操作，并进一步把人类示范用于自主技能学习。",
+      why: "它把「人怎么教人形」做成一条可复用的数据与控制管线，连接了遥操作、全身控制与模仿学习。",
+      intro: [
+        "OmniH2O 把人的动作当作人形机器人的天然示教。系统从 VR 头显、手部追踪或单目视频中恢复人体姿态，重定向到机器人骨架，再用 RL 训练的运动跟踪策略执行全身动作。",
+        "遥操作只是第一步。人类操作产生的数据可以进一步训练自主策略，让机器人学会在真实环境中完成抓取、搬运与移动操作，而不需要为每个任务重新设计奖励。"
+      ],
+      method: [
+        { title: "人体到人形重定向", text: "把人体关键点、手部姿态与头部视角映射到不同人形骨架。" },
+        { title: "RL 运动跟踪", text: "训练全身控制器在仿真中跟踪重定向后的运动，再迁移到真机。" },
+        { title: "从遥操作到自主", text: "把人类遥操作轨迹作为示范，训练可自主执行的移动操作策略。" }
+      ],
+      evidence: [
+        { value: "Whole-body", label: "全身 + 灵巧手遥操作", text: "人可以同时控制行走、躯干、手臂与手指。" },
+        { value: "Data", label: "人类示范到自主策略", text: "遥操作数据可转化为可部署的自主技能。" }
+      ],
+      limits: [
+        "人体与机器人形态差异导致重定向失真。",
+        "遥操作对通信延迟和操作者熟练度敏感。",
+        "自主策略仍受限于示范任务的覆盖范围。"
+      ],
+      related: ["hover", "groot-n1", "umi"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2406.08858" },
+        { label: "项目页", url: "https://omni.human2humanoid.com/" }
+      ]
+    },
+    {
+      id: "locoman",
+      domain: "loco-manipulation",
+      route: "loco-rl",
+      type: "paper",
+      title: "LocoMan",
+      subtitle: "给四足机器人装上轻量移动操作臂",
+      year: 2024,
+      venue: "arXiv 2024",
+      org: "多机构合作",
+      authors: "Changyi Lin 等",
+      featured: false,
+      tags: ["四足机器人", "移动操作", "模块化控制", "VLM 规划"],
+      tldr: "给四足机器人加装 3-DoF 轻量操作臂，用模块化的运动、操作与全身控制策略组合出受限空间中的移动操作，并用 VLM 做高层任务规划。",
+      why: "它把 loco-manipulation 从昂贵的人形平台扩展到更便宜、更稳定的四足平台，强调硬件与分层策略的协同设计。",
+      intro: [
+        "LocoMan 的出发点是：很多家庭/工业任务不需要完整人形，只需要机器人能够在不平整地面移动，同时用轻量手臂触碰、推拉和抓取物体。四足平台提供稳定移动，附加操作臂提供干预能力。",
+        "系统把控制拆成移动、操作和全身协调策略，再用视觉语言模型分解任务。这种分层让不同模块可以独立训练，但也带来模块之间的接口和时序问题。"
+      ],
+      method: [
+        { title: "轻量 loco-manipulator", text: "在四足机器人上安装低自由度操作臂，兼顾负载、灵活性与成本。" },
+        { title: "模块化策略", text: "分离移动、操作与全身控制策略，通过高层调度协调。" },
+        { title: "VLM 任务规划", text: "用视觉语言模型把自然语言任务拆成可执行的移动与操作步骤。" }
+      ],
+      evidence: [
+        { value: "四足", label: "受限空间移动操作", text: "在狭窄、需要改变身体姿态的空间中完成推拉与抓取任务。" },
+        { value: "模块化", label: "控制与规划解耦", text: "不同技能可独立训练并由高层组合。" }
+      ],
+      limits: [
+        "附加操作臂的自由度与负载有限，精细操作能力弱于人形或机械臂。",
+        "模块之间的接口误差会累积，长程任务可靠性不足。",
+        "高层 VLM 规划仍依赖预定义技能集合。"
+      ],
+      related: ["omnih2o", "hover", "wbc"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2403.18197" },
+        { label: "项目页", url: "https://locoman.github.io/" }
+      ]
+    },
+    {
+      id: "asap",
+      domain: "loco-manipulation",
+      route: "loco-sim2real",
+      type: "paper",
+      title: "ASAP",
+      subtitle: "对齐仿真与真实物理的人形全身技能学习",
+      year: 2025,
+      venue: "RSS 2025",
+      org: "CMU · NVIDIA 等",
+      authors: "Tairan He, Jiawei Gao 等",
+      featured: false,
+      tags: ["Sim2Real", "人形", "运动跟踪", "残差学习"],
+      tldr: "两阶段框架：先在仿真中用人体运动数据预训练全身跟踪策略，再在真机采集数据训练残差动作模型，并把残差模型放回仿真中微调，从而对齐真实动力学。",
+      why: "它把「模型误差」变成一个可学习的 delta 动作模型，而不是只靠域随机化或人工系统辨识，代表了人形 Sim2Real 的一条新路径。",
+      intro: [
+        "高动态人形动作对动力学误差极其敏感。ASAP 不试图一次造出完美仿真，而是承认仿真与真实存在差异：先把仿真策略部署到真机，收集真实轨迹，再学习一个残差动作来补偿差异。",
+        "残差模型被放回仿真，在预训练策略上继续微调，形成闭环。这个过程可以迭代，使策略逐步适应真实世界，同时保留仿真中的敏捷性。"
+      ],
+      method: [
+        { title: "仿真预训练", text: "用重定向的人体运动训练全身运动跟踪策略，获得敏捷的运动先验。" },
+        { title: "真实残差学习", text: "在真机采集数据，训练 delta 动作模型补偿动力学差异。" },
+        { title: "仿真中联合微调", text: "把残差模型集成进仿真，重新微调策略，缩小 sim2real 差距。" }
+      ],
+      evidence: [
+        { value: "Agile", label: "高动态全身动作", text: "在真实 Unitree G1 上完成多种敏捷动作，跟踪误差优于 SysID 与域随机化基线。" },
+        { value: "两阶段", label: "残差模型可迭代", text: "真实数据只用于学习残差，避免从头训练高维策略。" }
+      ],
+      limits: [
+        "残差模型依赖真实数据覆盖，未见过的高动态动作仍可能失败。",
+        "两阶段流程工程复杂，需要在仿真与真机之间反复迭代。",
+        "安全约束与人形硬件的耐久性仍是部署瓶颈。"
+      ],
+      related: ["sim2real", "hover", "groot-n1"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2502.01143" },
+        { label: "项目页", url: "https://agile.human2humanoid.com/" }
+      ]
+    },
+    {
+      id: "robocasa",
+      domain: "simulation",
+      route: "scene-sim",
+      type: "system",
+      title: "RoboCasa",
+      subtitle: "面向通用机器人的大规模日常任务仿真",
+      year: 2024,
+      venue: "RSS 2024",
+      org: "UT Austin · NVIDIA",
+      authors: "Soroush Nasiriany, Abhiram Maddukuri 等",
+      featured: true,
+      tags: ["场景仿真", "厨房任务", "生成式资产", "基准"],
+      tldr: "构建包含 100+ 日常厨房任务、2,500+ 物体与可生成场景的仿真环境，并提供人类演示与多任务基准，用于训练和评测通用操作策略。",
+      why: "它把仿真从「单个任务环境」推进到「可组合的日常生活场景集合」，让通用策略获得比 LIBERO 更接近家庭环境的训练分布。",
+      intro: [
+        "RoboCasa 关注的是场景级多样性：同一个厨房要能改变布局、物体、材质与任务。它提供生成式资产与场景配置，让研究者可以批量生成不同的厨房，而不是手工搭一个固定环境。",
+        "环境包含 100+ 任务，覆盖开抽屉、拿取、清理、微波炉等日常行为，并提供人类演示用于模仿学习。它的价值不仅在任务数量，更在于把「场景变化」作为变量纳入训练与评测。"
+      ],
+      method: [
+        { title: "可生成场景", text: "用模块化厨房资产与布局采样，自动组合出大量不同场景。" },
+        { title: "日常任务套件", text: "覆盖 100+ 厨房操作任务，并提供语言指令与成功判定。" },
+        { title: "人类示范", text: "为多任务提供遥操作演示，支持模仿学习与多任务策略训练。" }
+      ],
+      evidence: [
+        { value: "100+", label: "日常厨房任务", text: "从简单抓取到长程厨房流程，覆盖场景与物体变化。" },
+        { value: "2,500+", label: "物体与资产", text: "以生成式资产支撑场景级多样性。" }
+      ],
+      limits: [
+        "聚焦厨房，无法代表全部家庭或工业操作分布。",
+        "物理接触与流体、可变形物体仍被简化。",
+        "sim2real 迁移未在论文中充分验证。"
+      ],
+      related: ["isaac-lab", "sim2real", "libero"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2406.02523" },
+        { label: "项目页", url: "https://robocasa.ai/" }
+      ]
+    },
+    {
+      id: "mimicgen",
+      domain: "data",
+      route: "synthetic",
+      type: "system",
+      title: "MimicGen",
+      subtitle: "用少量人类示范放大成大规模数据",
+      year: 2023,
+      venue: "CoRL 2023",
+      org: "UT Austin · NVIDIA",
+      authors: "Ajay Mandlekar, Soroush Nasiriany 等",
+      featured: false,
+      tags: ["数据生成", "示范扩增", "模仿学习", "仿真"],
+      tldr: "把人类示范拆成以物体为中心的子任务片段，再通过空间变换、物体替换与机器人重执行，自动生成数千条新示范，覆盖新布局、新物体与新场景。",
+      why: "它把数据扩增从图像层面的扰动，提升到任务与物体层面的结构化变换，为「少量示范 + 大规模合成」提供了工程范式。",
+      intro: [
+        "人工采集机器人示教成本高，而且往往集中在少数物体和布局上。MimicGen 的思路是复用人类示范中的「动作意图」：抓住一个片段，改变相关物体或目标的位置，再让机器人在仿真里重新执行。",
+        "系统定义以物体为中心的子任务边界，通过变换物体位姿、替换几何、重新规划机器人轨迹来生成新示范。生成的数据可用于训练模仿学习策略，并在真实机器人上迁移。"
+      ],
+      method: [
+        { title: "示范分段", text: "把一条人类示范拆成以物体为中心的子任务，识别每段的交互对象与目标。" },
+        { title: "空间与物体变换", text: "改变物体、目标和场景布局，重新生成机器人可执行的轨迹。" },
+        { title: "大规模数据生成", text: "在仿真中自动生成数千条示范，覆盖原始数据没有的对象和布局。" }
+      ],
+      evidence: [
+        { value: "1000s", label: "自动生成示范", text: "从少量人类示范扩展到数千条训练轨迹。" },
+        { value: "多任务", label: "跨物体与场景", text: "生成数据能训练出在真实机器人上执行的新策略。" }
+      ],
+      limits: [
+        "依赖可识别的子任务分段与可重规划的仿真环境。",
+        "对接触丰富、可变形物体的变换容易失败。",
+        "生成数据继承源示范的偏置，不能自动发现新策略。"
+      ],
+      related: ["robocasa", "open-x-embodiment", "umi"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2310.17596" },
+        { label: "项目页", url: "https://mimicgen.github.io/" }
+      ]
+    },
+    {
+      id: "roboarena",
+      domain: "data",
+      route: "eval",
+      type: "benchmark",
+      title: "RoboArena",
+      subtitle: "把真机评测变成分布式盲测擂台",
+      year: 2025,
+      venue: "arXiv 2025",
+      org: "UC Berkeley · Stanford 等",
+      authors: "Pranav Atreya, Karl Pertsch 等",
+      featured: true,
+      tags: ["真机评测", "分布式评估", "盲测", "通用策略"],
+      tldr: "不固定任务与环境，而是让多个机构的评测者自由选择场景，对两个策略做双盲成对比较，再聚合偏好得到全局排名；用 DROID 平台和 600+ 真机 episode 验证。",
+      why: "它绕开了集中式机器人挑战赛的标准化瓶颈，让通用策略可以在多样真实环境中被公平比较，是评测基础设施的一次重要转向。",
+      intro: [
+        "通用策略的评测很难：固定任务会过拟合，集中比赛成本高且覆盖有限。RoboArena 让评测者保留场景选择权，但要求他们同时运行两个匿名策略并做成对比较。这样可以在不同任务上收集偏好，而不是强行统一任务。",
+        "聚合后的排名不依赖某个固定 benchmark，而依赖分布式的成对证据。它更像机器人领域的「众包 A/B 测试」，适合评估泛化能力，但需要严格的盲测协议与统计校正。"
+      ],
+      method: [
+        { title: "分布式评测网络", text: "多个机构使用统一机器人平台，自由选择任务与环境。" },
+        { title: "双盲成对比较", text: "同一场景中匿名运行两个策略，评测者只判断哪一个更好。" },
+        { title: "偏好聚合排名", text: "把跨机构、跨任务的成对比较聚合成全局策略排名。" }
+      ],
+      evidence: [
+        { value: "600+", label: "真实成对 episode", text: "在 7 个机构的 DROID 平台上完成 600 多对真机比较。" },
+        { value: "7", label: "通用策略参与", text: "用分布式偏好比集中式评测更准确地区分策略能力。" }
+      ],
+      limits: [
+        "依赖评测者遵守双盲协议，仍可能出现场景选择偏差。",
+        "成对比较成本高，难以覆盖所有任务维度。",
+        "偏好排名不解释失败原因，也不能代替细粒度诊断。"
+      ],
+      related: ["libero", "droid", "open-x-embodiment"],
+      links: [
+        { label: "论文", url: "https://arxiv.org/abs/2506.18123" },
+        { label: "项目页", url: "https://robo-arena.github.io/" }
+      ]
+    }
+  ];
+
+  const RESOURCES = [
+    {
+      id: "res-hm3d",
+      name: "HM3D",
+      type: "dataset",
+      year: 2021,
+      domains: ["navigation"],
+      scale: "1,000 个真实室内场景",
+      summary: "Habitat-Matterport 3D，真实室内扫描数据集，是 ObjectNav 与场景理解的标准训练/评测底座。",
+      url: "https://aihabitat.org/datasets/hm3d/"
+    },
+    {
+      id: "res-matterport3d",
+      name: "Matterport3D",
+      type: "dataset",
+      year: 2017,
+      domains: ["navigation"],
+      scale: "90 个建筑 / 194k RGB-D",
+      summary: "建筑级真实室内重建数据集，提供全景图像、网格与语义标注，是 VLN 与具身导航的经典数据底座。",
+      url: "https://niessner.github.io/Matterport/"
+    },
+    {
+      id: "res-r2r",
+      name: "R2R",
+      type: "benchmark",
+      year: 2018,
+      domains: ["navigation"],
+      scale: "7,189 条路径 / 21,567 条指令",
+      summary: "Room-to-Room，视觉语言导航的奠基 benchmark；要求智能体在离散导航图上按自然语言指令行进。",
+      url: "https://bringmeaspoon.org/"
+    },
+    {
+      id: "res-habitat3",
+      name: "Habitat 3.0",
+      type: "benchmark",
+      year: 2023,
+      domains: ["navigation", "simulation"],
+      scale: "人机共处 / 重排",
+      summary: "把真实室内场景、人形化身与机器人放进同一仿真，评测社交导航与人机协作。",
+      url: "https://aihabitat.org/habitat3/",
+      entryId: "habitat-3"
+    },
+    {
+      id: "res-libero",
+      name: "LIBERO",
+      type: "benchmark",
+      year: 2023,
+      domains: ["manipulation", "data"],
+      scale: "130 个任务 / 4 组能力",
+      summary: "语言条件操作基准，专门测试知识迁移与终身学习，而不是只测单一任务的成功率。",
+      url: "https://libero-project.github.io/",
+      entryId: "libero"
+    },
+    {
+      id: "res-calvin",
+      name: "CALVIN",
+      type: "benchmark",
+      year: 2022,
+      domains: ["manipulation", "data"],
+      scale: "34 个任务 / 长程指令",
+      summary: "面向长程语言条件操作的仿真 benchmark，强调连续指令序列与泛化。",
+      url: "https://github.com/mees/calvin"
+    },
+    {
+      id: "res-simplerenv",
+      name: "SimplerEnv",
+      type: "benchmark",
+      year: 2024,
+      domains: ["manipulation", "simulation"],
+      scale: "真实-仿真对齐评测",
+      summary: "用真实机器人视频与仿真环境对齐，为通用操作策略提供可复现的仿真评测替代。",
+      url: "https://simpler-env.github.io/"
+    },
+    {
+      id: "res-droid",
+      name: "DROID",
+      type: "dataset",
+      year: 2024,
+      domains: ["manipulation", "data"],
+      scale: "76k 轨迹 / 564 场景",
+      summary: "跨 13 家机构采集的真实操作数据集，用统一硬件与协议覆盖不同建筑和日常任务。",
+      url: "https://droid-dataset.github.io/",
+      entryId: "droid"
+    },
+    {
+      id: "res-oxe",
+      name: "Open X-Embodiment",
+      type: "dataset",
+      year: 2023,
+      domains: ["manipulation", "data"],
+      scale: "22 本体 / 1M+ 轨迹",
+      summary: "社区协作的跨本体机器人数据集合，统一格式与动作空间，支撑 RT-X 与后续通用策略。",
+      url: "https://robopen.github.io/",
+      entryId: "open-x-embodiment"
+    },
+    {
+      id: "res-amass",
+      name: "AMASS",
+      type: "dataset",
+      year: 2019,
+      domains: ["loco-manipulation"],
+      scale: "40+ 小时动作捕捉",
+      summary: "统一的人体动作捕捉数据集集合，是运动重定向、全身跟踪与人形运动先验的常用数据底座。",
+      url: "https://amass.is.tue.mpg.de/"
+    },
+    {
+      id: "res-humanoidbench",
+      name: "HumanoidBench",
+      type: "benchmark",
+      year: 2024,
+      domains: ["loco-manipulation"],
+      scale: "27 个任务 / 人形全身",
+      summary: "面向人形机器人的仿真基准，覆盖行走、平衡、全身操作与移动操作。",
+      url: "https://humanoid-bench.github.io/"
+    },
+    {
+      id: "res-locomujoco",
+      name: "LocoMuJoCo",
+      type: "benchmark",
+      year: 2024,
+      domains: ["loco-manipulation"],
+      scale: "多本体运动 / 模仿学习",
+      summary: "面向运动与移动操作的开源模仿学习基准，提供多种本体、任务与统一接口。",
+      url: "https://github.com/robfiras/loco-mujoco"
+    },
+    {
+      id: "res-behavior1k",
+      name: "BEHAVIOR-1K",
+      type: "benchmark",
+      year: 2022,
+      domains: ["loco-manipulation", "simulation"],
+      scale: "1,000 个日常活动",
+      summary: "以人类日常活动为中心的全身体具身 benchmark，覆盖家庭场景中的长程任务。",
+      url: "https://behavior.stanford.edu/"
+    },
+    {
+      id: "res-partnet-mobility",
+      name: "PartNet-Mobility",
+      type: "dataset",
+      year: 2020,
+      domains: ["simulation"],
+      scale: "2,000+ 铰接物体",
+      summary: "带关节、运动学与语义标注的 3D 物体数据集，是交互式仿真与关节物体操作的标准资产来源；通过 SAPIEN 加载。",
+      url: "https://github.com/haosulab/SAPIEN"
+    },
+    {
+      id: "res-maniskill",
+      name: "ManiSkill",
+      type: "benchmark",
+      year: 2023,
+      domains: ["simulation"],
+      scale: "GPU 并行 / 操作技能",
+      summary: "基于 SAPIEN 的 GPU 并行操作仿真与基准，覆盖刚体、关节物体与多种机器人。",
+      url: "https://maniskill.ai/"
+    },
+    {
+      id: "res-robocasa",
+      name: "RoboCasa",
+      type: "benchmark",
+      year: 2024,
+      domains: ["simulation", "manipulation"],
+      scale: "100+ 厨房任务",
+      summary: "大规模日常厨房任务仿真与 benchmark，强调场景生成、物体多样性与多任务训练。",
+      url: "https://robocasa.ai/",
+      entryId: "robocasa"
+    },
+    {
+      id: "res-bridgedata",
+      name: "BridgeData V2",
+      type: "dataset",
+      year: 2023,
+      domains: ["data"],
+      scale: "60k+ 轨迹 / 24 个环境",
+      summary: "面向多任务、多环境的真实操作数据集，覆盖抓取、推拉、堆叠等技能。",
+      url: "https://rail-berkeley.github.io/bridgedata/"
+    },
+    {
+      id: "res-rh20t",
+      name: "RH20T",
+      type: "dataset",
+      year: 2023,
+      domains: ["data"],
+      scale: "110+ 任务 / 多模态",
+      summary: "包含视觉、力/触觉、音频与动作的大规模真实操作数据集，覆盖多种机器人与任务。",
+      url: "https://rh20t.github.io/"
+    },
+    {
+      id: "res-roboarena",
+      name: "RoboArena",
+      type: "benchmark",
+      year: 2025,
+      domains: ["data"],
+      scale: "分布式真机盲测",
+      summary: "用跨机构双盲成对比较替代固定任务评测，对通用机器人策略进行分布式排名。",
+      url: "https://robo-arena.github.io/",
+      entryId: "roboarena"
+    }
   ];
 
   const PATHS = [
     {
-      id: "start-vla",
+      id: "navigation-route",
       label: "PATH 01",
-      title: "从零读懂 VLA",
-      description: "先建立范式感，再沿着「离散 token → 连续动作 → 分层推理」看三代系统如何演化。",
-      duration: "约 90 分钟",
+      title: "从导航任务开始",
+      description: "先分清「找物体」「听指令」「学导航」「与人共处」四类问题，再进入各自的技术路线。",
+      duration: "约 60 分钟",
       level: "入门",
-      steps: ["vla-paradigm", "rt2", "openvla", "pi0"]
+      steps: ["objectnav", "nomad", "navgpt", "habitat-3"]
     },
     {
-      id: "policy",
+      id: "manipulation-route",
       label: "PATH 02",
-      title: "操作策略的进化",
-      description: "从动作分布建模出发，理解 Diffusion、Action Chunking 与通用策略之间的关系。",
+      title: "操作路线的四次转向",
+      description: "从示教学习出发，看语义泛化、程序化规划与世界-动作模型如何各自回答「下一步做什么」。",
       duration: "约 2 小时",
       level: "进阶",
-      steps: ["diffusion-policy", "act-aloha", "action-chunking", "octo"]
+      steps: ["diffusion-policy", "rt2", "saycan", "worldvla"]
     },
     {
-      id: "frontier",
+      id: "sim2real-route",
       label: "PATH 03",
-      title: "世界模型与通用本体",
-      description: "追踪两条前沿：在潜空间/生成世界里预演未来，以及把基础模型装进人形身体。",
+      title: "从仿真到真机",
+      description: "沿基础设施层走一遍：GPU 仿真、场景任务、Sim2Real，以及把人形高动态技能带回现实。",
       duration: "约 2.5 小时",
       level: "前沿",
-      steps: ["dreamer-v3", "genie-3", "groot-n1", "isaac-lab"]
+      steps: ["isaac-lab", "robocasa", "sim2real", "asap"]
     }
   ];
 
@@ -1306,5 +2182,5 @@ window.EAI_DATA = (() => {
     benchmark: "基准"
   };
 
-  return { DOMAINS, ENTRIES, PATHS, TYPE_LABELS };
+  return { DOMAINS, ENTRIES, PATHS, RESOURCES, TYPE_LABELS };
 })();

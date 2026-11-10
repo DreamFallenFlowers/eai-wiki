@@ -23,18 +23,23 @@ body:
     attributes:
       label: 所属领域
       options:
-        - 视觉-语言-动作模型（VLA）
-        - 世界模型
-        - 策略学习
-        - 灵巧操作
-        - 导航与移动
-        - 人形机器人
-        - 仿真与 Sim2Real
-        - 具身感知
-        - 数据与评测
+        - 导航 Navigation
+        - 操作 Manipulation
+        - 移动操作 Loco-Manipulation
+        - 仿真器 Simulation
+        - 数据与评测 Data & Evaluation
         - 不确定 / 需要讨论
     validations:
       required: true
+
+  - type: input
+    id: route
+    attributes:
+      label: 技术路线
+      description: 站内已有路线可直接写名称；如果是新路线，请说明它与现有路线的关系。
+      placeholder: 例如：模仿学习 / VLA / WAM / Code as Policy / 具身智能体 Harness
+    validations:
+      required: false
 
   - type: dropdown
     id: entry_type
