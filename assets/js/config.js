@@ -34,7 +34,7 @@ window.EAI_CONFIG = {
   },
 
   // Content shown as the editorial date. Keep in sync with your last curation pass.
-  version: "0.1",
+  version: "0.2",
   edition: "SEED EDITION",
-  updated: "2026-11-10"
+  updated: "2026-11-11"
 };

@@ -4,14 +4,19 @@
 
 - **5 个研究领域**：导航、操作、移动操作、仿真器、数据与评测
 - **22 条技术路线**：如操作领域下的模仿学习、强化学习、VLA、WAM、代码即策略、具身智能体 Harness
-- **42 个深度词条**：论文 / 系统 / 概念 / 数据集 / 基准
-- **19 个常用数据集与基准**：按领域交叉收录，可直接跳转站内词条或原始项目页
+- **47 个深度词条**：论文 / 系统 / 概念 / 数据集 / 基准
+- **22 个常用数据集与基准**：按领域交叉收录，可直接跳转站内词条或原始项目页
 - **3 条阅读路径**：从导航、操作或 Sim2Real 进入
 - **公开讨论**：Giscus + GitHub Discussions
-- **社区共建**：站内表单生成 GitHub Issue；附带 Issue Forms、PR 模板与编辑规范
+- **Wiki 编辑提案**：领域、路线和词条页均有章节级「补充 / 编辑」入口，提交后生成 GitHub Issue
+- **社区共建**：附带 Issue Forms、PR 模板与编辑规范
 - **零构建、零依赖**：原生 HTML / CSS / JavaScript，推送即可部署
 
-![EAI Wiki preview](docs/preview.png)
+![EAI Wiki homepage](docs/preview.png)
+
+路线页是一篇可编辑的技术条目，包含导读、技术拆解、实践清单、代表工作、参考来源、目录与 Infobox：
+
+![Route wiki page](docs/preview-route.png)
 
 ---
 
@@ -30,7 +35,7 @@ Research Area
 | 操作 Manipulation | 模仿学习、强化学习、视觉-语言-动作模型（VLA）、世界-动作模型（WAM）、代码即策略、具身智能体 Harness |
 | 移动操作 Loco-Manipulation | 全身控制、学习式移动操作、人形基础模型、人形 Sim2Real |
 | 仿真器 Simulation | GPU 并行仿真、场景级仿真、Real2Sim 与神经重建、Sim2Real 迁移 |
-| 数据与评测 Data & Evaluation | 遥操作与示教采集、跨本体数据、合成数据与数据引擎、评测与基准 |
+| 数据与评测 Data & Evaluation | 真机遥操数据、UMI 数据、EGO 数据、数据引擎与评测（横切基础设施） |
 
 每个领域页同时提供：
 
@@ -39,7 +44,16 @@ Research Area
 - 常用 **datasets** 与 **benchmarks**
 - 相邻领域与贡献入口
 
-每条技术路线有独立页面（`#/route/<domain>/<route>`），按时间顺序列出具体论文、系统或概念。
+每条技术路线有独立页面（`#/route/<domain>/<route>`），不是简单的论文列表，而是一篇持续维护的 Wiki 条目：
+
+- **技术导读**：定义问题、系统边界与这条路线为什么存在
+- **技术拆解**：方法谱系、关键设计、权衡与失效模式
+- **实践清单**：部署与实验时真正需要检查的事项
+- **路线工作**：按时间排列的具体论文、系统与数据集
+- **参考来源 / Infobox / 目录**：可跳转的一手来源与结构化元数据
+- **章节级编辑提案**：每个小节都能单独补充或修订，提交到 GitHub 审核
+
+数据领域按**采集接口**而不是「跨本体」划分：真机遥操、UMI 手持采集、EGO 第一人称人类视频，再加上跨路线共用的数据引擎与评测。DROID / Open X-Embodiment 作为真机遥操数据收录，跨机构、跨本体是它们的属性，而不是单独的数据来源。
 
 ---
 
@@ -135,6 +149,8 @@ comments: {
 | 导出 | 用途 |
 | --- | --- |
 | `DOMAINS` | 5 个领域、领域内技术路线、领域导读 |
+| `ROUTE_DETAILS` | 每条路线的 Wiki 正文：技术导读、技术拆解、实践清单 |
+| `DOMAIN_DETAILS` | 每个领域的开放问题与阅读提示 |
 | `ENTRIES` | 词条，使用 `domain` + `route` 两级归属 |
 | `RESOURCES` | 每个领域的数据集与 benchmark，可引用站内词条 |
 | `PATHS` | 首页三条阅读路径 |
@@ -197,16 +213,46 @@ comments: {
   domains: ["manipulation", "data"],
   scale: "34 个任务 / 长程指令",
   summary: "面向长程语言条件操作的仿真 benchmark……",
-  url: "https://calvin.cs.uni-freiburg.de/",
+  url: "https://github.com/mees/calvin",
   entryId: "optional-entry-id"    // 可选：链接到已有词条
 }
 ```
 
 `RESOURCES` 可以跨领域复用。同一份资源会出现在多个领域页，但只占用一个搜索索引。
 
+### 路线 Wiki 正文
+
+路线页面不是自动生成的摘要。每个 `ROUTE_DETAILS` 条目包含：
+
+```js
+"manipulation:vla": {
+  lead: [
+    "第一段定义问题与技术边界。",
+    "第二段说明主要争论、取舍与阅读方法。"
+  ],
+  sections: [
+    {
+      title: "动作表示的两大分支",
+      body: ["技术解释……"],
+      bullets: ["离散动作的取舍……", "连续动作的取舍……"]
+    }
+  ],
+  practice: ["部署前先检查……", "评测时不要……"]
+}
+```
+
+领域页的开放问题在 `DOMAIN_DETAILS` 中维护：
+
+```js
+manipulation: {
+  openProblems: ["跨本体的动作表示……", "接触丰富任务……"],
+  readingGuide: "先看它解决哪类失败……"
+}
+```
+
 ### 新增路线
 
-在目标领域的 `routes` 数组里追加路线，然后在词条中使用新的 `route` id。领域页、路线页、筛选器、搜索与知识网络会自动更新。
+在目标领域的 `routes` 数组里追加路线，在 `ROUTE_DETAILS` 中使用 `"<domain>:<route>"` 补齐技术正文，然后在词条中使用新的 `route` id。领域页、路线页、筛选器、搜索与知识网络会自动更新。`validate-content.mjs` 会检查缺失的路线正文。
 
 ### 更新版本与日期
 
@@ -216,8 +262,9 @@ comments: {
 
 ## 贡献与评论
 
+- 领域页、路线页、词条页的「编辑本页」和章节级「补充」会打开 Wiki 编辑提案，生成一个**公开 GitHub Issue**，并带上页面、章节、依据与署名。
 - 站内「贡献一个词条」表单会生成一个**公开 GitHub Issue**，并带上领域与技术路线。
-- 仓库自带两个 Issue Forms：新词条、修订建议。
+- 仓库自带三个 Issue Forms：编辑页面、新词条、修订建议。
 - 评论通过 Giscus 落到 GitHub Discussions；每个词条独立讨论串。
 - 本地预览的评论存在 `localStorage`，明确标记为「仅本机可见」。
 - 详细规范见 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
@@ -246,14 +293,15 @@ eai-wiki/
 │   └── img/                      # 图标与社交封面
 ├── .github/
 │   ├── workflows/pages.yml       # GitHub Pages 自动部署
-│   ├── ISSUE_TEMPLATE/           # 新词条 / 修订表单
+│   ├── ISSUE_TEMPLATE/           # 编辑页面 / 新词条 / 修订表单
 │   └── pull_request_template.md
 ├── scripts/
 │   ├── serve.mjs                 # 零依赖本地预览服务器
 │   ├── validate-content.mjs      # 校验领域/路线/词条/资源引用
 │   ├── check-links.mjs           # 检查论文与项目链接
 │   └── og-template.html          # 可重新渲染的社交封面模板
-├── docs/preview.png              # README 预览图
+├── docs/preview.png              # 首页预览
+├── docs/preview-route.png        # 路线 Wiki 预览
 ├── GISCUS_SETUP.md               # 评论区接入说明
 ├── CONTRIBUTING.md               # 编辑与贡献规范
 ├── LICENSE                       # 代码：MIT

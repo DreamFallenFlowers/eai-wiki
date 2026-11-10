@@ -346,7 +346,7 @@
         <div class="hero-copy">
           <p class="eyebrow hero-eyebrow reveal">
             <span class="eyebrow-dot"></span>
-            COMMUNITY-MAINTAINED / SEED EDITION 0.1
+            COMMUNITY-EDITED WIKI / SEED EDITION ${esc(CFG.version || "0.2")}
           </p>
           <h1 class="hero-title reveal" style="--delay:50ms">
             <span>让具身智能</span>
@@ -876,6 +876,14 @@
 
   /* ------------------------------------------------------------------- domain */
 
+  function wikiEditAttrs(pageType, domainId, routeId = "", section = "", entryId = "") {
+    return `data-wiki-edit data-wiki-page="${pageType}" data-wiki-domain="${domainId}"${routeId ? ` data-wiki-route="${routeId}"` : ""}${entryId ? ` data-wiki-entry="${entryId}"` : ""} data-wiki-section="${esc(section)}"`;
+  }
+
+  function wikiEditButton(pageType, domainId, routeId, section, label = "编辑", entryId = "") {
+    return `<button class="section-edit" type="button" ${wikiEditAttrs(pageType, domainId, routeId, section, entryId)}>${esc(label)} <span>✎</span></button>`;
+  }
+
   function resourceMarkup(resource) {
     const entry = resource.entryId ? byId(resource.entryId) : null;
     const href = entry ? `#/entry/${entry.id}` : safeUrl(resource.url);
@@ -938,17 +946,39 @@
         </section>
 
         <div class="wrap domain-body">
-          <section class="domain-story">
+          <div class="wiki-toolbar">
+            <div class="wiki-toolbar-info">
+              <span class="wiki-badge">WIKI ARTICLE / DOMAIN</span>
+              <span class="wiki-meta">最后编辑 ${formatDate(CFG.updated || "2026-11-10")} · 由社区维护</span>
+            </div>
+            <div class="wiki-toolbar-actions">
+              <a class="wiki-action" href="${repoFileUrl("assets/js/data.js")}" target="_blank" rel="noopener">查看数据源 ↗</a>
+              ${wikiEditButton("domain", domain.id, "", "整页", "编辑本页")}
+            </div>
+          </div>
+
+          <section class="domain-story" id="domain-intro">
             <div class="domain-story-main">
               <div class="entry-section-head">
                 <span class="section-index">01</span>
                 <h2>领域导读</h2>
+                ${wikiEditButton("domain", domain.id, "", "领域导读", "补充")}
               </div>
               <div class="prose prose--large">
                 ${(domain.intro || []).map(paragraph => `<p>${esc(paragraph)}</p>`).join("")}
               </div>
+              ${domain.readingGuide ? `<div class="reading-guide"><span class="mono">READING GUIDE</span><p>${esc(domain.readingGuide)}</p></div>` : ""}
             </div>
             <aside class="domain-aside">
+              <div class="aside-card">
+                <div class="aside-card-head"><span>ON THIS PAGE</span><span>04</span></div>
+                <div class="domain-toc">
+                  <button type="button" data-scroll-target="domain-intro"><span>01</span>领域导读</button>
+                  <button type="button" data-scroll-target="domain-routes"><span>02</span>技术路线</button>
+                  <button type="button" data-scroll-target="domain-resources"><span>03</span>数据集与基准</button>
+                  <button type="button" data-scroll-target="domain-open-problems"><span>04</span>开放问题</button>
+                </div>
+              </div>
               <div class="aside-card">
                 <div class="aside-card-head"><span>TECH ROUTES</span><span>${padded(domain.routes.length)}</span></div>
                 <ol class="topic-list route-index-list">
@@ -957,18 +987,19 @@
                 </ol>
               </div>
               <div class="aside-note">
-                <span class="mono">EDITOR'S NOTE</span>
-                <p>领域导读由 AI 辅助起草，正在等待领域编辑审校。发现事实错误，请直接建议修订。</p>
-                <button type="button" class="text-button" data-open-contribute data-fix-domain="${domain.id}">建议修订 ↗</button>
+                <span class="mono">OPEN NOTEBOOK</span>
+                <p>领域导读由 AI 辅助起草、社区逐步审校。你可以补充技术定义、代表工作、数据与反例。</p>
+                <button type="button" class="text-button" data-open-contribute data-fix-domain="${domain.id}">提交词条修订 ↗</button>
               </div>
             </aside>
           </section>
 
-          <section class="domain-routes">
+          <section class="domain-routes" id="domain-routes">
             <div class="entry-section-head">
               <span class="section-index">02</span>
               <h2>技术路线</h2>
               <span class="section-tag">${domain.routes.length} 条路线 / ${entries.length} 个词条</span>
+              ${wikiEditButton("domain", domain.id, "", "技术路线", "建议新路线")}
             </div>
             <div class="route-grid">
               ${domain.routes.map((route, index) => {
@@ -1003,11 +1034,12 @@
             </div>
           </section>
 
-          <section class="domain-resources">
+          <section class="domain-resources" id="domain-resources">
             <div class="entry-section-head">
               <span class="section-index">03</span>
               <h2>常用数据集与基准</h2>
               <span class="section-tag">${resources.length} 个资源</span>
+              ${wikiEditButton("domain", domain.id, "", "数据集与基准", "补充资源")}
             </div>
             <div class="resource-columns">
               <div class="resource-group">
@@ -1024,6 +1056,23 @@
               </div>
             </div>
             <p class="resources-note">资源按领域交叉收录；同一个数据集可能同时服务于操作、仿真与数据路线。标注「站内词条」的条目可直接阅读详细导读。</p>
+          </section>
+
+          <section class="domain-open-problems" id="domain-open-problems">
+            <div class="entry-section-head">
+              <span class="section-index">04</span>
+              <h2>开放问题</h2>
+              <span class="section-tag">编辑判断，不是定论</span>
+              ${wikiEditButton("domain", domain.id, "", "开放问题", "补充")}
+            </div>
+            <div class="open-problem-grid">
+              ${(domain.openProblems || []).map((problem, index) => `
+                <article class="open-problem-card">
+                  <span>${padded(index + 1)}</span>
+                  <p>${esc(problem)}</p>
+                </article>`).join("")}
+            </div>
+            <p class="open-problem-note">这一节由编辑维护，代表当前社区认为最重要、但尚未解决的问题。它们不是论文结论，也不保证穷尽。</p>
           </section>
 
           <section class="domain-next">
@@ -1063,6 +1112,35 @@
   function renderRoutePage(domain, route) {
     const items = routeEntries(domain.id, route.id);
     const relatedRoutes = domain.routes.filter(item => item.id !== route.id);
+    const resources = resourcesForDomain(domain.id);
+    const sections = route.sections || [];
+    const references = [];
+    const seenReferences = new Set();
+    items.forEach(entry => {
+      (entry.links || []).forEach(link => {
+        if (seenReferences.has(link.url)) return;
+        seenReferences.add(link.url);
+        references.push({ entry, link });
+      });
+    });
+    const tocItems = [
+      { id: "route-overview", label: "路线导读" },
+      ...sections.map((section, index) => ({ id: `route-section-${index}`, label: section.title })),
+      { id: "route-practice", label: "实践清单" },
+      { id: "route-works", label: "路线上的工作" },
+      { id: "route-references", label: "参考来源" }
+    ];
+    const sectionBlocks = sections.map((section, index) => `
+      <section class="wiki-section" id="route-section-${index}">
+        <div class="wiki-section-head">
+          <span class="wiki-section-num">${padded(index + 2)}</span>
+          <h2>${esc(section.title)}</h2>
+          ${wikiEditButton("route", domain.id, route.id, section.title, "补充")}
+        </div>
+        ${(section.body || []).map(paragraph => `<p>${esc(paragraph)}</p>`).join("")}
+        ${section.bullets?.length ? `<ul class="wiki-bullets">${section.bullets.map(bullet => `<li>${esc(bullet)}</li>`).join("")}</ul>` : ""}
+      </section>`).join("");
+
     return `
       <div class="view view--route" style="--accent:${domain.accent};--tint:${domain.tint}">
         <section class="route-hero">
@@ -1070,6 +1148,16 @@
             <nav class="breadcrumbs breadcrumbs--on-tint" aria-label="面包屑">
               <a href="#/">EAI WIKI</a><span>/</span><a href="#/domain/${domain.id}">${esc(domain.name)}</a><span>/</span><span>${esc(route.name)}</span>
             </nav>
+            <div class="wiki-toolbar wiki-toolbar--hero">
+              <div class="wiki-toolbar-info">
+                <span class="wiki-badge">WIKI ARTICLE / ROUTE</span>
+                <span class="wiki-meta">最后编辑 ${formatDate(CFG.updated || "2026-11-10")} · ${items.length} 个词条 · ${references.length} 个来源</span>
+              </div>
+              <div class="wiki-toolbar-actions">
+                <a class="wiki-action" href="${repoFileUrl("assets/js/data.js")}" target="_blank" rel="noopener">查看数据源 ↗</a>
+                ${wikiEditButton("route", domain.id, route.id, "整页", "编辑本页")}
+              </div>
+            </div>
             <div class="route-hero-grid">
               <div>
                 <p class="domain-hero-en">${esc(domain.en)} / ${esc(route.en)}</p>
@@ -1080,48 +1168,107 @@
               <div class="route-question">
                 <span class="mono">ROUTE QUESTION</span>
                 <p>${esc(route.question)}</p>
-                <a class="text-link" href="#/domain/${domain.id}">返回领域地图 ${smallArrow()}</a>
+                <a class="text-link" href="#/domain/${domain.id}">返回${esc(domain.name)}领域 ${smallArrow()}</a>
               </div>
             </div>
             <div class="route-hero-meta">
               <div class="domain-meta-item"><span>AREA</span><strong>${esc(domain.name)}</strong></div>
               <div class="domain-meta-item"><span>ENTRIES</span><strong>${items.length}</strong></div>
+              <div class="domain-meta-item"><span>RESOURCES</span><strong>${resources.length}</strong></div>
               <div class="domain-meta-item"><span>UPDATED</span><strong>${formatDate(CFG.updated || "2026-11-10")}</strong></div>
             </div>
           </div>
         </section>
 
-        <div class="wrap route-body">
-          <div class="route-main">
-            <section class="domain-entries route-entries-section">
-              <div class="entry-section-head">
-                <span class="section-index">01</span>
-                <h2>这条路线上的工作</h2>
-                <span class="section-tag">按时间顺序 · 可继续补充</span>
+        <div class="wrap wiki-layout">
+          <article class="wiki-article">
+            <section class="wiki-section wiki-section--lead" id="route-overview">
+              <div class="wiki-section-head">
+                <span class="wiki-section-num">01</span>
+                <h2>路线导读</h2>
+                ${wikiEditButton("route", domain.id, route.id, "路线导读", "补充")}
+              </div>
+              ${(route.lead || []).map(paragraph => `<p>${esc(paragraph)}</p>`).join("")}
+              <div class="wiki-definition">
+                <span class="mono">DEFINITION</span>
+                <p>${esc(route.summary)} 它位于「${esc(domain.name)}」领域，解决的核心问题是：${esc(route.question)}</p>
+              </div>
+            </section>
+
+            ${sectionBlocks}
+
+            <section class="wiki-section" id="route-practice">
+              <div class="wiki-section-head">
+                <span class="wiki-section-num">${padded(sections.length + 2)}</span>
+                <h2>实践清单</h2>
+                ${wikiEditButton("route", domain.id, route.id, "实践清单", "补充")}
+              </div>
+              <ul class="wiki-checklist">
+                ${(route.practice || []).map((item, index) => `<li><span>${padded(index + 1)}</span><p>${esc(item)}</p></li>`).join("")}
+              </ul>
+            </section>
+
+            <section class="wiki-section" id="route-works">
+              <div class="wiki-section-head">
+                <span class="wiki-section-num">${padded(sections.length + 3)}</span>
+                <h2>路线上的工作</h2>
+                <span class="wiki-section-tag">按时间顺序 · 可继续补充</span>
               </div>
               ${entryGridMarkup(items, "这条路线还没有词条。你可以成为第一个补上它的人。")}
             </section>
 
+            <section class="wiki-section" id="route-references">
+              <div class="wiki-section-head">
+                <span class="wiki-section-num">${padded(sections.length + 4)}</span>
+                <h2>参考来源</h2>
+                <span class="wiki-section-tag">${references.length} 个一手入口</span>
+              </div>
+              ${references.length ? `<ol class="wiki-references">
+                ${references.map(({ entry, link }) => `<li>
+                  <a href="${safeUrl(link.url)}" target="_blank" rel="noopener">${esc(entry.title)} · ${esc(link.label)} <span>↗</span></a>
+                </li>`).join("")}
+              </ol>` : `<p class="wiki-empty-note">这条路线还没有收录参考资料。</p>`}
+              <p class="wiki-source-note">参考来源为各工作的一手论文或项目页。本页的二手概述由社区编辑，引用时请以原始来源为准。</p>
+            </section>
+
             <div class="revision-note route-contribute-note">
               <div>
-                <span class="mono">OPEN ROUTE</span>
-                <p>路线本身也会被修订：可能新增一条分支，也可能把两篇工作重新归位。欢迎在 GitHub 中提出。</p>
+                <span class="mono">OPEN ROUTE / EDIT THIS PAGE</span>
+                <p>路线定义、技术拆解和代表工作都可以被修订。提交的编辑提案会进入 GitHub 审核，而不是直接覆盖线上内容。</p>
               </div>
-              <button class="button button--outline" type="button" data-open-contribute data-prefill-domain="${domain.id}" data-prefill-route="${route.id}">补充这条路线 ${smallArrow()}</button>
+              <button class="button button--outline" type="button" ${wikiEditAttrs("route", domain.id, route.id, "整页")}>提交编辑提案 ${smallArrow()}</button>
             </div>
-          </div>
+          </article>
 
-          <aside class="route-aside">
-            <div class="aside-card">
+          <aside class="wiki-sidebar">
+            <div class="wiki-infobox">
+              <div class="wiki-infobox-head"><span>INFOBOX</span><span>${esc(domain.short)}</span></div>
+              <dl>
+                <div><dt>父领域</dt><dd><a href="#/domain/${domain.id}">${esc(domain.name)}</a></dd></div>
+                <div><dt>路线 ID</dt><dd><code>${esc(domain.id)}/${esc(route.id)}</code></dd></div>
+                <div><dt>词条</dt><dd>${items.length} 个</dd></div>
+                <div><dt>领域资源</dt><dd>${resources.length} 个</dd></div>
+                <div><dt>状态</dt><dd><span class="status-dot"></span>种子条目 · 待审校</dd></div>
+                <div><dt>更新</dt><dd>${formatDate(CFG.updated || "2026-11-10")}</dd></div>
+              </dl>
+              <button class="wiki-action wiki-action--wide" type="button" ${wikiEditAttrs("route", domain.id, route.id, "整页")}>编辑本页 / 新增描述</button>
+            </div>
+
+            <nav class="wiki-toc" aria-label="本页目录">
+              <span class="wiki-toc-title">CONTENTS</span>
+              ${tocItems.map((item, index) => `<button type="button" data-scroll-target="${item.id}"><span>${padded(index + 1)}</span>${esc(item.label)}</button>`).join("")}
+            </nav>
+
+            <div class="aside-card wiki-other-routes">
               <div class="aside-card-head"><span>OTHER ROUTES / ${esc(domain.short)}</span><span>${padded(relatedRoutes.length)}</span></div>
               <div class="route-aside-list">
-                ${relatedRoutes.map(item => `<a href="${routeHref(domain, item)}"><span>${esc(item.name)}</span><small>${routeEntries(domain.id, item.id).length} 个词条</small></a>`).join("")}
+                ${relatedRoutes.map(item => `<a href="${routeHref(domain, item)}"><span>${esc(item.name)}</span><small>${routeEntries(domain.id, item.id).length} 个</small></a>`).join("")}
               </div>
             </div>
+
             <div class="aside-note">
-              <span class="mono">HOW TO READ</span>
-              <p>先把路线问题读一遍，再看代表工作的证据与边界。不要用一篇论文替代整条路线。</p>
-              <a class="text-link" href="#/domain/${domain.id}">回到${esc(domain.name)}领域 ${smallArrow()}</a>
+              <span class="mono">EDITORIAL NOTE</span>
+              <p>本页把路线层面的技术判断与具体论文分开：论文页回答「这篇工作做了什么」，路线页回答「这一支为什么存在、如何比较」。</p>
             </div>
           </aside>
         </div>
@@ -1247,6 +1394,16 @@
           <nav class="breadcrumbs" aria-label="面包屑">
             <a href="#/">EAI WIKI</a><span>/</span><a href="#/domain/${domain.id}">${esc(domain.name)}</a><span>/</span><a href="${routeHref(domain, route)}">${esc(route.name)}</a><span>/</span><span>${esc(entry.title)}</span>
           </nav>
+          <div class="wiki-toolbar">
+            <div class="wiki-toolbar-info">
+              <span class="wiki-badge">WIKI ARTICLE / ENTRY</span>
+              <span class="wiki-meta">最后编辑 ${formatDate(CFG.updated || "2026-11-10")} · ${sources.length} 个来源 · 约 ${readTime(entry)} 分钟阅读</span>
+            </div>
+            <div class="wiki-toolbar-actions">
+              <a class="wiki-action" href="${repoFileUrl("assets/js/data.js")}" target="_blank" rel="noopener">查看数据源 ↗</a>
+              ${wikiEditButton("entry", domain.id, route.id, "整页", "编辑本页", entry.id)}
+            </div>
+          </div>
           <header class="entry-header">
             <div class="entry-overline">
               ${typeChip(entry.type)}
@@ -1294,6 +1451,7 @@
                 <div class="entry-section-head">
                   <span class="section-index">01</span>
                   <h2>它解决什么问题</h2>
+                  ${wikiEditButton("entry", domain.id, route.id, "它解决什么问题", "补充", entry.id)}
                 </div>
                 <div class="prose prose--large">
                   ${(entry.intro || []).map(paragraph => `<p>${esc(paragraph)}</p>`).join("")}
@@ -1305,6 +1463,7 @@
                   <span class="section-index">02</span>
                   <h2>核心机制</h2>
                   <span class="section-tag">${(entry.method || []).length} 个关键设计</span>
+                  ${wikiEditButton("entry", domain.id, route.id, "核心机制", "补充", entry.id)}
                 </div>
                 <div class="method-grid">
                   ${(entry.method || []).map((item, itemIndex) => `
@@ -1321,6 +1480,7 @@
                   <span class="section-index">03</span>
                   <h2>关键证据</h2>
                   <span class="section-tag">来自原始工作</span>
+                  ${wikiEditButton("entry", domain.id, route.id, "关键证据", "补充", entry.id)}
                 </div>
                 <div class="evidence-grid">
                   ${(entry.evidence || []).map(item => `
@@ -1337,6 +1497,7 @@
                 <div class="entry-section-head">
                   <span class="section-index">04</span>
                   <h2>边界与开放问题</h2>
+                  ${wikiEditButton("entry", domain.id, route.id, "边界与开放问题", "补充", entry.id)}
                 </div>
                 <ul class="limits-list">
                   ${(entry.limits || []).map((limit, limitIndex) => `
@@ -1348,6 +1509,7 @@
                 <div class="entry-section-head">
                   <span class="section-index">05</span>
                   <h2>继续阅读</h2>
+                  ${wikiEditButton("entry", domain.id, route.id, "继续阅读", "补充引用", entry.id)}
                 </div>
                 <div class="related-entry-grid">
                   ${related.map(item => {
@@ -1808,7 +1970,7 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
               <div>
                 <p class="eyebrow eyebrow--light"><span class="eyebrow-dot"></span> OPEN CALL FOR CONTRIBUTORS</p>
                 <h1>少一点搬运，<br><em>多一点判断。</em></h1>
-                <p class="contribute-hero-lede">这不是一个把论文摘要贴在一起的站点。我们更想要你的选择：为什么这篇工作值得读，它的证据够不够，哪里可能是错的。</p>
+                <p class="contribute-hero-lede">这不是一个把论文摘要贴在一起的站点。领域与路线页本身就是可编辑的 Wiki 条目：你可以补充技术拆解、失败模式、数据集和一手来源。</p>
                 <div class="contribute-hero-actions">
                   <button class="button button--orange" type="button" data-open-contribute>贡献一个词条 ${smallArrow()}</button>
                   <a class="button button--ghost-light" href="${esc(REPO_URL ? `${REPO_URL}/issues/new/choose` : "#/contribute")}" ${REPO ? 'target="_blank" rel="noopener"' : ""} data-issue-choose>在 GitHub 提交 ↗</a>
@@ -1816,7 +1978,7 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
               </div>
               <div class="contribute-hero-card">
                 <span class="mono">CONTRIBUTION / AT A GLANCE</span>
-                <div class="contrib-stat"><strong>3</strong><span>种参与方式<br>评论 · 修订 · 新词条</span></div>
+                <div class="contrib-stat"><strong>3</strong><span>种参与方式<br>评论 · 编辑 · 新词条</span></div>
                 <div class="contrib-stat"><strong>&lt; 10</strong><span>分钟完成<br>一次词条提名</span></div>
                 <div class="contrib-stat"><strong>0</strong><span>行代码要求<br>会写字就够了</span></div>
               </div>
@@ -1830,6 +1992,7 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
             <div class="prose prose--large">
               <p>具身智能的论文增长得比任何人的阅读速度都快。搜索结果给你的是「有哪些」，但很少回答「应该先读哪篇」「这个结果可信吗」「它和那篇工作到底是什么关系」。</p>
               <p>Wiki 的价值不在完整，而在<strong>有判断的连接</strong>：先把它放回领域的技术路线，再把路线放回它的问题史，最后把一句 demo 放回它的评测条件里。</p>
+              <p>因此本站在路线页上保留三种文本：<strong>词典式定义</strong>、<strong>技术拆解</strong>与<strong>可争议的编辑判断</strong>。它们都可以被后来者修订；页面上的「编辑本页」和章节「补充」就是入口。</p>
             </div>
           </div>
 
@@ -1850,9 +2013,9 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
               </article>
               <article class="way-card">
                 <span class="way-num">02</span>
-                <h3>建议一次修订</h3>
-                <p>事实错误、过时的数字、缺失的关键工作、更好的解释。附上来源，编辑会核对后合并。你不需要自己改代码。</p>
-                <button class="text-link" type="button" data-open-contribute data-intent="fix">提出修订 ${smallArrow()}</button>
+                <h3>编辑一个页面</h3>
+                <p>在任意领域、路线或词条页点击「编辑本页」，或直接补充某个技术小节。提案会记录页面、章节、正文与依据，进入公开审校。</p>
+                <button class="text-link" type="button" data-wiki-edit data-wiki-page="domain" data-wiki-domain="manipulation" data-wiki-section="整页">试试编辑「操作」领域 ${smallArrow()}</button>
               </article>
               <article class="way-card way-card--accent">
                 <span class="way-num">03</span>
@@ -1896,7 +2059,7 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
                   <h2>从想法到合并</h2>
                 </div>
                 <div class="process-grid">
-                  <div class="process-step"><span>01</span><h3>填写表单</h3><p>写清名称、领域、一句话概述与一手来源。表单会自动生成 GitHub Issue。</p></div>
+                  <div class="process-step"><span>01</span><h3>填写提案</h3><p>编辑现有页面，或提交一个新词条。写清页面/章节、技术内容与一手来源；表单会自动生成 GitHub Issue。</p></div>
                   <div class="process-step"><span>02</span><h3>公开讨论</h3><p>编辑和社区会在 Issue 中提出补充、质疑与格式建议。这里没有匿名权威。</p></div>
                   <div class="process-step"><span>03</span><h3>编辑审校</h3><p>核对来源、补齐结构、统一术语。必要时会请你提供更具体的证据。</p></div>
                   <div class="process-step"><span>04</span><h3>合并发布</h3><p>词条进入词条库与领域页，自动获得讨论区，并出现在下一次更新记录中。</p></div>
@@ -1926,6 +2089,10 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
                   <details>
                     <summary>可以推荐自己的工作吗？<span>+</span></summary>
                     <p>可以，但请如实披露作者身份，并避免把「被接收」写成「被证明」。编辑会重点检查证据与边界。</p>
+                  </details>
+                  <details>
+                    <summary>页面上的「编辑本页」会直接改线上内容吗？<span>+</span></summary>
+                    <p>不会。站点是静态的，编辑提案会生成一个公开 GitHub Issue，由编辑核对来源后合并。这样每一次技术修改都有讨论记录，也可以被回滚。</p>
                   </details>
                   <details>
                     <summary>为什么一定要用 GitHub？<span>+</span></summary>
@@ -1975,7 +2142,7 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
             </div>
             <div class="roadmap-track">
               <div class="roadmap-item is-current">
-                <span class="roadmap-phase">NOW / v0.1</span>
+                <span class="roadmap-phase">NOW / v0.2</span>
                 <h3>种子发布</h3>
                 <p>${DOMAINS.length} 个领域、${TOTAL_ROUTES} 条技术路线、${ENTRIES.length} 个基础词条与 ${RESOURCES.length} 个数据/基准资源。内容为 AI 辅助起草，等待领域编辑审校。</p>
                 <span class="roadmap-status">进行中</span>
@@ -2041,7 +2208,7 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
       meta: `${domain.routes.length} 条路线 · ${countDomainEntries(domain.id)} 个词条`,
       year: 2026,
       domainName: domain.name,
-      haystack: [domain.name, domain.en, domain.short, domain.description, domain.tagline, domain.question, ...domain.routes.flatMap(route => [route.name, route.en, ...route.tags])].join(" ").toLowerCase()
+      haystack: [domain.name, domain.en, domain.short, domain.description, domain.tagline, domain.question, ...(domain.intro || []), ...(domain.openProblems || []), ...domain.routes.flatMap(route => [route.name, route.en, ...route.tags])].join(" ").toLowerCase()
     })),
     ...DOMAINS.flatMap(domain => domain.routes.map(route => ({
       kind: "route",
@@ -2052,7 +2219,12 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
       meta: `${routeEntries(domain.id, route.id).length} 个词条`,
       year: 2026,
       domainName: domain.name,
-      haystack: [domain.name, route.name, route.en, route.summary, route.question, ...route.tags].join(" ").toLowerCase()
+      haystack: [
+        domain.name, route.name, route.en, route.summary, route.question, ...route.tags,
+        ...(route.lead || []),
+        ...(route.sections || []).flatMap(section => [section.title, ...(section.body || []), ...(section.bullets || [])]),
+        ...(route.practice || [])
+      ].join(" ").toLowerCase()
     }))),
     ...ENTRIES.map(entry => {
       const domain = domainOf(entry);
@@ -2401,6 +2573,151 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
     });
   }
 
+  function openWikiEditor(context = {}) {
+    const dialog = document.getElementById("contribute-dialog");
+    const shell = document.getElementById("contribute-shell");
+    const entry = context.entryId ? byId(context.entryId) : null;
+    const domain = entry ? domainOf(entry) : domainById.get(context.domainId);
+    if (!dialog || !shell || !domain) return;
+    closeAllDialogs();
+    closeMobileMenu();
+
+    const route = entry ? routeOf(entry) : context.routeId ? routeInfo(domain, context.routeId) : null;
+    const pageTitle = entry ? entry.title : route ? `${domain.name} / ${route.name}` : domain.name;
+    const pageHash = entry ? `#/entry/${entry.id}` : route ? routeHref(domain, route) : `#/domain/${domain.id}`;
+    const pageUrl = `${window.location.origin}${window.location.pathname}${pageHash}`;
+    const pageKind = entry ? "ENTRY" : route ? "ROUTE" : "DOMAIN";
+    const availableSections = entry
+      ? ["整页", "为什么重要", "它解决什么问题", "核心机制", "关键证据", "边界与开放问题", "继续阅读", "参考来源", "新章节建议"]
+      : route
+        ? ["整页", "路线导读", ...(route.sections || []).map(section => section.title), "实践清单", "路线上的工作", "参考来源", "新章节建议"]
+        : ["整页", "领域导读", "技术路线", "数据集与基准", "开放问题", "新章节建议"];
+    const requestedSection = availableSections.includes(context.section) ? context.section : "整页";
+
+    shell.innerHTML = `
+      <div class="form-head">
+        <div>
+          <span class="mono">WIKI EDIT PROPOSAL / ${pageKind}</span>
+          <h2 id="contribute-modal-title">编辑《${esc(pageTitle)}》</h2>
+          <p>补充技术定义、机制解释、反例或参考来源。提交后会生成公开 GitHub Issue，由编辑核对并合并；不会直接覆盖线上正文。</p>
+        </div>
+        <button class="icon-close icon-close--dark" type="button" data-close-modal aria-label="关闭表单">ESC</button>
+      </div>
+      <div class="wiki-edit-context">
+        <span>正在编辑</span>
+        <strong>${esc(pageTitle)}</strong>
+        <code>${esc(entry ? `${domain.id}/${entry.route}/${entry.id}` : `${domain.id}${route ? `/${route.id}` : ""}`)}</code>
+      </div>
+      <form class="contribute-form wiki-edit-form" id="wiki-edit-form" novalidate>
+        <div class="field-grid field-grid--two">
+          <label class="field">
+            <span>修改类型</span>
+            <select name="kind">
+              <option value="补充">补充内容</option>
+              <option value="修订">修订事实 / 表述</option>
+              <option value="引用">补充参考来源</option>
+              <option value="质疑">提出不同意见</option>
+              <option value="新章节">建议新章节</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>目标章节</span>
+            <select name="section">
+              ${availableSections.map(section => `<option value="${esc(section)}" ${section === requestedSection ? "selected" : ""}>${esc(section)}</option>`).join("")}
+            </select>
+          </label>
+        </div>
+        <label class="field">
+          <span>建议加入或修改的内容 <em>*</em></span>
+          <textarea name="content" rows="8" required maxlength="8000" placeholder="可以直接写技术描述、定义、机制、边界、失败模式或比较。支持 Markdown。"></textarea>
+        </label>
+        <label class="field">
+          <span>依据与参考链接</span>
+          <textarea name="sources" rows="3" maxlength="3000" placeholder="论文、代码、官方文档或你自己的实验记录。请优先一手来源。"></textarea>
+        </label>
+        <div class="field-grid field-grid--two">
+          <label class="field">
+            <span>署名 / GitHub 昵称</span>
+            <input name="contributor" type="text" maxlength="60" value="${esc(getSavedCommentName())}" placeholder="可选">
+          </label>
+          <div class="field">
+            <span>页面链接</span>
+            <div class="wiki-url-box">${esc(pageHash)}</div>
+          </div>
+        </div>
+        <div class="form-disclaimer">
+          <span>⌁</span>
+          <p>请区分事实、推测与个人判断。技术性修改最好附上原始论文、代码或可复现实验；AI 辅助撰写请注明。</p>
+        </div>
+        <div class="form-foot">
+          <p class="form-foot-note" id="form-status">提案进入 GitHub Issue 审核。当前页面为种子条目，全部内容都可以继续完善。</p>
+          <div class="form-actions">
+            <button class="button button--outline" type="button" data-wiki-copy>复制提案</button>
+            <button class="button button--orange" type="submit">提交编辑提案 ${smallArrow()}</button>
+          </div>
+        </div>
+      </form>`;
+
+    const form = document.getElementById("wiki-edit-form");
+    const buildDraft = () => {
+      const data = new FormData(form);
+      const value = key => String(data.get(key) || "").trim();
+      return `### 页面
+${pageTitle} (${pageUrl})
+
+### 修改类型
+${value("kind")}
+
+### 目标章节
+${value("section")}
+
+### 建议内容
+${value("content")}
+
+### 依据与参考
+${value("sources") || "（未填写）"}
+
+### 提交者
+${value("contributor") || "匿名 / 待联系"}
+
+---
+*由 EAI Wiki 页面编辑提案生成。请确认引用真实可访问。*`;
+    };
+
+    form.querySelector("[data-wiki-copy]").addEventListener("click", () => {
+      if (!form.reportValidity()) return;
+      copyText(buildDraft(), "编辑提案已复制");
+    });
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const section = form.elements.section.value;
+      const draft = buildDraft();
+      const link = issueUrl(`[编辑提案] ${pageTitle} / ${section}`, draft);
+      if (link) {
+        const anchor = document.createElement("a");
+        anchor.href = link;
+        anchor.target = "_blank";
+        anchor.rel = "noopener noreferrer";
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        dialog.close();
+        syncBodyLock();
+        showToast("已打开 GitHub Issue，请确认后提交");
+      } else {
+        copyText(draft, "提案已复制。发布站点后，这里会自动打开 GitHub Issue。");
+        const status = document.getElementById("form-status");
+        if (status) status.textContent = "仓库尚未配置：提案已复制，请在发布后的站点提交。";
+      }
+    });
+
+    if (!dialog.open) dialog.showModal();
+    syncBodyLock();
+    requestAnimationFrame(() => form.querySelector("textarea[name='content']")?.focus());
+  }
+
   function buildContributionDraft(form) {
     const data = new FormData(form);
     const value = key => String(data.get(key) || "").trim();
@@ -2737,6 +3054,19 @@ ${value("contributor") || "匿名 / 待联系"}
       const dialog = target.closest("dialog");
       if (dialog) dialog.close();
       syncBodyLock();
+      return;
+    }
+
+    const wikiEditTrigger = target.closest("[data-wiki-edit]");
+    if (wikiEditTrigger) {
+      event.preventDefault();
+      openWikiEditor({
+        pageType: wikiEditTrigger.dataset.wikiPage,
+        domainId: wikiEditTrigger.dataset.wikiDomain,
+        routeId: wikiEditTrigger.dataset.wikiRoute || "",
+        entryId: wikiEditTrigger.dataset.wikiEntry || "",
+        section: wikiEditTrigger.dataset.wikiSection || "整页"
+      });
       return;
     }
 

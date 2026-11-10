@@ -37,7 +37,7 @@ body:
     attributes:
       label: 技术路线
       description: 站内已有路线可直接写名称；如果是新路线，请说明它与现有路线的关系。
-      placeholder: 例如：模仿学习 / VLA / WAM / Code as Policy / 具身智能体 Harness
+      placeholder: 例如：模仿学习 / VLA / UMI 数据 / EGO 数据 / 具身智能体 Harness
     validations:
       required: false
 

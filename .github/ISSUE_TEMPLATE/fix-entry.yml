@@ -21,7 +21,7 @@ body:
     attributes:
       label: 所属领域 / 技术路线
       description: 如果问题涉及词条归位或路线划分，请写在这里。
-      placeholder: 例如：manipulation / VLA
+      placeholder: 例如：manipulation / VLA，data / EGO 数据
     validations:
       required: false
 

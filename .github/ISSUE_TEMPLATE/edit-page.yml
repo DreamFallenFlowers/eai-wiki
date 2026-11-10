@@ -1,0 +1,76 @@
+name: 编辑一个 Wiki 页面
+description: 为领域页、路线页或词条补充技术描述、修正事实、添加引用。
+title: "[编辑] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        谢谢你来补一页。领域页、路线页和词条页都可以编辑；如果你从站内的「编辑本页」或章节「补充」进入，页面和章节会自动写入 Issue。
+
+        请优先使用一手来源，并区分事实、推断与个人判断。AI 辅助写作必须披露。
+
+  - type: input
+    id: page
+    attributes:
+      label: 页面
+      description: 领域 / 技术路线 / 词条名称或站内链接。
+      placeholder: 例如 #/route/manipulation/vla
+    validations:
+      required: true
+
+  - type: input
+    id: section
+    attributes:
+      label: 目标章节
+      placeholder: 例如「动作表示的两大分支」；整页修改可留空
+    validations:
+      required: false
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 修改类型
+      options:
+        - 补充内容
+        - 修订事实 / 表述
+        - 补充参考来源
+        - 提出不同意见
+        - 建议新章节
+    validations:
+      required: true
+
+  - type: textarea
+    id: content
+    attributes:
+      label: 建议加入或修改的内容
+      description: 可以直接写技术定义、机制解释、数据、失败模式或比较。支持 Markdown。
+      placeholder: 写清楚你希望读者看到的最终文本，而不只是「建议补充」。
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: 依据与参考链接
+      description: 论文、代码、官方文档、可复现实验记录。没有来源的判断请明确标注。
+    validations:
+      required: false
+
+  - type: input
+    id: contributor
+    attributes:
+      label: 署名 / GitHub 昵称
+      placeholder: 可选
+    validations:
+      required: false
+
+  - type: dropdown
+    id: ai
+    attributes:
+      label: AI 参与程度
+      options:
+        - 未使用 AI
+        - AI 辅助润色 / 翻译
+        - AI 辅助起草，已人工核对全部事实与引用
+    validations:
+      required: true

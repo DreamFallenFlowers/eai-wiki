@@ -26,15 +26,29 @@ for (const resource of RESOURCES) {
 }
 
 for (const domain of DOMAINS) {
-  for (const key of ["id", "num", "name", "en", "short", "accent", "tint", "tagline", "description", "question", "intro", "routes", "related"]) {
+  for (const key of ["id", "num", "name", "en", "short", "accent", "tint", "tagline", "description", "question", "intro", "routes", "related", "openProblems"]) {
     if (domain[key] === undefined) errors.push(`domain ${domain.id}: missing ${key}`);
   }
+  if (!Array.isArray(domain.openProblems) || domain.openProblems.length < 2) errors.push(`domain ${domain.id}: expected at least 2 open problems`);
   if (!Array.isArray(domain.routes) || domain.routes.length < 2) errors.push(`domain ${domain.id}: expected at least 2 routes`);
   for (const route of domain.routes || []) {
     if (!route.id || !route.name || !route.en || !route.summary || !route.question) errors.push(`domain ${domain.id}: incomplete route`);
+    if (!Array.isArray(route.lead) || route.lead.length < 1) errors.push(`route ${domain.id}:${route.id}: missing editorial lead`);
+    if (!Array.isArray(route.sections) || route.sections.length < 2) errors.push(`route ${domain.id}:${route.id}: expected at least 2 technical sections`);
+    for (const section of route.sections || []) {
+      if (!section.title || !Array.isArray(section.body) || !section.body.length) errors.push(`route ${domain.id}:${route.id}: incomplete technical section`);
+    }
+    if (!Array.isArray(route.practice) || route.practice.length < 2) errors.push(`route ${domain.id}:${route.id}: expected at least 2 practice notes`);
     const key = `${domain.id}:${route.id}`;
     if (routeIds.has(key)) errors.push(`duplicate route key: ${key}`);
     routeIds.add(key);
+  }
+  if (domain.id === "data") {
+    const dataRouteIds = new Set(domain.routes.map(route => route.id));
+    for (const id of ["teleop", "umi", "ego"]) {
+      if (!dataRouteIds.has(id)) errors.push(`domain data: missing data collection route "${id}"`);
+    }
+    if (dataRouteIds.has("cross-embodiment")) errors.push('domain data: cross-embodiment must not be a standalone route');
   }
   for (const related of domain.related || []) {
     if (!domainIds.has(related)) errors.push(`domain ${domain.id}: unknown related domain "${related}"`);
