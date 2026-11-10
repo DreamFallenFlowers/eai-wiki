@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EAI Wiki · 具身智能开放知识库</title>
+  <meta name="description" content="EAI Wiki 是一个由社区共建的具身智能知识库：领域地图、论文与系统词条、阅读路径、知识网络与开放讨论。">
+  <meta name="author" content="EAI Wiki contributors">
+  <meta name="theme-color" content="#f2efe6">
+  <meta name="color-scheme" content="light">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="EAI Wiki">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:title" content="EAI Wiki · 具身智能开放知识库">
+  <meta property="og:description" content="从 VLA 到世界模型，从论文到真机。一个可搜索、可讨论、可共建的具身智能 Wiki。">
+  <meta property="og:image" content="assets/img/og-cover.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="EAI Wiki · 具身智能开放知识库">
+  <meta name="twitter:description" content="从 VLA 到世界模型，从论文到真机。一个可搜索、可讨论、可共建的具身智能 Wiki。">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script>document.documentElement.classList.replace('no-js', 'js');</script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "EAI Wiki",
+      "alternateName": "Embodied AI Wiki",
+      "description": "一个由社区共建的具身智能开放知识库：领域地图、论文与系统词条、阅读路径、知识网络与开放讨论。",
+      "inLanguage": "zh-CN"
+    }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <div class="ambient-grid" aria-hidden="true"></div>
+
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#/" aria-label="EAI Wiki 首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 34 34" fill="none">
+            <rect x="1" y="1" width="32" height="32" rx="7" fill="#141414"/>
+            <path d="M9 23V11h10v3h-6.4v1.9H18v3h-5.4V20H19v3H9Z" fill="#f2efe6"/>
+            <circle cx="24.8" cy="10.4" r="2.4" fill="#ff4b1f"/>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <span class="brand-name">EAI</span>
+          <span class="brand-sub">WIKI</span>
+        </span>
+        <span class="brand-version">v0.1</span>
+      </a>
+
+      <nav class="primary-nav" aria-label="主导航">
+        <a href="#/" data-nav="home">首页</a>
+        <a href="#/entries" data-nav="entries">词条库</a>
+        <a href="#/graph" data-nav="graph">知识网络</a>
+        <a href="#/contribute" data-nav="contribute">共建指南</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="search-trigger" type="button" data-open-search aria-label="搜索，快捷键 Control K">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.6" cy="8.6" r="5.4" stroke="currentColor" stroke-width="1.6"/><path d="m12.8 12.8 3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span>搜索</span>
+          <kbd>Ctrl K</kbd>
+        </button>
+        <a class="header-github js-repo-link" href="#/contribute" target="_blank" rel="noopener" aria-label="在 GitHub 上参与共建">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.93-.89-1.18-.89-1.18-.73-.5.06-.49.06-.49.81.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.66 7.66 0 0 1 8 3.87c.68 0 1.36.09 2 .27 1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.88 3.75-3.67 3.95.29.25.54.73.54 1.48v2.19c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          <span class="header-github-label">GitHub</span>
+        </a>
+        <button class="menu-toggle" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobile-menu" hidden>
+    <nav aria-label="移动端导航">
+      <a href="#/" data-nav="home"><span>01</span>首页</a>
+      <a href="#/entries" data-nav="entries"><span>02</span>词条库</a>
+      <a href="#/graph" data-nav="graph"><span>03</span>知识网络</a>
+      <a href="#/contribute" data-nav="contribute"><span>04</span>共建指南</a>
+    </nav>
+    <div class="mobile-menu-foot">
+      <p>一个开放的具身智能知识库。评论、修订、补充，都是贡献。</p>
+      <button class="button button--dark" type="button" data-open-search>搜索全部词条 <span>Ctrl K</span></button>
+    </div>
+  </div>
+
+  <main id="main" tabindex="-1">
+    <div class="app-loading">
+      <span class="loading-mark"></span>
+      <p>正在整理知识图谱…</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-cta wrap">
+      <div class="footer-cta-copy">
+        <p class="eyebrow eyebrow--light"><span class="eyebrow-dot"></span> OPEN NOTEBOOK / COMMUNITY EDITED</p>
+        <h2>知识不是孤岛。<br><em>一起把它写下去。</em></h2>
+      </div>
+      <div class="footer-cta-actions">
+        <button class="button button--orange" type="button" data-open-contribute>贡献一个词条 <span class="arrow">↗</span></button>
+        <a class="button button--ghost-light" href="#/contribute">阅读共建指南 <span class="arrow">→</span></a>
+        <p class="footer-note">不需要会写代码。填写表单，即可生成 GitHub Issue。</p>
+      </div>
+    </div>
+
+    <div class="footer-main wrap">
+      <div class="footer-brand">
+        <a class="brand brand--footer" href="#/" aria-label="EAI Wiki 首页">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 34 34" fill="none">
+              <rect x="1" y="1" width="32" height="32" rx="7" fill="#f2efe6"/>
+              <path d="M9 23V11h10v3h-6.4v1.9H18v3h-5.4V20H19v3H9Z" fill="#141414"/>
+              <circle cx="24.8" cy="10.4" r="2.4" fill="#ff4b1f"/>
+            </svg>
+          </span>
+          <span class="brand-copy"><span class="brand-name">EAI</span><span class="brand-sub">WIKI</span></span>
+        </a>
+        <p>Embodied AI Wiki<br>一个关于身体、智能与行动方式的开放笔记。</p>
+        <p class="footer-coords">31°13′N 121°28′E · 互联网</p>
+      </div>
+      <div class="footer-columns">
+        <div>
+          <h3>Explore</h3>
+          <a href="#/">领域地图</a>
+          <a href="#/entries">全部词条</a>
+          <a href="#/graph">知识网络</a>
+          <a href="#/contribute">共建指南</a>
+        </div>
+        <div>
+          <h3>Participate</h3>
+          <a href="#/contribute" data-issue="entry">提交新词条</a>
+          <a href="#/contribute" data-issue="fix">建议修订</a>
+          <a href="#" class="js-discussion-link">参与讨论</a>
+          <a href="CONTRIBUTING.md" class="js-repo-file" data-file="CONTRIBUTING.md">编辑规范</a>
+        </div>
+        <div>
+          <h3>Colophon</h3>
+          <span>Seed edition / 2026</span>
+          <span>内容：CC BY-SA 4.0</span>
+          <span>代码：MIT</span>
+          <a href="https://github.com" target="_blank" rel="noopener">Made for the open web ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom wrap">
+      <span>© 2026 EAI Wiki contributors</span>
+      <span class="footer-disclaimer">种子内容可能包含错误。引用前请核对原始论文；所有观点不构成安全或工程建议。</span>
+      <a href="#main" class="back-to-top" data-back-to-top>回到顶部 ↑</a>
+    </div>
+  </footer>
+
+  <dialog class="modal search-modal" id="search-dialog" aria-labelledby="search-title">
+    <div class="search-shell">
+      <div class="search-topline">
+        <span class="mono">SEARCH / EAI WIKI</span>
+        <button class="icon-close" type="button" data-close-search aria-label="关闭搜索">ESC</button>
+      </div>
+      <h2 id="search-title" class="sr-only">搜索词条</h2>
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m15.6 15.6 4.4 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <input id="search-input" type="search" autocomplete="off" spellcheck="false" placeholder="搜索领域、论文、系统或概念…" aria-describedby="search-help">
+        <span class="search-count" id="search-count" aria-live="polite"></span>
+      </div>
+      <div class="search-body">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <div class="search-hints" id="search-help">
+        <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span>
+        <span><kbd>Enter</kbd> 打开</span>
+        <span><kbd>Esc</kbd> 关闭</span>
+        <span class="search-hint-right">共 <b id="search-total">0</b> 个词条</span>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="modal form-modal" id="contribute-dialog" aria-labelledby="contribute-modal-title">
+    <div class="form-shell" id="contribute-shell"></div>
+  </dialog>
+
+  <dialog class="modal citation-modal" id="citation-dialog" aria-labelledby="citation-title">
+    <div class="citation-shell" id="citation-shell"></div>
+  </dialog>
+
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <noscript>
+    <div class="noscript-bar">这个站点需要 JavaScript 才能浏览词条与搜索。请在浏览器设置中启用 JavaScript。</div>
+  </noscript>
+
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+</body>
+</html>

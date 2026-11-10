@@ -1,0 +1,8 @@
+# Local preview artifacts
+shots/
+*.log
+.DS_Store
+Thumbs.db
+
+# Node (not required by the site, but useful for contributors)
+node_modules/
