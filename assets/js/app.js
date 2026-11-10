@@ -872,25 +872,43 @@
 
   /* ------------------------------------------------------------------- domain */
 
-  function wikiEditAttrs(pageType, domainId, routeId = "", section = "", entryId = "") {
-    return `data-wiki-edit data-wiki-page="${pageType}" data-wiki-domain="${domainId}"${routeId ? ` data-wiki-route="${routeId}"` : ""}${entryId ? ` data-wiki-entry="${entryId}"` : ""} data-wiki-section="${esc(section)}"`;
+  function wikiPageHref(pageType, domain, route, entry) {
+    if (pageType === "entry") return `#/entry/${entry.id}`;
+    if (pageType === "route") return routeHref(domain, route);
+    return `#/domain/${domain.id}`;
+  }
+
+  function wikiEditHref(pageType, domainId, routeId, entryId, section = "") {
+    const base = pageType === "entry"
+      ? `#/edit/entry/${entryId}`
+      : pageType === "route"
+        ? `#/edit/route/${domainId}/${routeId}`
+        : `#/edit/domain/${domainId}`;
+    return section && section !== "整页" ? `${base}?section=${encodeURIComponent(section)}` : base;
+  }
+
+  function wikiTalkHref(pageType, domainId, routeId, entryId) {
+    if (pageType === "entry") return `#/talk/entry/${entryId}`;
+    if (pageType === "route") return `#/talk/route/${domainId}/${routeId}`;
+    return `#/talk/domain/${domainId}`;
   }
 
   function wikiEditLink(pageType, domainId, routeId, section, entryId = "") {
-    return `<button class="wiki-section-edit" type="button" ${wikiEditAttrs(pageType, domainId, routeId, section, entryId)}>编辑</button>`;
+    return `<a class="wiki-section-edit" href="${wikiEditHref(pageType, domainId, routeId, entryId, section)}">编辑</a>`;
   }
 
-  function articleTabs(pageType, domain, route, entry = null) {
-    const title = entry ? entry.title : route ? route.name : domain.name;
-    const pageHash = entry ? `#/entry/${entry.id}` : route ? routeHref(domain, route) : `#/domain/${domain.id}`;
-    const editAttr = entry
-      ? wikiEditAttrs("entry", domain.id, route.id, "整页", entry.id)
+  function articleTabs(pageType, domain, route, entry = null, active = "article") {
+    const pageHash = wikiPageHref(pageType, domain, route, entry);
+    const talkHash = entry
+      ? wikiTalkHref("entry", domain.id, route.id, entry.id)
       : route
-        ? wikiEditAttrs("route", domain.id, route.id, "整页")
-        : wikiEditAttrs("domain", domain.id, "", "整页");
-    const discussion = entry
-      ? `<button class="wiki-tab" type="button" data-scroll-target="discussion">讨论</button>`
-      : `<button class="wiki-tab" type="button" data-wiki-discuss data-discuss-title="${esc(title)}" data-discuss-url="${esc(pageHash)}">讨论</button>`;
+        ? wikiTalkHref("route", domain.id, route.id, "")
+        : wikiTalkHref("domain", domain.id, "", "");
+    const editHash = entry
+      ? wikiEditHref("entry", domain.id, route.id, entry.id)
+      : route
+        ? wikiEditHref("route", domain.id, route.id, "")
+        : wikiEditHref("domain", domain.id, "", "");
     const history = REPO
       ? `<a class="wiki-tab" href="${REPO_URL}/commits/${BRANCH}/assets/js/data.js" target="_blank" rel="noopener">历史</a>`
       : `<span class="wiki-tab is-disabled" title="发布到 GitHub 后可查看编辑历史">历史</span>`;
@@ -899,9 +917,9 @@
         <div class="wiki-tabbar-inner">
           <a class="wiki-tabbar-brand" href="#/"><span class="wiki-tabbar-mark">E</span><span>EAI Wiki</span></a>
           <nav class="wiki-tabs" aria-label="页面命名空间">
-            <a class="wiki-tab is-active" href="${pageHash}">条目</a>
-            ${discussion}
-            <button class="wiki-tab" type="button" ${editAttr}>编辑</button>
+            <a class="wiki-tab ${active === "article" ? "is-active" : ""}" href="${pageHash}">条目</a>
+            <a class="wiki-tab ${active === "talk" ? "is-active" : ""}" href="${talkHash}">讨论</a>
+            <a class="wiki-tab ${active === "edit" ? "is-active" : ""}" href="${editHash}">编辑</a>
             ${history}
           </nav>
           <div class="wiki-tabbar-right">
@@ -971,6 +989,123 @@ ${title} (${pageUrl})
     } else {
       copyText(body, "讨论模板已复制；发布站点后会打开 GitHub Issue");
     }
+  }
+
+  function wikiIdentity(domain, route, entry) {
+    const type = entry ? "entry" : route ? "route" : "domain";
+    const title = entry ? entry.title : route ? route.name : domain.name;
+    const articleHref = wikiPageHref(type, domain, route, entry);
+    return {
+      type,
+      domain,
+      route,
+      entry,
+      title,
+      articleHref,
+      talkHref: wikiTalkHref(type, domain.id, route?.id || "", entry?.id || ""),
+      editHref: wikiEditHref(type, domain.id, route?.id || "", entry?.id || ""),
+      commentStorageKey: entry ? entry.id : route ? `route/${domain.id}/${route.id}` : `domain/${domain.id}`,
+      commentTerm: entry ? `entry/${entry.id}` : route ? `route/${domain.id}/${route.id}` : `domain/${domain.id}`
+    };
+  }
+
+  function wikiSectionOptions(identity) {
+    const { type, domain, route, entry } = identity;
+    if (type === "route") {
+      const routeWhole = [
+        `# ${route.name}`,
+        route.summary,
+        "## 路线导读",
+        ...(route.lead || []),
+        ...(route.sections || []).map(section => `## ${section.title}\n${(section.body || []).join("\n\n")}${section.bullets?.length ? `\n\n${section.bullets.map(item => `- ${item}`).join("\n")}` : ""}`),
+        "## 实践清单",
+        ...(route.practice || []).map(item => `- ${item}`)
+      ].join("\n\n");
+      return [
+        { value: "整页", source: routeWhole },
+        { value: "路线导读", source: (route.lead || []).join("\n\n") },
+        ...(route.sections || []).map(section => ({
+          value: section.title,
+          source: [...(section.body || []), ...(section.bullets || []).map(item => `- ${item}`)].join("\n\n")
+        })),
+        { value: "实践清单", source: (route.practice || []).map(item => `- ${item}`).join("\n") },
+        { value: "路线上的工作", source: routeEntries(domain.id, route.id).map(item => `- ${item.title}（${item.year}，${item.venue}）：${item.tldr}`).join("\n") },
+        { value: "参见", source: (domain.routes || []).filter(item => item.id !== route.id).map(item => `- ${item.name}：${item.summary}`).join("\n") },
+        { value: "参考资料", source: routeEntries(domain.id, route.id).flatMap(item => (item.links || []).map(link => `${item.title} · ${link.label}：${link.url}`)).join("\n") }
+      ];
+    }
+    if (type === "entry") {
+      const entryWhole = [
+        `# ${entry.title}`,
+        entry.tldr,
+        entry.why,
+        "## 它解决什么问题",
+        ...(entry.intro || []),
+        "## 核心机制",
+        ...(entry.method || []).map(item => `### ${item.title}\n${item.text}`),
+        "## 关键证据",
+        ...(entry.evidence || []).map(item => `- ${item.label}：${item.value}。${item.text}`),
+        "## 边界与开放问题",
+        ...(entry.limits || []).map(item => `- ${item}`)
+      ].join("\n\n");
+      return [
+        { value: "整页", source: entryWhole },
+        { value: "它解决什么问题", source: (entry.intro || []).join("\n\n") },
+        { value: "核心机制", source: (entry.method || []).map(item => `### ${item.title}\n${item.text}`).join("\n\n") },
+        { value: "关键证据", source: (entry.evidence || []).map(item => `- ${item.label}：${item.value}。${item.text}`).join("\n") },
+        { value: "边界与开放问题", source: (entry.limits || []).map(item => `- ${item}`).join("\n") },
+        { value: "参见", source: (entry.related || []).map(id => byId(id)).filter(Boolean).map(item => `- ${item.title}：${item.subtitle}`).join("\n") },
+        { value: "参考资料", source: (entry.links || []).map(link => `- ${link.label}：${link.url}`).join("\n") }
+      ];
+    }
+    const resources = resourcesForDomain(domain.id);
+    const domainWhole = [
+      `# ${domain.name}`,
+      domain.description,
+      ...(domain.intro || []),
+      "## 技术路线",
+      ...domain.routes.map(item => `### ${item.name}\n${item.question}\n${item.summary}`),
+      "## 数据集与基准",
+      ...resources.map(item => `- ${typeLabel(item.type)} · ${item.name}（${item.year}）：${item.summary}`),
+      "## 开放问题",
+      ...(domain.openProblems || []).map(item => `- ${item}`)
+    ].join("\n\n");
+    return [
+      { value: "整页", source: domainWhole },
+      { value: "领域导读", source: [...(domain.intro || []), domain.readingGuide || ""].filter(Boolean).join("\n\n") },
+      { value: "技术路线", source: domain.routes.map(item => `- ${item.name}（${item.en}）：${item.question}；${routeEntries(domain.id, item.id).length} 个词条。`).join("\n") },
+      { value: "数据集与基准", source: resources.map(item => `- ${typeLabel(item.type)} · ${item.name}（${item.year}）：${item.summary} ${item.url}`).join("\n") },
+      { value: "开放问题", source: (domain.openProblems || []).map(item => `- ${item}`).join("\n") },
+      { value: "参见", source: (domain.related || []).map(id => domainById.get(id)).filter(Boolean).map(item => `- ${item.name}：${item.description}`).join("\n") }
+    ];
+  }
+
+  function markdownLite(text) {
+    const inline = value => esc(value)
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/_([^_]+)_/g, "<em>$1</em>")
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    const lines = String(text || "").split(/\r?\n/);
+    const html = [];
+    let listOpen = false;
+    const closeList = () => { if (listOpen) { html.push("</ul>"); listOpen = false; } };
+    lines.forEach(line => {
+      if (/^###\s+/.test(line)) { closeList(); html.push(`<h4>${inline(line.replace(/^###\s+/, ""))}</h4>`); }
+      else if (/^##\s+/.test(line)) { closeList(); html.push(`<h3>${inline(line.replace(/^##\s+/, ""))}</h3>`); }
+      else if (/^#\s+/.test(line)) { closeList(); html.push(`<h3>${inline(line.replace(/^#\s+/, ""))}</h3>`); }
+      else if (/^[-*]\s+/.test(line)) {
+        if (!listOpen) { html.push("<ul>"); listOpen = true; }
+        html.push(`<li>${inline(line.replace(/^[-*]\s+/, ""))}</li>`);
+      } else if (!line.trim()) {
+        closeList();
+      } else {
+        closeList();
+        html.push(`<p>${inline(line)}</p>`);
+      }
+    });
+    closeList();
+    return html.join("");
   }
 
   function resourceMarkup(resource) {
@@ -1244,6 +1379,7 @@ ${title} (${pageUrl})
                   </tbody>
                 </table>
                 ${items.length ? "" : '<p class="wiki-empty">这条路线还没有词条。欢迎补充。</p>'}
+                <p class="wiki-more-note">这里只列路线上的代表工作。更多论文、系统与数据集可以使用 <button class="wiki-inline-button" type="button" data-open-search>站内搜索</button>，或浏览 <a href="#/entries">全部词条</a>。</p>
               </section>
 
               <section class="wiki-section" id="route-see-also">
@@ -1306,16 +1442,18 @@ ${title} (${pageUrl})
 }`;
   }
 
-  function entryCommentsMarkup(entry) {
+  function entryCommentsMarkup(page, options = {}) {
+    const storageKey = page.commentStorageKey || page.id;
+    const compact = Boolean(options.compact);
     let main;
     if (commentsConfigReady()) {
       main = `<div class="giscus-shell">
-        <div id="giscus-container" data-entry-id="${entry.id}">
+        <div id="giscus-container" data-entry-id="${storageKey}">
           <div class="comment-loading"><span class="loading-mark"></span><p>正在载入 GitHub Discussions…</p></div>
         </div>
       </div>`;
     } else if (isLocalPreview()) {
-      const comments = readLocalComments(entry.id);
+      const comments = readLocalComments(storageKey);
       main = `
         <div class="local-preview-note">
           <span class="preview-dot"></span>
@@ -1332,7 +1470,7 @@ ${title} (${pageUrl})
           </div>
           <div id="local-comment-list">${localCommentsMarkup(comments)}</div>
           <form class="comment-form" id="local-comment-form" novalidate>
-            <input type="hidden" name="entryId" value="${entry.id}">
+            <input type="hidden" name="entryId" value="${storageKey}">
             <div class="comment-form-row">
               <label>昵称
                 <input type="text" name="name" maxlength="40" required placeholder="怎么称呼你？" value="${esc(getSavedCommentName())}">
@@ -1351,23 +1489,23 @@ ${title} (${pageUrl})
       main = `<div class="comment-setup">
         <span class="comment-setup-mark">DISCUSS / SETUP NEEDED</span>
         <h3>评论区还没有接入。</h3>
-        <p>维护者需要启用 GitHub Discussions 并完成 Giscus 配置。完成后，每个词条都会自动拥有一个公开、可订阅的讨论串。</p>
+        <p>维护者需要启用 GitHub Discussions 并完成 Giscus 配置。完成后，每个页面都会自动拥有一个公开、可订阅的讨论串。</p>
         <div class="comment-setup-actions">
           <a class="button button--dark" href="${esc(repoFileUrl("GISCUS_SETUP.md"))}" target="_blank" rel="noopener">查看 3 分钟接入说明 ${smallArrow()}</a>
-          <a class="button button--outline" href="${esc(issueUrl(`[讨论] ${entry.title}`, `我想补充关于 ${entry.title} 的讨论：\n\n`)) || "#/contribute"}" ${REPO ? 'target="_blank" rel="noopener"' : ""}>先在 Issues 中补充 ↗</a>
+          <a class="button button--outline" href="${esc(issueUrl(`[讨论] ${page.title}`, `我想补充关于 ${page.title} 的讨论：\n\n`)) || "#/contribute"}" ${REPO ? 'target="_blank" rel="noopener"' : ""}>先在 Issues 中补充 ↗</a>
         </div>
       </div>`;
     }
 
     return `
-      <section class="discussion" id="discussion">
-        <div class="discussion-head">
+      <section class="discussion ${compact ? "discussion--compact" : ""}" id="discussion">
+        ${compact ? "" : `<div class="discussion-head">
           <div>
             <p class="eyebrow">TALK PAGE / DISCUSSION</p>
             <h2>讨论</h2>
           </div>
           <p class="discussion-sub">关于本条目的问题、复现经验、补充引用或不同意见，都欢迎留在这里。请区分事实与判断，并尽量附上出处。</p>
-        </div>
+        </div>`}
         ${main}
       </section>`;
   }
@@ -1388,8 +1526,7 @@ ${title} (${pageUrl})
       { id: "entry-evidence", label: "关键证据" },
       { id: "entry-limits", label: "边界与开放问题" },
       { id: "entry-related", label: "参见" },
-      { id: "entry-references", label: "参考资料" },
-      { id: "discussion", label: "讨论" }
+      { id: "entry-references", label: "参考资料" }
     ];
     const infoboxRows = [
       ["类型", esc(type)],
@@ -1521,10 +1658,6 @@ ${title} (${pageUrl})
           </div>
         </div>
 
-        <div class="wiki-talk-shell">
-          ${entryCommentsMarkup(entry)}
-        </div>
-
         <nav class="entry-pagination wrap" aria-label="相邻词条">
           ${previous ? `
             <a class="pagination-card pagination-card--prev" href="#/entry/${previous.id}">
@@ -1537,6 +1670,282 @@ ${title} (${pageUrl})
               <strong>${esc(next.title)}</strong>
             </a>` : ""}
         </nav>
+      </div>`;
+  }
+
+  function renderEditPage(route) {
+    const identity = wikiIdentity(route.domain, route.route || null, route.entry || null);
+    const options = wikiSectionOptions(identity);
+    const selected = options.find(item => item.value === route.section) || options[0];
+    const current = options.find(item => item.value === selected.value) || options[0];
+    return `
+      <div class="view view--article" style="--accent:${identity.domain.accent};--tint:${identity.domain.tint}">
+        <div class="wiki-skin">
+          ${articleTabs(identity.type, identity.domain, identity.route, identity.entry, "edit")}
+          <div class="wiki-skin-grid">
+            <aside class="wiki-side">
+              <div class="wiki-tools wiki-edit-help">
+                <div class="wiki-tools-head">编辑帮助</div>
+                <p>编辑的是提案，不是线上正文。</p>
+                <ul>
+                  <li>一手来源优先</li>
+                  <li>区分事实与判断</li>
+                  <li>写清适用边界</li>
+                  <li>提交后由编辑核对</li>
+                </ul>
+              </div>
+              <div class="wiki-tools">
+                <div class="wiki-tools-head">页面工具</div>
+                <a href="${identity.articleHref}">返回条目</a>
+                <a href="${identity.talkHref}">讨论页</a>
+                <a href="${repoFileUrl("assets/js/data.js")}" target="_blank" rel="noopener">查看源数据</a>
+              </div>
+            </aside>
+
+            <main class="wiki-article-body">
+              <h1 class="wiki-title">编辑 ${esc(identity.title)}</h1>
+              <div class="wiki-site-sub">出自 EAI Wiki，开放的具身智能百科</div>
+              <div class="wiki-statusline">
+                <span class="wiki-status-dot"></span>
+                您正在编辑「${esc(identity.title)}」的 ${esc(selected.value)} 部分。保存会生成一个公开编辑提案，不会直接覆盖线上正文。
+              </div>
+              <div class="wiki-edit-notice">
+                <strong>提案模式</strong>
+                <p>请只修改你能够核对的文本。提交后会生成 GitHub Issue，编辑会检查来源、语气与结构后再合并。</p>
+              </div>
+
+              <form class="wiki-edit-page-form" id="wiki-edit-page-form" novalidate
+                data-page-type="${identity.type}"
+                data-domain-id="${identity.domain.id}"
+                data-route-id="${identity.route?.id || ""}"
+                data-entry-id="${identity.entry?.id || ""}"
+                data-article-href="${identity.articleHref}">
+                <div class="wiki-edit-scope">
+                  <label>编辑范围
+                    <select id="wiki-edit-section">
+                      ${options.map(item => `<option value="${esc(item.value)}" ${item.value === selected.value ? "selected" : ""}>${esc(item.value)}</option>`).join("")}
+                    </select>
+                  </label>
+                  <span>切换章节会重新载入编辑页。</span>
+                </div>
+
+                <div class="wiki-editor-toolbar" aria-label="编辑工具栏">
+                  <button type="button" data-edit-wrap="**" title="粗体">B</button>
+                  <button type="button" data-edit-wrap="_" title="斜体"><em>I</em></button>
+                  <button type="button" data-edit-insert="## " title="二级标题">H2</button>
+                  <button type="button" data-edit-insert="- " title="列表">• 列表</button>
+                  <button type="button" data-edit-insert="[链接文字](https://)" title="链接">链接</button>
+                  <button type="button" data-edit-insert="&#96;代码&#96;" title="行内代码">&lt;/&gt;</button>
+                </div>
+                <textarea class="wiki-edit-textarea" id="wiki-edit-textarea" name="content" rows="18" required>${esc(current.source)}</textarea>
+                <div class="wiki-editor-preview" id="wiki-editor-preview" hidden></div>
+
+                <div class="wiki-edit-fields">
+                  <label><span>编辑摘要 <em>*</em></span>
+                    <input type="text" name="summary" id="wiki-edit-summary" maxlength="160" required placeholder="例如：补充 π0.5 的训练数据配方；修正路线归位">
+                  </label>
+                  <label>依据与参考链接
+                    <textarea name="sources" rows="3" maxlength="3000" placeholder="论文、代码、官方文档或可复现实验记录。优先一手来源。"></textarea>
+                  </label>
+                  <div class="wiki-edit-fields-row">
+                    <label>署名 / GitHub 昵称
+                      <input type="text" name="contributor" maxlength="60" value="${esc(getSavedCommentName())}" placeholder="可选">
+                    </label>
+                    <label>AI 参与
+                      <select name="ai">
+                        <option value="未使用 AI">未使用 AI</option>
+                        <option value="AI 辅助润色 / 翻译">AI 辅助润色 / 翻译</option>
+                        <option value="AI 辅助起草，已核对事实">AI 辅助起草，已核对事实</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+
+                <p class="wiki-edit-disclaimer">提交即表示你同意文字以 CC BY-SA 4.0 发布。请勿提交版权不明的长段原文、论文图片或敏感数据。</p>
+                <div class="wiki-edit-actions">
+                  <div>
+                    <button class="wiki-button" type="button" data-edit-preview>显示预览</button>
+                    <button class="wiki-button" type="button" data-edit-copy>复制提案</button>
+                  </div>
+                  <div>
+                    <a class="wiki-button wiki-button--quiet" href="${identity.articleHref}">取消</a>
+                    <button class="wiki-button wiki-button--primary" type="submit">保存更改</button>
+                  </div>
+                </div>
+                <p class="wiki-edit-status" id="wiki-edit-status">保存会生成公开 GitHub Issue；本地预览会复制提案。</p>
+              </form>
+              ${articleFooter()}
+            </main>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function buildWikiEditDraft(identity, section, summary, content, sources, contributor, ai) {
+    const pageUrl = `${window.location.origin}${window.location.pathname}${identity.articleHref}`;
+    return `### 页面
+${identity.title} (${pageUrl})
+
+### 编辑范围
+${section}
+
+### 编辑摘要
+${summary}
+
+### 建议内容
+${content}
+
+### 依据与参考
+${sources || "（未填写）"}
+
+### 署名
+${contributor || "匿名 / 待联系"}
+
+### AI 参与
+${ai}
+
+---
+*由 EAI Wiki 编辑页生成。请确认所有引用真实可访问。*`;
+  }
+
+  function setupEditPage(route) {
+    const form = document.getElementById("wiki-edit-page-form");
+    if (!form) return;
+    const identity = wikiIdentity(route.domain, route.route || null, route.entry || null);
+    const textarea = document.getElementById("wiki-edit-textarea");
+    const preview = document.getElementById("wiki-editor-preview");
+    const sectionSelect = document.getElementById("wiki-edit-section");
+    const status = document.getElementById("wiki-edit-status");
+    const initialContent = textarea?.value || "";
+
+    form.querySelectorAll("[data-edit-wrap]").forEach(button => {
+      button.addEventListener("click", () => {
+        if (!textarea) return;
+        const marker = button.dataset.editWrap;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selected = textarea.value.slice(start, end);
+        const replacement = `${marker}${selected || "文字"}${marker}`;
+        textarea.setRangeText(replacement, start, end, "end");
+        textarea.focus();
+        if (!selected) textarea.setSelectionRange(start + marker.length, start + marker.length + 2);
+      });
+    });
+
+    form.querySelectorAll("[data-edit-insert]").forEach(button => {
+      button.addEventListener("click", () => {
+        if (!textarea) return;
+        const insertion = button.dataset.editInsert;
+        textarea.setRangeText(insertion, textarea.selectionStart, textarea.selectionEnd, "end");
+        textarea.focus();
+      });
+    });
+
+    form.querySelector("[data-edit-preview]")?.addEventListener("click", event => {
+      if (!preview) return;
+      const willShow = preview.hidden;
+      if (willShow && textarea) preview.innerHTML = markdownLite(textarea.value);
+      preview.hidden = !willShow;
+      event.currentTarget.textContent = willShow ? "隐藏预览" : "显示预览";
+    });
+
+    const buildDraft = () => {
+      const data = new FormData(form);
+      return buildWikiEditDraft(
+        identity,
+        sectionSelect?.value || "整页",
+        String(data.get("summary") || "").trim() || "（未填写编辑摘要）",
+        String(data.get("content") || "").trim(),
+        String(data.get("sources") || "").trim(),
+        String(data.get("contributor") || "").trim(),
+        String(data.get("ai") || "").trim()
+      );
+    };
+
+    form.querySelector("[data-edit-copy]")?.addEventListener("click", () => {
+      if (!form.reportValidity()) return;
+      copyText(buildDraft(), "编辑提案已复制");
+    });
+
+    sectionSelect?.addEventListener("change", () => {
+      const next = sectionSelect.value;
+      if (textarea && textarea.value.trim() !== initialContent.trim() && !window.confirm("切换编辑范围会丢失未提交的修改。继续吗？")) {
+        sectionSelect.value = route.section || "整页";
+        return;
+      }
+      const target = wikiEditHref(identity.type, identity.domain.id, identity.route?.id || "", identity.entry?.id || "", next);
+      window.location.hash = target;
+    });
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const draft = buildDraft();
+      const section = sectionSelect?.value || "整页";
+      const link = issueUrl(`[编辑] ${identity.title} / ${section}`, draft);
+      if (link) {
+        window.open(link, "_blank", "noopener");
+        if (status) status.textContent = "已打开 GitHub Issue，请确认后提交。";
+        showToast("已打开 GitHub 编辑提案");
+      } else {
+        copyText(draft, "编辑提案已复制；发布站点后会打开 GitHub Issue");
+        if (status) status.textContent = "仓库尚未配置：编辑提案已复制。";
+      }
+    });
+  }
+
+  function renderTalkPage(route) {
+    const identity = wikiIdentity(route.domain, route.route || null, route.entry || null);
+    const target = {
+      id: identity.commentStorageKey,
+      title: identity.title,
+      commentStorageKey: identity.commentStorageKey,
+      commentTerm: identity.commentTerm
+    };
+    return `
+      <div class="view view--article" style="--accent:${identity.domain.accent};--tint:${identity.domain.tint}">
+        <div class="wiki-skin">
+          ${articleTabs(identity.type, identity.domain, identity.route, identity.entry, "talk")}
+          <div class="wiki-skin-grid">
+            <aside class="wiki-side">
+              <div class="wiki-tools">
+                <div class="wiki-tools-head">讨论页工具</div>
+                <a href="${identity.articleHref}">返回条目</a>
+                <a href="${identity.editHref}">编辑条目</a>
+                <button type="button" data-print-page>可打印版</button>
+                <button type="button" data-copy-permalink>永久链接</button>
+              </div>
+              <div class="wiki-tools wiki-talk-rules">
+                <div class="wiki-tools-head">讨论规范</div>
+                <p>讨论条目内容，不讨论贡献者个人。</p>
+                <p>请签名、给出依据，并区分事实与判断。</p>
+              </div>
+            </aside>
+
+            <main class="wiki-article-body">
+              <h1 class="wiki-title">讨论:${esc(identity.title)}</h1>
+              <div class="wiki-site-sub">出自 EAI Wiki，开放的具身智能百科</div>
+              <div class="wiki-statusline">
+                <span class="wiki-status-dot"></span>
+                这是「${esc(identity.title)}」的讨论页。请围绕条目内容、来源与路线归位展开讨论。
+              </div>
+              <div class="wiki-talk-banner">
+                <strong>讨论页不是论坛</strong>
+                <p>这里用于协调条目编辑：补充来源、指出错误、讨论范围与归位。与条目无关的观点请放到个人页面或 GitHub Discussions。</p>
+                <button class="wiki-button" type="button" data-wiki-discuss data-discuss-title="${esc(identity.title)}" data-discuss-url="${esc(identity.articleHref)}">在 GitHub 发起讨论</button>
+              </div>
+
+              <section class="wiki-talk-thread">
+                <div class="wiki-section-heading">
+                  <h2>讨论串</h2>
+                  <span class="wiki-section-tag">TALK / OPEN THREAD</span>
+                </div>
+                ${entryCommentsMarkup(target, { compact: true })}
+              </section>
+              ${articleFooter()}
+            </main>
+          </div>
+        </div>
       </div>`;
   }
 
@@ -1587,7 +1996,8 @@ ${title} (${pageUrl})
     }).join("");
   }
 
-  function setupComments(entry) {
+  function setupComments(page) {
+    const storageKey = page.commentStorageKey || page.id;
     const form = document.getElementById("local-comment-form");
     if (form) {
       form.addEventListener("submit", event => {
@@ -1599,14 +2009,14 @@ ${title} (${pageUrl})
           showToast("昵称和评论都不能为空");
           return;
         }
-        const comments = readLocalComments(entry.id);
+        const comments = readLocalComments(storageKey);
         comments.push({
           id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
           name: name.slice(0, 40),
           text: text.slice(0, 1600),
           createdAt: new Date().toISOString()
         });
-        saveLocalComments(entry.id, comments);
+        saveLocalComments(storageKey, comments);
         try { localStorage.setItem("eai-wiki:comment-name", name.slice(0, 40)); } catch (_) { /* noop */ }
         const list = document.getElementById("local-comment-list");
         if (list) list.innerHTML = localCommentsMarkup(comments);
@@ -1632,7 +2042,7 @@ ${title} (${pageUrl})
       "data-category": comments.category || "Announcements",
       "data-category-id": comments.categoryId,
       "data-mapping": comments.mapping || "specific",
-      "data-term": `eai-wiki/entry/${entry.id}`,
+      "data-term": `eai-wiki/${page.commentTerm || `entry/${page.id}`}`,
       "data-strict": comments.strict || "0",
       "data-reactions-enabled": comments.reactionsEnabled || "1",
       "data-emit-metadata": comments.emitMetadata || "0",
@@ -1962,7 +2372,7 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
                 <span class="way-num">02</span>
                 <h3>编辑一个页面</h3>
                 <p>在任意领域、路线或词条页点击顶部「编辑」标签，或小节右侧的「[编辑]」。提案会记录页面、章节、正文与依据，进入公开审校。</p>
-                <button class="text-link" type="button" data-wiki-edit data-wiki-page="domain" data-wiki-domain="manipulation" data-wiki-section="整页">试试编辑「操作」领域 ${smallArrow()}</button>
+                <a class="text-link" href="#/edit/domain/manipulation">试试编辑「操作」领域 ${smallArrow()}</a>
               </article>
               <article class="way-card way-card--accent">
                 <span class="way-num">03</span>
@@ -2520,151 +2930,6 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
     });
   }
 
-  function openWikiEditor(context = {}) {
-    const dialog = document.getElementById("contribute-dialog");
-    const shell = document.getElementById("contribute-shell");
-    const entry = context.entryId ? byId(context.entryId) : null;
-    const domain = entry ? domainOf(entry) : domainById.get(context.domainId);
-    if (!dialog || !shell || !domain) return;
-    closeAllDialogs();
-    closeMobileMenu();
-
-    const route = entry ? routeOf(entry) : context.routeId ? routeInfo(domain, context.routeId) : null;
-    const pageTitle = entry ? entry.title : route ? `${domain.name} / ${route.name}` : domain.name;
-    const pageHash = entry ? `#/entry/${entry.id}` : route ? routeHref(domain, route) : `#/domain/${domain.id}`;
-    const pageUrl = `${window.location.origin}${window.location.pathname}${pageHash}`;
-    const pageKind = entry ? "ENTRY" : route ? "ROUTE" : "DOMAIN";
-    const availableSections = entry
-      ? ["整页", "为什么重要", "它解决什么问题", "核心机制", "关键证据", "边界与开放问题", "继续阅读", "参考来源", "新章节建议"]
-      : route
-        ? ["整页", "路线导读", ...(route.sections || []).map(section => section.title), "实践清单", "路线上的工作", "参考来源", "新章节建议"]
-        : ["整页", "领域导读", "技术路线", "数据集与基准", "开放问题", "新章节建议"];
-    const requestedSection = availableSections.includes(context.section) ? context.section : "整页";
-
-    shell.innerHTML = `
-      <div class="form-head">
-        <div>
-          <span class="mono">WIKI EDIT PROPOSAL / ${pageKind}</span>
-          <h2 id="contribute-modal-title">编辑《${esc(pageTitle)}》</h2>
-          <p>补充技术定义、机制解释、反例或参考来源。提交后会生成公开 GitHub Issue，由编辑核对并合并；不会直接覆盖线上正文。</p>
-        </div>
-        <button class="icon-close icon-close--dark" type="button" data-close-modal aria-label="关闭表单">ESC</button>
-      </div>
-      <div class="wiki-edit-context">
-        <span>正在编辑</span>
-        <strong>${esc(pageTitle)}</strong>
-        <code>${esc(entry ? `${domain.id}/${entry.route}/${entry.id}` : `${domain.id}${route ? `/${route.id}` : ""}`)}</code>
-      </div>
-      <form class="contribute-form wiki-edit-form" id="wiki-edit-form" novalidate>
-        <div class="field-grid field-grid--two">
-          <label class="field">
-            <span>修改类型</span>
-            <select name="kind">
-              <option value="补充">补充内容</option>
-              <option value="修订">修订事实 / 表述</option>
-              <option value="引用">补充参考来源</option>
-              <option value="质疑">提出不同意见</option>
-              <option value="新章节">建议新章节</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>目标章节</span>
-            <select name="section">
-              ${availableSections.map(section => `<option value="${esc(section)}" ${section === requestedSection ? "selected" : ""}>${esc(section)}</option>`).join("")}
-            </select>
-          </label>
-        </div>
-        <label class="field">
-          <span>建议加入或修改的内容 <em>*</em></span>
-          <textarea name="content" rows="8" required maxlength="8000" placeholder="可以直接写技术描述、定义、机制、边界、失败模式或比较。支持 Markdown。"></textarea>
-        </label>
-        <label class="field">
-          <span>依据与参考链接</span>
-          <textarea name="sources" rows="3" maxlength="3000" placeholder="论文、代码、官方文档或你自己的实验记录。请优先一手来源。"></textarea>
-        </label>
-        <div class="field-grid field-grid--two">
-          <label class="field">
-            <span>署名 / GitHub 昵称</span>
-            <input name="contributor" type="text" maxlength="60" value="${esc(getSavedCommentName())}" placeholder="可选">
-          </label>
-          <div class="field">
-            <span>页面链接</span>
-            <div class="wiki-url-box">${esc(pageHash)}</div>
-          </div>
-        </div>
-        <div class="form-disclaimer">
-          <span>⌁</span>
-          <p>请区分事实、推测与个人判断。技术性修改最好附上原始论文、代码或可复现实验；AI 辅助撰写请注明。</p>
-        </div>
-        <div class="form-foot">
-          <p class="form-foot-note" id="form-status">提案进入 GitHub Issue 审核。当前页面为种子条目，全部内容都可以继续完善。</p>
-          <div class="form-actions">
-            <button class="button button--outline" type="button" data-wiki-copy>复制提案</button>
-            <button class="button button--orange" type="submit">提交编辑提案 ${smallArrow()}</button>
-          </div>
-        </div>
-      </form>`;
-
-    const form = document.getElementById("wiki-edit-form");
-    const buildDraft = () => {
-      const data = new FormData(form);
-      const value = key => String(data.get(key) || "").trim();
-      return `### 页面
-${pageTitle} (${pageUrl})
-
-### 修改类型
-${value("kind")}
-
-### 目标章节
-${value("section")}
-
-### 建议内容
-${value("content")}
-
-### 依据与参考
-${value("sources") || "（未填写）"}
-
-### 提交者
-${value("contributor") || "匿名 / 待联系"}
-
----
-*由 EAI Wiki 页面编辑提案生成。请确认引用真实可访问。*`;
-    };
-
-    form.querySelector("[data-wiki-copy]").addEventListener("click", () => {
-      if (!form.reportValidity()) return;
-      copyText(buildDraft(), "编辑提案已复制");
-    });
-
-    form.addEventListener("submit", event => {
-      event.preventDefault();
-      if (!form.reportValidity()) return;
-      const section = form.elements.section.value;
-      const draft = buildDraft();
-      const link = issueUrl(`[编辑提案] ${pageTitle} / ${section}`, draft);
-      if (link) {
-        const anchor = document.createElement("a");
-        anchor.href = link;
-        anchor.target = "_blank";
-        anchor.rel = "noopener noreferrer";
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-        dialog.close();
-        syncBodyLock();
-        showToast("已打开 GitHub Issue，请确认后提交");
-      } else {
-        copyText(draft, "提案已复制。发布站点后，这里会自动打开 GitHub Issue。");
-        const status = document.getElementById("form-status");
-        if (status) status.textContent = "仓库尚未配置：提案已复制，请在发布后的站点提交。";
-      }
-    });
-
-    if (!dialog.open) dialog.showModal();
-    syncBodyLock();
-    requestAnimationFrame(() => form.querySelector("textarea[name='content']")?.focus());
-  }
-
   function buildContributionDraft(form) {
     const data = new FormData(form);
     const value = key => String(data.get(key) || "").trim();
@@ -2742,7 +3007,9 @@ ${value("contributor") || "匿名 / 待联系"}
     if (hash && !hash.startsWith("#/")) return null;
     const raw = hash.replace(/^#\/?/, "").replace(/\/+$/, "");
     if (!raw) return { name: "home", raw: "/" };
-    const parts = raw.split("/").filter(Boolean);
+    const [pathPart, queryPart] = raw.split("?");
+    const query = new URLSearchParams(queryPart || "");
+    const parts = pathPart.split("/").filter(Boolean);
     if (parts[0] === "entries" && !parts[1]) return { name: "catalog", raw };
     if ((parts[0] === "entry" || parts[0] === "entries") && parts[1]) {
       const entry = byId(decodeURIComponent(parts[1]));
@@ -2762,6 +3029,28 @@ ${value("contributor") || "匿名 / 待联系"}
     }
     if (parts[0] === "graph" && !parts[1]) return { name: "graph", raw };
     if (parts[0] === "contribute" && !parts[1]) return { name: "contribute", raw };
+    if (parts[0] === "edit" || parts[0] === "talk") {
+      const name = parts[0];
+      const section = query.get("section") || "";
+      if (parts[1] === "domain" && parts[2]) {
+        const domain = domainById.get(decodeURIComponent(parts[2]));
+        if (domain) return { name, pageType: "domain", domain, section, raw };
+      }
+      if (parts[1] === "route" && parts[2] && parts[3]) {
+        const domain = domainById.get(decodeURIComponent(parts[2]));
+        const route = domain ? routeInfo(domain, decodeURIComponent(parts[3])) : null;
+        if (domain && route) return { name, pageType: "route", domain, route, section, raw };
+      }
+      if (parts[1] === "entry" && parts[2]) {
+        const entry = byId(decodeURIComponent(parts[2]));
+        if (entry) {
+          const domain = domainOf(entry);
+          const route = routeOf(entry);
+          return { name, pageType: "entry", domain, route, entry, section, raw };
+        }
+      }
+      return { name: "notfound", raw };
+    }
     return { name: "notfound", raw };
   }
 
@@ -2787,6 +3076,14 @@ ${value("contributor") || "匿名 / 待联系"}
     if (route.name === "entry") {
       return { title: `${route.entry.title} · EAI Wiki`, description: route.entry.tldr };
     }
+    if (route.name === "edit") {
+      const title = route.entry?.title || route.route?.name || route.domain.name;
+      return { title: `编辑 ${title} · EAI Wiki`, description: `编辑「${title}」的 Wiki 条目，提交技术补充、来源与修订提案。` };
+    }
+    if (route.name === "talk") {
+      const title = route.entry?.title || route.route?.name || route.domain.name;
+      return { title: `讨论:${title} · EAI Wiki`, description: `关于「${title}」的讨论页：来源、技术判断与条目范围。` };
+    }
     if (route.name === "graph") {
       return { title: "知识网络 · EAI Wiki", description: "以图的方式浏览导航、操作、移动操作、仿真器与数据评测五个领域及其技术路线。" };
     }
@@ -2808,7 +3105,7 @@ ${value("contributor") || "匿名 / 待联系"}
 
   function updateNav(route) {
     let active = "home";
-    if (route.name === "catalog" || route.name === "domain" || route.name === "route" || route.name === "entry") active = "entries";
+    if (route.name === "catalog" || route.name === "domain" || route.name === "route" || route.name === "entry" || route.name === "edit" || route.name === "talk") active = "entries";
     if (route.name === "graph") active = "graph";
     if (route.name === "contribute") active = "contribute";
     document.querySelectorAll("[data-nav]").forEach(link => {
@@ -2829,6 +3126,8 @@ ${value("contributor") || "匿名 / 待联系"}
     else if (route.name === "domain") html = renderDomain(route.domain);
     else if (route.name === "route") html = renderRoutePage(route.domain, route.route);
     else if (route.name === "entry") html = renderEntry(route.entry);
+    else if (route.name === "edit") html = renderEditPage(route);
+    else if (route.name === "talk") html = renderTalkPage(route);
     else if (route.name === "graph") html = renderGraph();
     else if (route.name === "contribute") html = renderContribute();
     else html = renderNotFound(route);
@@ -2838,7 +3137,16 @@ ${value("contributor") || "匿名 / 待联系"}
     updateNav(route);
     updateMeta(routeMeta(route));
     hydrateRepoLinks();
-    if (route.name === "entry") setupComments(route.entry);
+    if (route.name === "talk") {
+      const identity = wikiIdentity(route.domain, route.route || null, route.entry || null);
+      setupComments({
+        id: identity.commentStorageKey,
+        title: identity.title,
+        commentStorageKey: identity.commentStorageKey,
+        commentTerm: identity.commentTerm
+      });
+    }
+    if (route.name === "edit") setupEditPage(route);
     if (!options.keepScroll) window.scrollTo(0, 0);
     document.documentElement.classList.add("page-ready");
   }
@@ -3022,19 +3330,6 @@ ${value("contributor") || "匿名 / 待联系"}
     if (permalinkTrigger) {
       event.preventDefault();
       copyText(window.location.href, "页面永久链接已复制");
-      return;
-    }
-
-    const wikiEditTrigger = target.closest("[data-wiki-edit]");
-    if (wikiEditTrigger) {
-      event.preventDefault();
-      openWikiEditor({
-        pageType: wikiEditTrigger.dataset.wikiPage,
-        domainId: wikiEditTrigger.dataset.wikiDomain,
-        routeId: wikiEditTrigger.dataset.wikiRoute || "",
-        entryId: wikiEditTrigger.dataset.wikiEntry || "",
-        section: wikiEditTrigger.dataset.wikiSection || "整页"
-      });
       return;
     }
 

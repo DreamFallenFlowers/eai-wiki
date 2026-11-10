@@ -327,7 +327,7 @@ window.EAI_DATA = (() => {
         "值函数与技能边界共同决定上限；环境变化或物体位置变化会放大误差。",
         "主要面向准静态桌面/厨房场景，动态任务与精细接触并非其强项。"
       ],
-      related: ["rt2", "vla-paradigm", "octo"],
+      related: ["rt2", "diffusion-policy", "octo"],
       links: [
         { label: "论文", url: "https://arxiv.org/abs/2204.01691" },
         { label: "项目页", url: "https://say-can.github.io/" }
@@ -366,7 +366,7 @@ window.EAI_DATA = (() => {
         "继承 VLM 的幻觉与安全风险；语言上合理不等于物理上可行。",
         "模型与训练数据未公开，社区难以复现和审计。"
       ],
-      related: ["openvla", "pi0", "vla-paradigm"],
+      related: ["openvla", "pi0", "pi05"],
       links: [
         { label: "论文", url: "https://arxiv.org/abs/2307.15818" },
         { label: "项目页", url: "https://robotics-transformer2.github.io/" }
@@ -452,81 +452,41 @@ window.EAI_DATA = (() => {
       ]
     },
     {
-      id: "gemini-robotics-15",
+      id: "pi05",
       domain: "manipulation",
       route: "vla",
-      type: "system",
-      title: "Gemini Robotics 1.5",
-      subtitle: "会「先想后做」的具身推理与动作模型",
+      type: "paper",
+      title: "π0.5",
+      subtitle: "面向开放世界泛化的视觉-语言-动作模型",
       year: 2025,
-      venue: "Google DeepMind · 2025",
-      org: "Google DeepMind",
-      authors: "Gemini Robotics Team",
-      featured: true,
-      tags: ["双系统", "具身推理", "跨本体", "多步任务"],
-      tldr: "把具身推理模型 ER 1.5 与 VLA 模型 Robotics 1.5 配对：前者负责多步任务分解与跨模态思考，后者把计划变成动作，并支持跨机器人迁移。",
-      why: "代表 2025 年「推理模型 + 动作模型」的双系统路线，强调可解释的中间思考与多本体泛化。",
-      intro: [
-        "Gemini Robotics 1.5 把系统拆成两个互补的模型。Gemini Robotics-ER 1.5 是「具身推理器」，可以从图像、视频和语言中推断任务步骤、空间关系、工具使用，甚至调用外部工具；Gemini Robotics 1.5 则是把高层计划转成动作的 VLA。",
-        "这种分工的价值在于可解释性和可迁移性：中间的自然语言计划可以被人类检查，同一套计划也可以下发给不同本体。但它也带来新的问题——推理延迟、两个模型之间的接口误差，以及高层计划与低层可行性不一致。"
-      ],
-      method: [
-        { title: "ER 1.5：具身推理", text: "从视觉和语言中推断多步任务、空间关系与工具使用，生成可检查的中间计划。" },
-        { title: "Robotics 1.5：动作执行", text: "接收高层计划与视觉观察，输出低层机器人动作，并支持多本体部署。" },
-        { title: "跨本体迁移", text: "将技能与策略从一种机器人形态迁移到另一种，减少每种硬件的重复数据采集。" }
-      ],
-      evidence: [
-        { value: "分层", label: "先思考，再行动", text: "把推理过程显式化，让计划可被人审阅，也便于跨任务复用。" },
-        { value: "跨本体", label: "从机械臂到人形", text: "官方强调同一套模型能力可迁移到不同机器人平台。" }
-      ],
-      limits: [
-        "官方披露有限，缺少可复现的训练细节与独立评测。",
-        "双模型级联带来推理延迟与错误传播，实时性仍是挑战。",
-        "安全、隐私与物理约束需要额外系统层保障。"
-      ],
-      related: ["pi0", "rt2", "groot-n1"],
-      links: [
-        { label: "官方博客", url: "https://deepmind.google/discover/blog/gemini-robotics-15-brings-ai-agents-into-the-physical-world/" }
-      ]
-    },
-    {
-      id: "vla-paradigm",
-      domain: "manipulation",
-      route: "vla",
-      type: "concept",
-      title: "VLA 范式",
-      subtitle: "从「感知→规划→控制」到端到端动作生成",
-      year: 2025,
-      venue: "概念词条",
-      org: "社区综合",
-      authors: "EAI Wiki 编辑组",
+      venue: "arXiv 2025",
+      org: "Physical Intelligence",
+      authors: "Kevin Black, Noah Brown 等",
       featured: false,
-      tags: ["范式", "端到端", "分层系统", "能力边界"],
-      tldr: "VLA 把视觉、语言与动作放进同一个建模问题，用大规模多模态预训练获得语义泛化；它的核心争议是「端到端」到底应该端到哪一层。",
-      why: "理解 VLA 的能力边界，必须区分语义泛化、动作精度、控制频率与安全性这四个正交维度，而不是笼统地说「模型会不会做」。",
+      tags: ["开放世界", "异构任务共训", "语义子任务", "长程操作"],
+      tldr: "在 π0 基础上，把多种机器人数据、网页数据、目标检测与语义子任务预测混合共训，让单个 VLA 能在未见过的家庭中完成清理厨房、整理卧室等长程任务。",
+      why: "它把开放世界泛化从「同一实验室的新物体」推进到「全新的真实住宅」，说明异构任务共训与语义子任务是 VLA 走向通用操作的关键。",
       intro: [
-        "VLA 不是某一个模型，而是一类接口设计：输入图像与语言，输出动作。它可以用离散 token 自回归，也可以用扩散或流匹配生成连续动作；可以是单个端到端网络，也可以是「VLM 规划 + 动作专家」的双系统。",
-        "判断一个 VLA 是否真的进步，至少要拆成四问：它能否理解新指令？能否操作新物体？能否迁移到新本体？能否在真实控制频率下稳定执行？很多论文只回答了其中一两个，传播时却常被当成全部。"
+        "π0.5 沿用 π0 的连续动作生成骨干，但把训练数据从单一操作轨迹扩展为异构任务混合：不同机器人、不同任务、网页图文、目标检测、语义子任务标签以及低层动作都可以进入同一训练目标。",
+        "部署时，模型可以在新家庭中理解「清理厨房」这类高层目标，先预测语义子任务，再输出连续动作。论文展示了端到端系统在未见住宅中的长程清理能力，也暴露出数据配方与评测规模仍是核心变量。"
       ],
       method: [
-        { title: "三条技术路线", text: "离散动作 token（RT-2 / OpenVLA）、连续生成式动作头（π0 / Diffusion Policy）、分层系统（Gemini Robotics / SayCan）。" },
-        { title: "数据配方", text: "互联网 VLM 数据提供语义先验，跨本体机器人数据提供动作先验，任务后训练提供熟练度。" },
-        { title: "评测三问", text: "新物体、新指令、新本体分别测什么？三者不能用一个平均成功率概括。" }
+        { title: "异构任务共训", text: "混合多机器人操作数据、网页数据与视觉语言任务，提升语义和场景泛化。" },
+        { title: "混合多模态目标", text: "同一训练序列同时包含图像、语言、物体检测、语义子任务预测与低层动作。" },
+        { title: "语义子任务引导", text: "模型先预测下一步子任务，再生成对应的连续动作块，把长程任务拆成可执行阶段。" }
       ],
       evidence: [
-        { value: "语义", label: "继承 VLM 的世界知识", text: "这是 VLA 相对传统策略最明确的增量，也是大量涌现能力的来源。" },
-        { value: "控制", label: "仍受动作数据与本体差异制约", text: "语义泛化不会自动带来精确接触、高频响应或安全保证。" }
+        { value: "New homes", label: "未见真实住宅", text: "在全新的家庭环境中执行清理厨房、卧室等长程灵巧操作任务。" },
+        { value: "Co-training", label: "异构共训是泛化关键", text: "论文强调多源数据、语义子任务与动作监督的混合对开放世界迁移至关重要。" }
       ],
       limits: [
-        "不是所有机器人都需要 VLA；低成本固定任务用专用策略往往更可靠。",
-        "数据、算力与安全成本高，真机评测昂贵且难以标准化。",
-        "「端到端」不等于「无条件通用」，部署时需要明确适用边界。"
+        "训练数据、完整配方与权重未公开，外部难以独立复现。",
+        "真实住宅评测仍以有限任务与场景为主，长期可靠性未知。",
+        "语义子任务预测错误会向下游动作传播，安全与恢复仍需系统层保障。"
       ],
-      related: ["rt2", "openvla", "pi0", "octo"],
+      related: ["pi0", "openvla", "rt2"],
       links: [
-        { label: "延伸：RT-2", url: "https://arxiv.org/abs/2307.15818" },
-        { label: "延伸：OpenVLA", url: "https://arxiv.org/abs/2406.09246" },
-        { label: "延伸：π0", url: "https://arxiv.org/abs/2410.24164" }
+        { label: "论文", url: "https://arxiv.org/abs/2504.16054" }
       ]
     },
 
@@ -983,7 +943,7 @@ window.EAI_DATA = (() => {
       tldr: "采用「System 2 视觉语言模型 + System 1 扩散动作专家」的双系统架构，并用真实机器人、仿真与人类视频组成的数据金字塔训练，面向人形机器人的操作与移动。",
       why: "把互联网规模的多模态模型与人形全身控制连接起来，并提供开放权重与仿真—部署工具链。",
       intro: [
-        "GR00T N1 的结构和 π0、Gemini Robotics 有相似之处：慢系统理解场景与指令，快系统生成动作。不同点在于它明确面向人形机器人，并把 Isaac 仿真、合成数据、真实遥操作数据组织成「数据金字塔」。",
+        "GR00T N1 的结构和 π0 等双系统 VLA 有相似之处：慢系统理解场景与指令，快系统生成动作。不同点在于它明确面向人形机器人，并把 Isaac 仿真、合成数据、真实遥操作数据组织成「数据金字塔」。",
         "人形机器人的难点不只在模型，而在全身控制：走路、平衡、手臂操作必须同时成立。GR00T N1 提供的是上层「大脑」与部分「小脑」接口，真正的全身控制仍需要运动控制栈和安全层配合。"
       ],
       method: [
@@ -1000,7 +960,7 @@ window.EAI_DATA = (() => {
         "全身控制、安全与操作策略的耦合复杂，端到端评测困难。",
         "官方展示与独立复现之间可能存在差距。"
       ],
-      related: ["pi0", "gemini-robotics-15", "wbc", "isaac-lab"],
+      related: ["pi0", "pi05", "wbc", "isaac-lab"],
       links: [
         { label: "论文", url: "https://arxiv.org/abs/2503.14734" },
         { label: "代码", url: "https://github.com/NVIDIA/Isaac-GR00T" }
@@ -1552,7 +1512,7 @@ window.EAI_DATA = (() => {
         "自回归推理速度有限，闭环实时性需要额外优化。",
         "主要在较短的桌面任务上验证，长程与接触丰富任务仍待检验。"
       ],
-      related: ["world-model", "vla-paradigm", "genie-3"],
+      related: ["world-model", "pi05", "genie-3"],
       links: [
         { label: "论文", url: "https://arxiv.org/abs/2506.21539" },
         { label: "代码", url: "https://github.com/alibaba-damo-academy/WorldVLA" }
@@ -1630,7 +1590,7 @@ window.EAI_DATA = (() => {
         "规划循环计算成本高，动态环境需要频繁重规划。",
         "对透明、反光、可变形物体的三维感知仍脆弱。"
       ],
-      related: ["code-as-policies", "saycan", "vla-paradigm"],
+      related: ["code-as-policies", "saycan", "rt2"],
       links: [
         { label: "论文", url: "https://arxiv.org/abs/2307.05973" },
         { label: "项目页", url: "https://voxposer.github.io/" }
@@ -1669,7 +1629,7 @@ window.EAI_DATA = (() => {
         "缺乏标准 benchmark，难以比较不同 harness 的真实贡献。",
         "过度工程会引入延迟与脆弱接口，甚至掩盖底层模型的能力边界。"
       ],
-      related: ["saycan", "code-as-policies", "gemini-robotics-15"],
+      related: ["saycan", "code-as-policies", "pi0"],
       links: [
         { label: "开源实例", url: "https://github.com/HenryLiu0405/Embodied-Harness" },
         { label: "延伸：Code as Policies", url: "https://arxiv.org/abs/2209.07753" }
@@ -2661,7 +2621,7 @@ window.EAI_DATA = (() => {
         {
           title: "动作表示的两大分支",
           body: [
-            "一类方法把动作离散成 token，与文本共享词表，如 RT-2 与 OpenVLA；另一类方法外接连续动作头，用扩散或流匹配生成动作块，如 π0 与 Gemini Robotics。离散 token 更接近语言模型原生的自回归训练，连续头更适合高频、平滑的接触控制。"
+            "一类方法把动作离散成 token，与文本共享词表，如 RT-2 与 OpenVLA；另一类方法外接连续动作头，用扩散或流匹配生成动作块，如 π0 与 RDT-1B。离散 token 更接近语言模型原生的自回归训练，连续头更适合高频、平滑的接触控制。"
           ],
           bullets: [
             "离散动作：实现简单、可复用 LLM 基础设施，但精度与频率受 token 化限制。",

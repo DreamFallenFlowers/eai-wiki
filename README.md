@@ -4,7 +4,7 @@
 
 - **5 个研究领域**：导航、操作、移动操作、仿真器、数据与评测
 - **22 条技术路线**：如操作领域下的模仿学习、强化学习、VLA、WAM、代码即策略、具身智能体 Harness
-- **47 个深度词条**：论文 / 系统 / 概念 / 数据集 / 基准
+- **46 个深度词条**：论文 / 系统 / 概念 / 数据集 / 基准
 - **22 个常用数据集与基准**：按领域交叉收录，可直接跳转站内词条或原始项目页
 - **3 条阅读路径**：从导航、操作或 Sim2Real 进入
 - **公开讨论**：Giscus + GitHub Discussions
@@ -15,9 +15,17 @@
 
 ![EAI Wiki homepage](docs/preview.png)
 
-领域、路线和词条详情页都采用维基百科式的文章版式：**条目 / 讨论 / 编辑 / 历史**命名空间标签、左侧目录、右侧信息框、带 `[编辑]` 的章节、wikitable、编号参考资料、页面分类和最后修订信息。
+领域、路线和词条详情页都采用维基百科式的文章版式：**条目 / 讨论 / 编辑 / 历史**命名空间标签、左侧目录、右侧信息框、带 `[编辑]` 的章节、wikitable、编号参考资料、页面分类和最后修订信息。编辑与讨论不是弹窗，而是独立的编辑页和 `讨论:` 讨论页。
 
 ![Route wiki page](docs/preview-route.png)
+
+编辑页参考维基百科的编辑界面：章节选择、Markdown 工具条、实时预览、编辑摘要、来源与 AI 披露。
+
+![Wiki edit page](docs/preview-edit.png)
+
+讨论页是独立的 `讨论:` 命名空间，而不是文章底部的评论区；每个页面都有独立的讨论串。
+
+![Wiki talk page](docs/preview-talk.png)
 
 ---
 
@@ -139,7 +147,7 @@ comments: {
 }
 ```
 
-每条词条使用独立的 discussion term，例如 `eai-wiki/entry/openvla`。
+领域页、路线页、词条页都使用独立的 discussion term，例如 `eai-wiki/entry/openvla`、`eai-wiki/route/manipulation/vla`、`eai-wiki/domain/data`。
 
 ---
 
@@ -266,7 +274,7 @@ manipulation: {
 - 领域页、路线页、词条页的顶部「编辑」标签和章节「[编辑]」会打开 Wiki 编辑提案，生成一个**公开 GitHub Issue**，并带上页面、章节、依据与署名。
 - 站内「贡献一个词条」表单会生成一个**公开 GitHub Issue**，并带上领域与技术路线。
 - 仓库自带三个 Issue Forms：编辑页面、新词条、修订建议。
-- 评论通过 Giscus 落到 GitHub Discussions；每个词条独立讨论串。
+- 评论通过 Giscus 落到 GitHub Discussions；每个领域、路线与词条页面都有独立讨论串和讨论页。
 - 本地预览的评论存在 `localStorage`，明确标记为「仅本机可见」。
 - 详细规范见 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
 
@@ -303,7 +311,9 @@ eai-wiki/
 │   └── og-template.html          # 可重新渲染的社交封面模板
 ├── docs/preview.png              # 首页预览
 ├── docs/preview-route.png        # 路线 Wiki 预览
-├── GISCUS_SETUP.md               # 评论区接入说明
+├── docs/preview-edit.png         # 编辑页预览
+├── docs/preview-talk.png         # 讨论页预览
+├── GISCUS_SETUP.md               # 讨论页 / 评论区接入说明
 ├── CONTRIBUTING.md               # 编辑与贡献规范
 ├── LICENSE                       # 代码：MIT
 └── LICENSE-CONTENT.md            # 文字：CC BY-SA 4.0
@@ -315,9 +325,15 @@ eai-wiki/
 | --- | --- |
 | `#/` | 首页与研究领域地图 |
 | `#/entries` | 全部词条；支持类型 / 领域 / 路线筛选 |
-| `#/domain/:domainId` | 领域详情：导读、路线、数据集与基准 |
-| `#/route/:domainId/:routeId` | 技术路线详情：该路线下的全部工作 |
-| `#/entry/:entryId` | 词条详情、引用与讨论 |
+| `#/domain/:domainId` | 领域条目：技术路线表、数据集与基准、开放问题 |
+| `#/route/:domainId/:routeId` | 路线条目：技术拆解、实践清单与代表工作 |
+| `#/entry/:entryId` | 词条条目：技术机制、证据、参考来源与分类 |
+| `#/edit/domain/:domainId` | 领域编辑页 |
+| `#/edit/route/:domainId/:routeId` | 路线编辑页；支持 `?section=...` |
+| `#/edit/entry/:entryId` | 词条编辑页；支持 `?section=...` |
+| `#/talk/domain/:domainId` | 领域讨论页 |
+| `#/talk/route/:domainId/:routeId` | 路线讨论页 |
+| `#/talk/entry/:entryId` | 词条讨论页 |
 | `#/graph` | 五领域知识网络 |
 | `#/contribute` | 共建指南 |
 

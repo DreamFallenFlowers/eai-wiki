@@ -4,10 +4,10 @@ EAI Wiki 的公开评论由 [Giscus](https://giscus.app/) 承载。它把评论�
 
 - 不需要数据库或服务器。
 - 每条评论都有 GitHub 身份与公开记录。
-- 每个词条是一个独立 discussion，可订阅、可搜索。
+- 每个领域、技术路线与词条页面都是一个独立 discussion，可订阅、可搜索。
 - 站点保持纯静态，可直接部署在 GitHub Pages。
 
-**在完成下面的步骤之前，线上词条页会显示「评论区还没有接入」，本地预览则使用仅本机可见的测试评论。**
+**在完成下面的步骤之前，线上讨论页会显示「评论区还没有接入」，本地预览则使用仅本机可见的测试评论。**
 
 ---
 
@@ -129,24 +129,24 @@ window.EAI_CONFIG = {
 | `repoId` | 仓库的 GraphQL node ID，以 `R_` 开头 |
 | `categoryId` | Discussions 分类 ID，以 `DIC_` 开头 |
 | `category` | 分类名称，必须与 GitHub 中的名称一致 |
-| `mapping` | 设为 `specific`，由站点提供每个词条的独立 term |
+| `mapping` | 设为 `specific`，由站点为每个领域、路线与词条页面提供独立 term |
 | `strict` | `0` 表示 term 不存在时创建新讨论 |
 | `theme` | 目前默认 `light`；也可改为 `preferred_color_scheme` 或自定义 CSS URL |
 | `lang` | `zh-CN` |
 
-站点的 `data-term` 会写成 `eai-wiki/entry/<entry-id>`，因此不同词条不会串评论。
+站点的 `data-term` 会分别写成 `eai-wiki/entry/<entry-id>`、`eai-wiki/route/<domain>/<route>` 或 `eai-wiki/domain/<domain>`，因此不同页面不会串评论。
 
 ---
 
 ## 第 6 步：测试
 
 1. 推送修改，等待 GitHub Actions 部署完成。
-2. 打开任意词条页，例如 `#/entry/openvla`。
+2. 打开任意条目的讨论页，例如 `#/talk/entry/openvla` 或 `#/talk/route/manipulation/vla`。
 3. 应该看到 GitHub 登录按钮与评论区。
 4. 用测试账号发一条评论，确认：
    - 仓库 Discussions 中出现了对应标题的讨论；
    - 刷新后评论仍在；
-   - 另一个词条不会显示这条评论；
+   - 另一个页面不会显示这条评论；
    - 移动端 iframe 宽度正常。
 
 ---
@@ -167,10 +167,10 @@ window.EAI_CONFIG = {
 - 确认分类存在且类型允许 Giscus 创建讨论。
 - 尝试把 `category` 改为分类的准确名称（区分大小写不严格，但建议一致）。
 
-### 每条词条都指向同一个 discussion
+### 每个页面都指向同一个 discussion
 
 - 检查 `mapping` 是否为 `specific`。
-- 检查页面生成的 iframe `src` 中是否有 `term=eai-wiki%2Fentry%2F...`。
+- 检查页面生成的 iframe `src` 中是否有 `term=eai-wiki%2Fentry%2F...`、`term=eai-wiki%2Froute%2F...` 或 `term=eai-wiki%2Fdomain%2F...`。
 - 清除浏览器缓存后重试。
 
 ### 想换评论系统
