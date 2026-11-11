@@ -92,7 +92,7 @@ for (const entry of ENTRIES) {
 }
 
 for (const resource of RESOURCES) {
-  if (!["dataset", "benchmark"].includes(resource.type)) errors.push(`resource ${resource.id}: invalid type "${resource.type}"`);
+  if (!["dataset", "benchmark", "platform"].includes(resource.type)) errors.push(`resource ${resource.id}: invalid type "${resource.type}"`);
   if (!resource.name || !resource.summary || !resource.scale || !resource.year) errors.push(`resource ${resource.id}: incomplete metadata`);
   if (!Array.isArray(resource.domains) || !resource.domains.length) errors.push(`resource ${resource.id}: missing domains`);
   for (const domainId of resource.domains || []) {
@@ -113,7 +113,7 @@ for (const path of PATHS) {
   }
 }
 
-const typeCounts = Object.fromEntries(Object.keys(TYPE_LABELS).map(type => [type, ENTRIES.filter(entry => entry.type === type).length]));
+const typeCounts = Object.fromEntries(["paper", "system", "concept", "dataset", "benchmark"].map(type => [type, ENTRIES.filter(entry => entry.type === type).length]));
 console.log(`Domains: ${DOMAINS.length}`);
 console.log(`Routes: ${routeIds.size}`);
 console.log(`Entries: ${ENTRIES.length}`);

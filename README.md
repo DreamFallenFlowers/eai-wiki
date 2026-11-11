@@ -1,11 +1,11 @@
 # EAI Wiki · 具身智能开放知识库
 
-一个可直接发布到 GitHub Pages 的具身智能 Wiki。它不是平铺的论文列表，而是一张**领域 → 技术路线 → 具体工作 → 数据集/基准**的分层地图。
+一个可直接发布到 GitHub Pages 的具身智能 Wiki。它不是平铺的论文列表，而是一张**领域 → 技术路线 → 具体工作 → 数据/平台/基准**的分层地图。
 
-- **5 个研究领域**：导航、操作、移动操作、仿真器、数据与评测
-- **22 条技术路线**：如操作领域下的模仿学习、强化学习、VLA、WAM、代码即策略、具身智能体 Harness
-- **46 个深度词条**：论文 / 系统 / 概念 / 数据集 / 基准
-- **22 个常用数据集与基准**：按领域交叉收录，可直接跳转站内词条或原始项目页
+- **7 个研究领域**：导航、操作、移动操作、硬件、控制、仿真器、数据与评测
+- **32 条技术路线**：如操作领域下的模仿学习、强化学习、VLA、WAM、代码即策略、具身智能体 Harness
+- **56 个深度词条**：论文 / 系统 / 概念 / 数据集 / 基准
+- **28 个常用数据集、硬件平台与基准**：按领域交叉收录，可直接跳转站内词条或原始项目页
 - **3 条阅读路径**：从导航、操作或 Sim2Real 进入
 - **公开讨论**：Giscus + GitHub Discussions
 - **维基式详情页**：条目 / 讨论 / 编辑 / 历史标签、左侧目录、信息框、带 [编辑] 的章节、参考来源与页面分类
@@ -14,6 +14,14 @@
 - **零构建、零依赖**：原生 HTML / CSS / JavaScript，推送即可部署
 
 ![EAI Wiki homepage](docs/preview.png)
+
+首页现在按七个领域组织：导航、操作、移动操作、硬件、控制、仿真器、数据与评测。硬件领域继续按灵巧手、机械臂、人形机器人、轮式机器人、传感器与执行器拆分。
+
+![Seven research areas](docs/preview-domains.png)
+
+硬件领域页把五条路线、对应词条与具体平台放进同一张 Wiki 表格：
+
+![Hardware domain](docs/preview-hardware.png)
 
 词条库也是 Wiki 索引页：左侧目录、筛选工具、类型与领域表格、条目的讨论 / 编辑标签，而不是卡片瀑布流。
 
@@ -43,7 +51,7 @@
 Research Area
 └── Technical Route
     ├── Papers / Systems / Concepts
-    └── Related Datasets & Benchmarks
+    └── Related Datasets, Platforms & Benchmarks
 ```
 
 | 研究领域 | 技术路线 |
@@ -51,6 +59,8 @@ Research Area
 | 导航 Navigation | 语义导航与 ObjectNav、视觉-语言导航、导航基础模型、社交与动态导航 |
 | 操作 Manipulation | 模仿学习、强化学习、视觉-语言-动作模型（VLA）、世界-动作模型（WAM）、代码即策略、具身智能体 Harness |
 | 移动操作 Loco-Manipulation | 全身控制、学习式移动操作、人形基础模型、人形 Sim2Real |
+| 硬件 Hardware | 灵巧手、机械臂、人形机器人、轮式机器人、传感器与执行器 |
+| 控制 Control | 反馈与经典控制、最优控制与 MPC、力控与阻抗控制、学习控制、安全控制与约束 |
 | 仿真器 Simulation | GPU 并行仿真、场景级仿真、Real2Sim 与神经重建、Sim2Real 迁移 |
 | 数据与评测 Data & Evaluation | 真机遥操数据、UMI 数据、EGO 数据、数据引擎与评测（横切基础设施） |
 
@@ -58,7 +68,7 @@ Research Area
 
 - 领域导读与核心问题
 - 技术路线目录及每条路线的代表工作
-- 常用 **datasets** 与 **benchmarks**
+- 常用 **datasets**、**benchmarks** 与硬件平台
 - 相邻领域与顶部「编辑」入口
 
 每条技术路线有独立页面（`#/route/<domain>/<route>`），不是简单的论文列表，而是一篇持续维护的 Wiki 条目：
@@ -165,11 +175,11 @@ comments: {
 
 | 导出 | 用途 |
 | --- | --- |
-| `DOMAINS` | 5 个领域、领域内技术路线、领域导读 |
+| `DOMAINS` | 7 个领域、领域内技术路线、领域导读 |
 | `ROUTE_DETAILS` | 每条路线的 Wiki 正文：技术导读、技术拆解、实践清单 |
 | `DOMAIN_DETAILS` | 每个领域的开放问题与阅读提示 |
 | `ENTRIES` | 词条，使用 `domain` + `route` 两级归属 |
-| `RESOURCES` | 每个领域的数据集与 benchmark，可引用站内词条 |
+| `RESOURCES` | 每个领域的数据集、benchmark 与硬件平台，可引用站内词条 |
 | `PATHS` | 首页三条阅读路径 |
 | `TYPE_LABELS` | 词条类型的中文显示 |
 
@@ -219,13 +229,13 @@ comments: {
 }
 ```
 
-### 数据集 / benchmark
+### 数据集 / benchmark / 硬件平台
 
 ```js
 {
   id: "res-calvin",
   name: "CALVIN",
-  type: "benchmark",              // dataset | benchmark
+  type: "benchmark",              // dataset | benchmark | platform
   year: 2022,
   domains: ["manipulation", "data"],
   scale: "34 个任务 / 长程指令",
@@ -318,6 +328,8 @@ eai-wiki/
 │   ├── check-links.mjs           # 检查论文与项目链接
 │   └── og-template.html          # 可重新渲染的社交封面模板
 ├── docs/preview.png              # 首页预览
+├── docs/preview-domains.png      # 七个研究领域卡片
+├── docs/preview-hardware.png     # 硬件领域 Wiki 页
 ├── docs/preview-catalog.png      # 词条库索引预览
 ├── docs/preview-route.png        # 路线 Wiki 预览
 ├── docs/preview-edit.png         # 编辑页预览
@@ -335,7 +347,7 @@ eai-wiki/
 | --- | --- |
 | `#/` | 首页与研究领域地图 |
 | `#/entries` | 全部词条；支持类型 / 领域 / 路线筛选 |
-| `#/domain/:domainId` | 领域条目：技术路线表、数据集与基准、开放问题 |
+| `#/domain/:domainId` | 领域条目：技术路线表、数据 / 平台 / 基准、开放问题 |
 | `#/route/:domainId/:routeId` | 路线条目：技术拆解、实践清单与代表工作 |
 | `#/entry/:entryId` | 词条条目：技术机制、证据、参考来源与分类 |
 | `#/edit/domain/:domainId` | 领域编辑页 |
@@ -344,7 +356,7 @@ eai-wiki/
 | `#/talk/domain/:domainId` | 领域讨论页 |
 | `#/talk/route/:domainId/:routeId` | 路线讨论页 |
 | `#/talk/entry/:entryId` | 词条讨论页 |
-| `#/graph` | 五领域知识网络 |
+| `#/graph` | 七领域知识网络 |
 | `#/contribute` | 共建指南 |
 
 由于是 hash 路由，GitHub Pages 不需要额外的 rewrite 规则。

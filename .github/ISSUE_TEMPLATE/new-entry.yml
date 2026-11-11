@@ -26,6 +26,8 @@ body:
         - 导航 Navigation
         - 操作 Manipulation
         - 移动操作 Loco-Manipulation
+        - 硬件 Hardware
+        - 控制 Control
         - 仿真器 Simulation
         - 数据与评测 Data & Evaluation
         - 不确定 / 需要讨论
@@ -37,7 +39,7 @@ body:
     attributes:
       label: 技术路线
       description: 站内已有路线可直接写名称；如果是新路线，请说明它与现有路线的关系。
-      placeholder: 例如：模仿学习 / VLA / UMI 数据 / EGO 数据 / 具身智能体 Harness
+      placeholder: 例如：模仿学习 / VLA / 灵巧手 / 阻抗控制 / UMI 数据 / EGO 数据
     validations:
       required: false
 

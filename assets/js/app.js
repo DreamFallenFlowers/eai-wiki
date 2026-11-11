@@ -32,6 +32,8 @@
     navigation: "导航",
     manipulation: "操作",
     "loco-manipulation": "移动操作",
+    hardware: "硬件",
+    control: "控制",
     simulation: "仿真器",
     data: "数据评测"
   };
@@ -253,6 +255,8 @@
     navigation: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="2"/><path d="m30 18-4.2 8.1L18 30l4.2-8.1L30 18Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="24" r="2" fill="currentColor"/></svg>`,
     manipulation: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 7v13m-8-8v8a8 8 0 0 0 16 0v-8M16 25v8m16-8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 33h18v5H15z" stroke="currentColor" stroke-width="2"/><path d="M20 25v8m8-8v8" stroke="currentColor" stroke-width="2"/></svg>`,
     "loco-manipulation": `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="10" r="5" stroke="currentColor" stroke-width="2"/><path d="M24 15v15m-9-10 9 4 9-4M24 30l-7 11m7-11 7 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    hardware: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M10 39V23h10v8h8V15h10v24" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M16 23v-7h16v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="39" r="2" fill="currentColor"/><circle cx="38" cy="39" r="2" fill="currentColor"/></svg>`,
+    control: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="2"/><path d="M24 14v10l7 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 11v8h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     simulation: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="m24 7 15 8.5v17L24 41 9 32.5v-17L24 7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m9 15.5 15 8.7 15-8.7M24 24.2V41" stroke="currentColor" stroke-width="1.5"/><circle cx="24" cy="24" r="3" fill="currentColor"/></svg>`,
     data: `<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M10 37V24m9 13V14m9 23V28m9 9V8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M6 41h36" stroke="currentColor" stroke-width="1.5"/><circle cx="19" cy="14" r="2.5" fill="currentColor"/></svg>`
   };
@@ -350,7 +354,7 @@
           </h1>
           <p class="hero-lede reveal" style="--delay:110ms">
             一个由研究者、工程师和好奇的人共同维护的具身智能开放知识库。
-            先看五大领域，再沿技术路线走到具体论文——让每个概念都有出处，每次争论都有上下文。
+            先看七大领域，再沿技术路线走到具体论文——让每个概念都有出处，每次争论都有上下文。
           </p>
           <button class="hero-search reveal" style="--delay:160ms" type="button" data-open-search>
             <span class="hero-search-icon">${smallSearchIcon()}</span>
@@ -385,7 +389,7 @@
           </div>
           <div class="stat reveal" style="--delay:150ms">
             <span class="stat-value">${resourcesCount}</span>
-            <span class="stat-label">个数据集与基准</span>
+            <span class="stat-label">个数据 / 平台 / 基准</span>
             <span class="stat-note">训练、评测与复现</span>
           </div>
         </div>
@@ -402,10 +406,10 @@
         <div class="section-head">
           <div>
             <p class="eyebrow">01 / RESEARCH AREAS</p>
-            <h2 class="section-title">五个领域，<br><em>一张技术地图。</em></h2>
+            <h2 class="section-title">七个领域，<br><em>一张技术地图。</em></h2>
           </div>
           <div class="section-aside">
-            <p>每个领域先拆成技术路线，再落到具体论文、系统与概念。每个领域另设常用的数据集与 benchmark，方便从「读论文」进入「做实验」。</p>
+            <p>每个领域先拆成技术路线，再落到具体论文、系统与概念。每个领域另设常用的数据、硬件平台与 benchmark，方便从「读论文」进入「做实验」。</p>
             <a class="text-link" href="#/entries">浏览全部 ${ENTRIES.length} 个词条 ${smallArrow()}</a>
           </div>
         </div>
@@ -504,7 +508,7 @@
         <div class="home-graph-copy">
           <p class="eyebrow">04 / CONNECTIONS</p>
           <h2 class="section-title">领域不是抽屉。<br><em>路线也不是。</em></h2>
-          <p>导航会借操作的语义规划，移动操作依赖仿真与数据，评测又反过来定义什么叫「通用」。知识网络从五个领域展开，再带你进入领域内部的技术路线。</p>
+          <p>导航会借操作的语义规划，移动操作依赖硬件、控制、仿真与数据，评测又反过来定义什么叫「通用」。知识网络从七个领域展开，再带你进入领域内部的技术路线。</p>
           <div class="home-graph-stats">
             <div><strong>${DOMAINS.length}</strong><span>领域节点</span></div>
             <div><strong>${TOTAL_ROUTES}</strong><span>技术路线</span></div>
@@ -552,7 +556,7 @@
   }
 
   function heroArt() {
-    const positions = ["one", "two", "three", "four", "five"];
+    const positions = ["one", "two", "three", "four", "five", "six", "seven"];
     const nodes = DOMAINS.map((domain, index) => ({
       icon: padded(index + 1),
       title: domain.name,
@@ -560,7 +564,7 @@
       cls: `loop-node--${positions[index]}`
     }));
     return `
-      <div class="hero-art reveal" style="--delay:150ms" role="img" aria-label="具身智能研究地图：导航、操作、移动操作、仿真器与数据评测">
+      <div class="hero-art reveal" style="--delay:150ms" role="img" aria-label="具身智能研究地图：导航、操作、移动操作、硬件、控制、仿真器与数据评测">
         <div class="art-topline">
           <span>FIG. 01 / RESEARCH ATLAS</span>
           <span class="art-live"><i></i>LIVE INDEX</span>
@@ -604,7 +608,7 @@
           <span class="art-coord">31.2304° N<br>121.4737° E</span>
         </div>
         <div class="art-foot">
-          <span>NAV / MANIP / LOCO / SIM / DATA</span>
+          <span>${DOMAINS.map(domain => domain.short).join(" / ")}</span>
           <span>${ENTRIES.length} ENTRIES · ${TOTAL_ROUTES} ROUTES</span>
         </div>
       </div>`;
@@ -840,7 +844,7 @@
                   ["词条", `${ENTRIES.length} 个`],
                   ["研究领域", `${DOMAINS.length} 个`],
                   ["技术路线", `${TOTAL_ROUTES} 条`],
-                  ["数据集 / 基准", `${RESOURCES.length} 个`],
+                  ["资源", `${RESOURCES.length} 个`],
                   ["状态", '<span class="wiki-status-dot"></span>持续更新']
                 ])}
               </div>
@@ -922,7 +926,7 @@
                 <ul class="wiki-list">
                   <li><strong>论文 / 系统：</strong>有明确方法、实验或系统实现的工作。</li>
                   <li><strong>概念：</strong>持续被使用的技术概念、范式或系统层。</li>
-                  <li><strong>数据集 / 基准：</strong>可被复用的数据、仿真环境与评测协议。</li>
+                  <li><strong>数据 / 平台 / 基准：</strong>可被复用的数据、仿真环境、硬件平台与评测协议。</li>
                 </ul>
                 <p class="wiki-source-note">收录不代表 endorsement；编辑会优先保留有一手来源、能说明边界的条目。</p>
               </section>
@@ -1167,7 +1171,7 @@ ${title} (${pageUrl})
       ...(domain.intro || []),
       "## 技术路线",
       ...domain.routes.map(item => `### ${item.name}\n${item.question}\n${item.summary}`),
-      "## 数据集与基准",
+      "## 数据、平台与基准",
       ...resources.map(item => `- ${typeLabel(item.type)} · ${item.name}（${item.year}）：${item.summary}`),
       "## 开放问题",
       ...(domain.openProblems || []).map(item => `- ${item}`)
@@ -1176,7 +1180,7 @@ ${title} (${pageUrl})
       { value: "整页", source: domainWhole },
       { value: "领域导读", source: [...(domain.intro || []), domain.readingGuide || ""].filter(Boolean).join("\n\n") },
       { value: "技术路线", source: domain.routes.map(item => `- ${item.name}（${item.en}）：${item.question}；${routeEntries(domain.id, item.id).length} 个词条。`).join("\n") },
-      { value: "数据集与基准", source: resources.map(item => `- ${typeLabel(item.type)} · ${item.name}（${item.year}）：${item.summary} ${item.url}`).join("\n") },
+      { value: "数据、平台与基准", source: resources.map(item => `- ${typeLabel(item.type)} · ${item.name}（${item.year}）：${item.summary} ${item.url}`).join("\n") },
       { value: "开放问题", source: (domain.openProblems || []).map(item => `- ${item}`).join("\n") },
       { value: "参见", source: (domain.related || []).map(id => domainById.get(id)).filter(Boolean).map(item => `- ${item.name}：${item.description}`).join("\n") }
     ];
@@ -1217,7 +1221,7 @@ ${title} (${pageUrl})
     return `
       <a class="resource-card" href="${href}" ${external ? 'target="_blank" rel="noopener"' : ""} style="--resource-accent:${entry ? domainOf(entry).accent : "var(--orange)"}">
         <div class="resource-top">
-          <span class="resource-type">${resource.type === "dataset" ? "DATASET" : "BENCHMARK"}</span>
+          <span class="resource-type">${resource.type === "dataset" ? "DATASET" : resource.type === "benchmark" ? "BENCHMARK" : "PLATFORM"}</span>
           <span class="resource-year">${resource.year}</span>
           <span class="resource-link-icon">${external ? arrowIcon() : "↗"}</span>
         </div>
@@ -1233,11 +1237,10 @@ ${title} (${pageUrl})
   function renderDomain(domain) {
     const entries = entriesByDomain.get(domain.id) || [];
     const resources = resourcesForDomain(domain.id);
-    const datasets = resources.filter(resource => resource.type === "dataset");
-    const benchmarks = resources.filter(resource => resource.type === "benchmark");
+
     const tocItems = [
       { id: "domain-routes", label: "技术路线" },
-      { id: "domain-resources", label: "数据集与基准" },
+      { id: "domain-resources", label: "数据、平台与基准" },
       { id: "domain-open-problems", label: "开放问题" },
       { id: "domain-see-also", label: "参见" }
     ];
@@ -1247,7 +1250,7 @@ ${title} (${pageUrl})
       ["英文名", esc(domain.en)],
       ["技术路线", `${domain.routes.length} 条`],
       ["词条", `${entries.length} 个`],
-      ["数据集 / 基准", `${datasets.length} / ${benchmarks.length}`],
+      ["资源", `${resources.length} 个`],
       ["相邻领域", (domain.related || []).map(id => domainById.get(id)).filter(Boolean).map(item => `<a href="#/domain/${item.id}">${esc(item.name)}</a>`).join("、")],
       ["状态", '<span class="wiki-status-dot"></span>种子领域 · 待审校']
     ];
@@ -1287,7 +1290,7 @@ ${title} (${pageUrl})
                 <span class="wiki-status-dot"></span>
                 此领域页由社区维护，路线划分与开放问题仍待领域编辑审校。最后修订 ${formatDate(CFG.updated || "2026-11-11")}。
               </div>
-              <div class="wiki-hatnote">本页是研究领域条目。具体的论文、系统与数据集见下文；阅读技术细节请进入各条<strong>技术路线</strong>。</div>
+              <div class="wiki-hatnote">本页是研究领域条目。具体的论文、系统、硬件平台与数据见下文；阅读技术细节请进入各条<strong>技术路线</strong>。</div>
 
               <div class="wiki-lead-layout">
                 <div class="wiki-lead">
@@ -1324,14 +1327,14 @@ ${title} (${pageUrl})
 
               <section class="wiki-section" id="domain-resources">
                 <div class="wiki-section-heading">
-                  <h2>数据集与基准</h2>
-                  ${wikiEditLink("domain", domain.id, "", "数据集与基准")}
+                  <h2>数据、平台与基准</h2>
+                  ${wikiEditLink("domain", domain.id, "", "数据、平台与基准")}
                 </div>
                 <table class="wikitable">
                   <thead><tr><th>类型</th><th>名称</th><th>年份</th><th>规模</th><th>说明</th></tr></thead>
-                  <tbody>${resourceRows || '<tr><td colspan="5" class="wiki-empty">这个领域还没有收录数据集或 benchmark。</td></tr>'}</tbody>
+                  <tbody>${resourceRows || '<tr><td colspan="5" class="wiki-empty">这个领域还没有收录数据、平台或 benchmark。</td></tr>'}</tbody>
                 </table>
-                <p class="wiki-source-note">资源可跨领域复用；同一数据集可能同时出现在多个领域页。标有 ↗ 的链接会离开站内。</p>
+                <p class="wiki-source-note">资源可跨领域复用；同一数据集、硬件平台或 benchmark 可能同时出现在多个领域页。标有 ↗ 的链接会离开站内。</p>
               </section>
 
               <section class="wiki-section" id="domain-open-problems">
@@ -1352,7 +1355,7 @@ ${title} (${pageUrl})
                 <ul class="wiki-list">
                   ${(domain.related || []).map(id => domainById.get(id)).filter(Boolean).map(item => `<li><a href="#/domain/${item.id}">${esc(item.name)}</a>：相邻研究领域，存在交叉的数据、系统或评测问题。</li>`).join("")}
                   <li><a href="#/entries">全部词条</a>：跨领域浏览论文、系统、概念、数据集与 benchmark。</li>
-                  <li><a href="#/graph">知识网络</a>：查看五个领域之间的连接。</li>
+                  <li><a href="#/graph">知识网络</a>：查看七个领域之间的连接。</li>
                 </ul>
               </section>
 
@@ -1435,7 +1438,7 @@ ${title} (${pageUrl})
                 <span class="wiki-status-dot"></span>
                 此条目由社区维护，技术判断仍待领域编辑审校。最后修订 ${formatDate(CFG.updated || "2026-11-11")}。
               </div>
-              <div class="wiki-hatnote">本页是「${esc(domain.name)}」领域的技术路线条目。关于具体模型、系统与数据集，见 <a href="#route-works">路线上的工作</a>。</div>
+              <div class="wiki-hatnote">本页是「${esc(domain.name)}」领域的技术路线条目。关于具体模型、系统、硬件来源与数据，见 <a href="#route-works">路线上的工作</a>。</div>
 
               <div class="wiki-lead-layout">
                 <div class="wiki-lead">
@@ -2165,6 +2168,8 @@ ${ai}
     navigation: "NAV",
     manipulation: "MAN",
     "loco-manipulation": "LOCO",
+    hardware: "HW",
+    control: "CTRL",
     simulation: "SIM",
     data: "DATA"
   };
@@ -2302,7 +2307,7 @@ ${ai}
               <h1>知识网络<em>Graph</em></h1>
             </div>
             <div class="page-hero-aside">
-              <p>五个领域不是并列的抽屉，领域内部也不是平铺的论文列表。选中一个节点，沿技术路线进入具体工作。</p>
+              <p>七个领域不是并列的抽屉，领域内部也不是平铺的论文列表。选中一个节点，沿技术路线进入具体工作。</p>
               <div class="graph-summary">
                 <div><strong>${padded(DOMAINS.length)}</strong><span>领域节点</span></div>
                 <div><strong>${padded(TOTAL_ROUTES)}</strong><span>技术路线</span></div>
@@ -3142,11 +3147,11 @@ ${value("contributor") || "匿名 / 待联系"}
     if (route.name === "home") {
       return {
         title: "EAI Wiki · 具身智能开放知识库",
-        description: "EAI Wiki 是一个由社区共建的具身智能知识库：导航、操作、移动操作、仿真器、数据与评测五大领域，按技术路线整理论文、数据集与 benchmark。"
+        description: "EAI Wiki 是一个由社区共建的具身智能知识库：导航、操作、移动操作、硬件、控制、仿真器、数据与评测七大领域，按技术路线整理论文、数据集与 benchmark。"
       };
     }
     if (route.name === "catalog") {
-      return { title: "词条库 · EAI Wiki", description: `浏览 ${ENTRIES.length} 个具身智能词条与 ${RESOURCES.length} 个数据集/基准，按 ${DOMAINS.length} 个领域和 ${TOTAL_ROUTES} 条技术路线组织。` };
+      return { title: "词条库 · EAI Wiki", description: `浏览 ${ENTRIES.length} 个具身智能词条与 ${RESOURCES.length} 个数据、平台与基准，按 ${DOMAINS.length} 个领域和 ${TOTAL_ROUTES} 条技术路线组织。` };
     }
     if (route.name === "domain") {
       return { title: `${route.domain.name} · EAI Wiki`, description: route.domain.description };
@@ -3169,7 +3174,7 @@ ${value("contributor") || "匿名 / 待联系"}
       return { title: `讨论:${title} · EAI Wiki`, description: `关于「${title}」的讨论页：来源、技术判断与条目范围。` };
     }
     if (route.name === "graph") {
-      return { title: "知识网络 · EAI Wiki", description: "以图的方式浏览导航、操作、移动操作、仿真器与数据评测五个领域及其技术路线。" };
+      return { title: "知识网络 · EAI Wiki", description: "以图的方式浏览导航、操作、移动操作、硬件、控制、仿真器与数据评测七个领域及其技术路线。" };
     }
     if (route.name === "contribute") {
       return { title: "共建指南 · EAI Wiki", description: "如何为 EAI Wiki 提交词条、提出修订与参与讨论。" };
