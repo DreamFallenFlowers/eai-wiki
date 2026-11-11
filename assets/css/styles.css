@@ -1051,6 +1051,8 @@ strong { font-weight: 650; }
 /* domain atlas card grid */
 
 .domains-section { padding-bottom: clamp(80px, 10vw, 150px); }
+.view--home .hero { padding-bottom: clamp(36px, 4vw, 58px); }
+.view--home .domains-section { padding-top: clamp(24px, 3.5vw, 46px); }
 .domain-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));

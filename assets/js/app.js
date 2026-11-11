@@ -330,16 +330,6 @@
   /* ------------------------------------------------------------------- home */
 
   function renderHome() {
-    const domainsCount = padded(DOMAINS.length);
-    const routesCount = padded(TOTAL_ROUTES);
-    const entriesCount = padded(ENTRIES.length);
-    const resourcesCount = padded(RESOURCES.length);
-    const featPrimary = byId("openvla");
-    const featDomain = domainOf(featPrimary);
-    const featRoute = routeOf(featPrimary);
-    const featuredList = ["pi0", "genie-3", "diffusion-policy", "groot-n1"].map(byId).filter(Boolean);
-    const topTags = allTags(8);
-
     return `
     <div class="view view--home">
       <section class="hero wrap">
@@ -370,38 +360,6 @@
         ${heroArt()}
       </section>
 
-      <section class="stat-strip" aria-label="知识库概况">
-        <div class="wrap stat-grid">
-          <div class="stat reveal">
-            <span class="stat-value">${domainsCount}</span>
-            <span class="stat-label">个研究领域</span>
-            <span class="stat-note">navigation → data</span>
-          </div>
-          <div class="stat reveal" style="--delay:50ms">
-            <span class="stat-value">${routesCount}</span>
-            <span class="stat-label">条技术路线</span>
-            <span class="stat-note">领域内的研究分支</span>
-          </div>
-          <div class="stat reveal" style="--delay:100ms">
-            <span class="stat-value">${entriesCount}</span>
-            <span class="stat-label">个深度词条</span>
-            <span class="stat-note">论文、系统与概念</span>
-          </div>
-          <div class="stat reveal" style="--delay:150ms">
-            <span class="stat-value">${resourcesCount}</span>
-            <span class="stat-label">个数据 / 平台 / 基准</span>
-            <span class="stat-note">训练、评测与复现</span>
-          </div>
-        </div>
-      </section>
-
-      <div class="marquee" aria-hidden="true">
-        <div class="marquee-track">
-          ${marqueeItems()}
-          ${marqueeItems()}
-        </div>
-      </div>
-
       <section class="section domains-section wrap" id="domains">
         <div class="section-head">
           <div>
@@ -418,140 +376,6 @@
         </div>
       </section>
 
-      <section class="section featured-section">
-        <div class="wrap">
-          <div class="section-head">
-            <div>
-              <p class="eyebrow">02 / SELECTED ENTRIES</p>
-              <h2 class="section-title">先读这些。<br><em>其余的，顺着引用走。</em></h2>
-            </div>
-            <div class="section-aside">
-              <p>不是排行榜，而是一条有判断的入口。每篇词条都回答四个问题：它是什么、为什么重要、证据在哪、边界是什么。</p>
-              <a class="text-link" href="#/entries">进入词条库 ${smallArrow()}</a>
-            </div>
-          </div>
-
-          <div class="featured-layout">
-            <a class="spotlight reveal" href="#/entry/${featPrimary.id}" style="--accent:${featDomain.accent}">
-              <div class="spotlight-top">
-                <span class="spotlight-kicker">SPOTLIGHT / ${padded(featPrimary.year)}</span>
-                <span class="spotlight-type">${typeLabel(featPrimary.type)}</span>
-              </div>
-              <div class="spotlight-main">
-                <div class="spotlight-copy">
-                  <p class="spotlight-domain">${featDomain.num} / ${esc(featDomain.en)} · ${esc(featRoute.name)}</p>
-                  <h3>${esc(featPrimary.title)}</h3>
-                  <p class="spotlight-sub">${esc(featPrimary.subtitle)}</p>
-                  <p class="spotlight-tldr">${esc(featPrimary.tldr)}</p>
-                </div>
-                <div class="spotlight-figure" aria-hidden="true">
-                  <span class="figure-orbit figure-orbit--one"></span>
-                  <span class="figure-orbit figure-orbit--two"></span>
-                  <span class="figure-metric">7<span>B</span></span>
-                  <span class="figure-caption">OPEN<br>WEIGHTS</span>
-                  <span class="figure-cross">+</span>
-                </div>
-              </div>
-              <div class="spotlight-foot">
-                <span>${esc(featPrimary.venue)}</span>
-                <span class="spotlight-cta">阅读词条 <i>${arrowIcon()}</i></span>
-              </div>
-            </a>
-
-            <div class="featured-list reveal" style="--delay:80ms">
-              <div class="featured-list-head">
-                <span>ALSO WORTH YOUR TIME</span>
-                <span>04 ENTRIES</span>
-              </div>
-              ${featuredList.map((entry, index) => {
-                const domain = domainOf(entry);
-                return `
-                <a class="featured-row" href="#/entry/${entry.id}" style="--accent:${domain.accent}">
-                  <span class="fr-index">${padded(index + 2)}</span>
-                  <span class="fr-copy">
-                    <span class="fr-meta">${esc(domain.short)} / ${esc(routeOf(entry).name)} · ${typeLabel(entry.type)}</span>
-                    <strong>${esc(entry.title)}</strong>
-                    <span class="fr-sub">${esc(entry.subtitle)}</span>
-                  </span>
-                  <span class="fr-year">${entry.year}</span>
-                  <span class="fr-arrow">${arrowIcon()}</span>
-                </a>`;
-              }).join("")}
-              <a class="featured-more" href="#/entries">
-                <span>还有 ${ENTRIES.length - featuredList.length - 1} 个词条</span>
-                <span>查看全部 ${smallArrow()}</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section paths-section">
-        <div class="wrap">
-          <div class="section-head section-head--light">
-            <div>
-              <p class="eyebrow eyebrow--light">03 / GUIDED PATHS</p>
-              <h2 class="section-title">别从信息流开始。<br><em>从一条路径开始。</em></h2>
-            </div>
-            <div class="section-aside">
-              <p>三条为不同目标设计的阅读路线。每条路线都有先后顺序，也都可以随时岔开去读你感兴趣的引用。</p>
-              <a class="text-link text-link--light" href="#/graph">看看它们如何相连 ${smallArrow()}</a>
-            </div>
-          </div>
-          <div class="paths-grid">
-            ${PATHS.map(pathCard).join("")}
-          </div>
-        </div>
-      </section>
-
-      <section class="section home-graph-section wrap">
-        <div class="home-graph-copy">
-          <p class="eyebrow">04 / CONNECTIONS</p>
-          <h2 class="section-title">领域不是抽屉。<br><em>路线也不是。</em></h2>
-          <p>导航会借操作的语义规划，移动操作依赖硬件、控制、仿真与数据，评测又反过来定义什么叫「通用」。知识网络从七个领域展开，再带你进入领域内部的技术路线。</p>
-          <div class="home-graph-stats">
-            <div><strong>${DOMAINS.length}</strong><span>领域节点</span></div>
-            <div><strong>${TOTAL_ROUTES}</strong><span>技术路线</span></div>
-            <div><strong>${RESOURCES.length}</strong><span>数据 / 基准</span></div>
-          </div>
-          <a class="button button--dark" href="#/graph">进入知识网络 <span>${smallArrow()}</span></a>
-        </div>
-        <div class="home-graph-visual">
-          ${miniGraphMarkup()}
-          <div class="mini-caption">
-            <span>FIG. 02 — DOMAIN ADJACENCY</span>
-            <span>点击进入完整图谱 ↗</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="editorial-band">
-        <div class="wrap editorial-band-inner">
-          <div class="editorial-label">
-            <span class="eyebrow eyebrow--light">OUR EDITORIAL BAR</span>
-            <span class="editorial-mark">✳</span>
-          </div>
-          <blockquote>“每条词条都要回答三件事：<br>它解决什么问题？证据是什么？<em>哪里还不可靠？</em>”</blockquote>
-          <div class="editorial-meta">
-            <span>AI 辅助起草 · 社区审校中</span>
-            <a href="#/contribute">阅读编辑原则 ${smallArrow()}</a>
-          </div>
-        </div>
-      </section>
-
-      <section class="section home-tags-section wrap">
-        <div class="section-head section-head--compact">
-          <div>
-            <p class="eyebrow">05 / BY TOPIC</p>
-            <h2 class="section-title section-title--small">按主题漫游</h2>
-          </div>
-          <p class="section-aside section-aside--inline">不按领域，按你此刻好奇的东西。</p>
-        </div>
-        <div class="tag-cloud">
-          ${topTags.map((tag, index) => `<a href="#/entries" data-tag-jump="${esc(tag)}" style="--tag-delay:${index * 25}ms">${esc(tag)}<span>↗</span></a>`).join("")}
-          <a class="tag-cloud-more" href="#/entries">全部索引 ${smallArrow()}</a>
-        </div>
-      </section>
     </div>`;
   }
 
