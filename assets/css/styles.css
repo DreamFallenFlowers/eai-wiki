@@ -4793,3 +4793,230 @@ strong { font-weight: 650; }
   }
   .reveal { opacity: 1; transform: none; }
 }
+
+/* ------------------------------------------------------------------ catalog wiki */
+
+.catalog-wiki-toolbar { display: flex; flex-direction: column; gap: 10px; margin: 4px 0 12px; }
+.catalog-wiki-toolbar .filter-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.catalog-wiki-controls { display: grid; grid-template-columns: minmax(180px, 1fr) repeat(3, minmax(120px, auto)); gap: 6px; align-items: center; }
+.catalog-wiki-controls .catalog-search { height: 34px; }
+.catalog-wiki-controls .select-wrap select { height: 34px; }
+.catalog-wikitable td { vertical-align: top; }
+.catalog-wikitable td:first-child { min-width: 145px; }
+.catalog-wikitable th:nth-child(2), .catalog-wikitable td:nth-child(2) { width: 58px; white-space: nowrap; }
+.catalog-wikitable td:nth-child(3) { min-width: 145px; }
+.catalog-wikitable .wiki-table-text { line-height: 1.5; }
+.catalog-wikitable td:first-child > a { font-weight: 600; }
+.catalog-empty { padding: 20px 0; }
+.catalog-empty-action { margin-top: 10px; }
+
+/* ------------------------------------------------------------------ dark colors
+   The layout is intentionally unchanged: this layer only retunes the palette
+   to the dark charcoal sheet from the site's footer/contribution language. */
+
+:root {
+  --paper: #171715;
+  --paper-raised: #1f1f1c;
+  --paper-deep: #242420;
+  --cream: #f6f1e5;
+  --ink: #f2efe6;
+  --ink-soft: #dfdad0;
+  --muted: #aaa69c;
+  --muted-light: #7c7970;
+  --line: rgba(246, 241, 229, 0.13);
+  --line-strong: rgba(246, 241, 229, 0.28);
+  --line-light: rgba(246, 241, 229, 0.16);
+  --orange: #ec5d38;
+  --orange-deep: #d24b28;
+  --blue: #8ab4f8;
+  --red: #ff817a;
+  color-scheme: dark;
+}
+
+html, body { background: #171715; }
+body { color: var(--ink); }
+::selection { background: var(--orange); color: #171715; }
+.ambient-grid {
+  background-image:
+    linear-gradient(to right, rgba(246, 241, 229, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(246, 241, 229, 0.035) 1px, transparent 1px);
+}
+.site-header { background: rgba(23, 23, 21, 0.86); }
+.site-header.is-scrolled { background: rgba(23, 23, 21, 0.97); }
+.site-header .brand-mark svg rect { fill: #f2efe6; }
+.site-header .brand-mark svg path { fill: #171715; }
+.brand-version { color: var(--muted); border-color: var(--line); }
+.header-github { background: #1d1d1a; color: var(--cream); border-color: rgba(246, 241, 229, 0.28); }
+.header-github:hover { background: var(--cream); color: #171715; border-color: var(--cream); }
+.search-trigger kbd { background: #20201d; }
+.view--contribute-wiki .wiki-inline-button { color: #8ab4f8; }
+.view--contribute-wiki .faq-list details { border-color: var(--line); }
+.view--contribute-wiki .faq-list details p { color: #c9c4ba; }
+.view--contribute-wiki .code-block { background: #11110f; color: #e7e2d8; border-color: #4a4a44; }
+.site-footer { background: #11110f; color: var(--cream); }
+.site-footer::before { opacity: 0.9; }
+.marquee { background: #11110f; border-color: #2a2a26; color: var(--cream); }
+.featured-section::before { background-image: radial-gradient(rgba(246, 241, 229, 0.08) 0.65px, transparent 0.65px); }
+.spotlight, .paths-section, .contribute-hero, .graph-canvas-card, .aside-card--dark { background: #11110f; color: var(--cream); }
+.domain-card {
+  background: #1e1e1b;
+  background: color-mix(in srgb, var(--accent) 9%, #1b1b18);
+  color: var(--ink);
+}
+.domain-card--feature { background: #11110f; color: var(--cream); border-color: rgba(246, 241, 229, 0.14); }
+.domain-card:hover { box-shadow: 0 18px 35px rgba(0, 0, 0, 0.34); }
+.domain-card--feature:hover { box-shadow: 0 24px 55px rgba(0, 0, 0, 0.46); }
+.domain-card:hover .dc-arrow { background: var(--cream); border-color: var(--cream); color: #171715; }
+.domain-card--feature:hover .dc-arrow { background: var(--accent); border-color: var(--accent); color: #171715; }
+.dc-mini-tags span { border-color: var(--line); color: var(--muted); }
+.domain-card:not(.domain-card--feature) .dc-description { color: rgba(246, 241, 229, 0.66); }
+.domain-card:not(.domain-card--feature) .dc-route-list span { border-color: var(--line); color: rgba(246, 241, 229, 0.7); }
+.domain-card:not(.domain-card--feature) .dc-mini-tags span { border-color: var(--line); color: var(--muted); }
+.button--dark { background: var(--cream); border-color: var(--cream); color: #171715; }
+.button--dark:hover { background: #fffaf0; border-color: #fffaf0; color: #171715; }
+.button--outline:hover { background: var(--cream); border-color: var(--cream); color: #171715; }
+.button--ghost-light:hover { background: var(--cream); color: #171715; border-color: var(--cream); }
+.hero-search { background: #1f1f1c; border-color: var(--line-strong); color: var(--ink); }
+.hero-search-placeholder { color: var(--muted); }
+.hero-search:hover { background: var(--cream); border-color: var(--cream); color: #171715; }
+.hero-search:hover .hero-search-placeholder,
+.hero-search:hover .hero-search-hint { color: rgba(23, 23, 21, 0.62); }
+.filter-chip.is-active { background: var(--orange); border-color: var(--orange); color: #171715; }
+.filter-chip.is-active span { color: rgba(23, 23, 21, 0.66); }
+.entry-card:hover, .resource-card:hover, .mini-node:hover { background: #252521; }
+.icon-close:hover { background: var(--cream); color: #171715; }
+.wiki-action:hover { background: var(--cream); color: #171715; border-color: var(--cream); }
+.field textarea:focus, .field input:focus, .field select:focus { background: #252521; }
+.catalog-search, .select-wrap select { background: var(--paper-raised); color: var(--ink); }
+.catalog-search input, .select-wrap select { color: var(--ink); }
+.catalog-wiki-controls .catalog-search, .catalog-wiki-controls .select-wrap select { background: #20201d; color: var(--ink); }
+.catalog-wiki-controls .select-wrap select option { background: #20201d; color: var(--ink); }
+.catalog-wikitable td:first-child > a { color: var(--wiki-link, #8ab4f8); }
+
+/* dark wiki article surface */
+.wiki-skin {
+  --wiki-border: #4a4a44;
+  --wiki-border-soft: #363631;
+  --wiki-box: #20201d;
+  --wiki-link: #8ab4f8;
+  --wiki-muted: #aaa69c;
+  background: #171715;
+  color: #f2efe6;
+  border-top-color: #363631;
+}
+.wiki-tabbar { background: #171715; }
+.wiki-tabbar-mark { background: #20201d; border-color: #5d5d55; color: #f2efe6; }
+.wiki-tab.is-active { color: #f2efe6; }
+.wiki-tab { color: #8ab4f8; }
+.wiki-tabbar-link { color: #aaa69c; }
+.wiki-tabbar-link:hover { color: #8ab4f8; }
+.wiki-title, .wiki-section-heading h2, .wiki-subheading, .wiki-section-heading h2, .wiki-lead strong { color: #f2efe6; }
+.wiki-site-sub { color: #aaa69c; }
+.wiki-statusline { border-bottom-color: #363631; color: #aaa69c; }
+.wiki-hatnote { color: #aaa69c; }
+.wiki-article-body { color: #f2efe6; }
+.wiki-article-body p { color: #e7e2d8; }
+.wiki-infobox { border-color: #4a4a44; background: #20201d; }
+.wiki-infobox-title { background: #2b2b27; border-bottom-color: #4a4a44; color: #f2efe6; }
+.wiki-infobox th, .wiki-infobox td { border-top-color: #363631; color: #e7e2d8; }
+.wiki-infobox th { color: #aaa69c; }
+.wiki-toc-box { background: #20201d; border-color: #4a4a44; }
+.wiki-toc-heading { border-bottom-color: #363631; color: #f2efe6; }
+.wiki-toc-box button { color: #8ab4f8; }
+.wiki-toc-box button::before { color: #aaa69c; }
+.wiki-tools { border-top-color: #363631; }
+.wiki-tools-head { color: #f2efe6; }
+.wiki-tools a, .wiki-tools button { color: #8ab4f8; }
+.wiki-tool-disabled { color: #7c7970; }
+.wiki-mobile-toc { background: #20201d; border-color: #4a4a44; }
+.wiki-mobile-toc summary { color: #f2efe6; }
+.wiki-mobile-toc button { color: #8ab4f8; }
+.wiki-section { border-color: #363631; }
+.wiki-section-heading { border-bottom-color: #4a4a44; }
+.wiki-section-edit { color: #8ab4f8; }
+.wiki-section-edit::before, .wiki-section-edit::after { color: #aaa69c; }
+.wiki-definition { background: color-mix(in srgb, var(--accent) 12%, #1d1d1a); border-color: var(--accent); }
+.wiki-definition p { color: #f2efe6; }
+.wiki-definition .mono { color: #aaa69c; }
+.wiki-bullets, .wiki-list { color: #e7e2d8; }
+.wiki-bullets li { border-color: #363631; color: #e7e2d8; }
+.wiki-list li { color: #e7e2d8; }
+.wikitable { background: #20201d; border-color: #4a4a44; color: #f2efe6; }
+.wikitable th, .wikitable td { border-color: #4a4a44; }
+.wikitable th { background: #2b2b27; color: #f2efe6; }
+.wiki-table-sub, .wiki-table-text { color: #b5b0a5; }
+.wiki-references { border-color: #363631; }
+.wiki-skin .wiki-references { color: #e7e2d8; }
+.wiki-skin .wiki-references a { color: #8ab4f8; }
+.wiki-source-note, .wiki-empty { color: #aaa69c; }
+.wiki-more-note { background: #20201d; border-color: #4a4a44; color: #aaa69c; }
+.wiki-inline-button { color: #8ab4f8; }
+.wiki-categories { background: #20201d; border-color: #4a4a44; color: #e7e2d8; }
+.wiki-categories a { color: #8ab4f8; }
+.wiki-article-footer { border-top-color: #363631; color: #aaa69c; }
+.wiki-article-footer a { color: #8ab4f8; }
+.wiki-talk-banner, .wiki-edit-notice { background: #20201d; border-color: #4a4a44; color: #e7e2d8; }
+.wiki-talk-banner strong, .wiki-edit-notice strong { color: #f2efe6; }
+.wiki-talk-banner p, .wiki-edit-notice p { color: #aaa69c; }
+.wiki-edit-scope label, .wiki-edit-scope > span, .wiki-edit-fields label, .wiki-edit-disclaimer, .wiki-edit-status { color: #aaa69c; }
+.wiki-edit-scope select, .wiki-edit-fields input, .wiki-edit-fields textarea, .wiki-edit-fields select, .wiki-edit-textarea { background: #1b1b18; border-color: #4a4a44; color: #f2efe6; }
+.wiki-edit-fields input::placeholder, .wiki-edit-fields textarea::placeholder, .wiki-edit-textarea::placeholder { color: #77746c; }
+.wiki-editor-toolbar { background: #20201d; border-color: #4a4a44; }
+.wiki-editor-toolbar button { background: #2a2a26; border-color: #4a4a44; color: #f2efe6; }
+.wiki-editor-toolbar button:hover { background: #34342f; color: #f2efe6; border-color: #6b6b62; }
+.wiki-editor-preview { background: #20201d; border-color: #4a4a44; color: #e7e2d8; }
+.wiki-button { background: #20201d; border-color: #4a4a44; color: #8ab4f8; }
+.wiki-button:hover { background: #2a2a26; border-color: #8ab4f8; color: #8ab4f8; }
+.wiki-button--primary { background: var(--orange); border-color: var(--orange); color: #171715; }
+.wiki-button--primary:hover { background: #f06b46; color: #171715; }
+.wiki-button--quiet { color: #aaa69c; }
+.wiki-edit-help p, .wiki-edit-help ul, .wiki-talk-rules p { color: #aaa69c; }
+.wiki-edit-help li { color: #aaa69c; }
+.wiki-edit-actions { border-top-color: #363631; }
+.wiki-edit-textarea:focus, .wiki-edit-fields input:focus, .wiki-edit-fields textarea:focus, .wiki-edit-fields select:focus { outline-color: #8ab4f8; }
+.wiki-skin .wiki-talk-thread .local-preview-note { background: #20201d; border-color: #4a4a44; color: #e7e2d8; }
+.wiki-skin .wiki-talk-thread .local-preview-note p { color: #aaa69c; }
+.wiki-skin .wiki-talk-thread .comment-count-row { border-top-color: #363631; color: #aaa69c; }
+.wiki-skin .wiki-talk-thread .comment-form { background: #20201d; border-color: #4a4a44; }
+.wiki-skin .wiki-talk-thread .comment-form input, .wiki-skin .wiki-talk-thread .comment-form textarea { background: #1b1b18; border-color: #4a4a44; color: #f2efe6; }
+.wiki-skin .wiki-talk-thread .comment-content > p { color: #e7e2d8; }
+.wiki-skin .wiki-talk-thread .comment-meta { color: #aaa69c; }
+.wiki-skin .wiki-talk-thread .comment-form .button--dark { background: var(--orange); border-color: var(--orange); color: #171715; }
+.wiki-skin .wiki-talk-thread .comment-form .button--dark:hover { background: #f06b46; }
+.wiki-skin .wiki-talk-thread .local-preview-note .preview-dot { background: var(--orange); }
+.wiki-skin .wiki-talk-thread .comment-form label { color: #aaa69c; }
+.form-disclaimer { background: #20201d; color: #aaa69c; }
+.toast { background: #20201d; color: #f2efe6; border-color: #4a4a44; }
+.code-block { background: #11110f; color: #e7e2d8; border-color: #4a4a44; }
+.graph-canvas-card { background: #11110f; color: var(--cream); }
+
+/* dark site panels outside the article skin */
+.modal { background: #1b1b18; color: var(--ink); }
+.modal input, .modal textarea, .modal select, .field input, .field textarea, .field select, .comment-form input, .comment-form textarea { background: #20201d; border-color: #4a4a44; color: var(--ink); }
+.search-result.is-selected, .search-result:hover { background: #252521; }
+.search-input-row, .search-field { background: #20201d; border-color: #4a4a44; }
+.citation-block, .code-block { background: #20201d; border-color: #4a4a44; color: #e7e2d8; }
+.faq-list details, .way-card, .process-step, .aside-card, .guide-aside .aside-card { background: #1f1f1c; border-color: var(--line); }
+.ways-section, .guide-section, .contribute-body { background: #171715; }
+.contribute-intro .prose, .faq-list details p, .guide-main { color: #d8d3c9; }
+.graph-quicknav button, .graph-panel { background: #1f1f1c; border-color: var(--line); color: var(--ink); }
+.graph-panel-question { background: #242420; }
+.graph-canvas-card { background: #11110f; color: var(--cream); }
+.entry-pagination, .pagination-card { border-color: var(--line); }
+.pagination-card:hover { background: #20201d; }
+.local-preview-note { background: #24221d; border-color: #4a4a44; color: #e7e2d8; }
+.local-preview-note p { color: #aaa69c; }
+.comment-setup, .giscus-shell, .comment-form { background: #1f1f1c; border-color: var(--line); }
+.section-head--light, .contribute-hero, .contribute-hero h1 { color: var(--cream); }
+
+@media (max-width: 900px) {
+  .catalog-wiki-controls { grid-template-columns: 1fr 1fr; }
+  .catalog-wiki-controls .catalog-search { grid-column: 1 / -1; }
+}
+@media (max-width: 590px) {
+  .catalog-wiki-controls { grid-template-columns: 1fr; }
+  .catalog-wiki-controls .catalog-search { grid-column: auto; }
+  .catalog-wikitable { display: block; overflow-x: auto; }
+  .catalog-wikitable tbody { display: table; width: 100%; }
+  .catalog-wikitable thead { display: table; width: 100%; }
+}

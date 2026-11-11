@@ -29,7 +29,7 @@ window.EAI_CONFIG = {
     reactionsEnabled: "1",
     emitMetadata: "0",
     inputPosition: "top",
-    theme: "light",
+    theme: "dark_dimmed",
     lang: "zh-CN"
   },
 

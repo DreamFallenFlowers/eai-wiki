@@ -749,99 +749,201 @@
     return `<div class="entry-grid">${list.map(entryCardMarkup).join("")}</div>`;
   }
 
+  function catalogTableMarkup(list, emptyMessage = "没有匹配的词条。换个关键词，或者清空筛选。", emptyAction = "") {
+    if (!list.length) {
+      return `<div class="wiki-empty catalog-empty">${emptyMessage}${emptyAction ? `<div class="catalog-empty-action">${emptyAction}</div>` : ""}</div>`;
+    }
+    return `
+      <table class="wikitable catalog-wikitable">
+        <thead>
+          <tr><th>词条</th><th>类型</th><th>领域 / 路线</th><th>年份</th><th>概要</th></tr>
+        </thead>
+        <tbody>
+          ${list.map(entry => {
+            const domain = domainOf(entry);
+            const route = routeOf(entry);
+            return `<tr class="catalog-row">
+              <td><a href="#/entry/${entry.id}">${esc(entry.title)}</a><br><span class="wiki-table-sub">${esc(entry.subtitle)}</span></td>
+              <td>${esc(typeLabel(entry.type))}</td>
+              <td><a href="#/domain/${domain.id}">${esc(domain.name)}</a> / <a href="${routeHref(domain, route)}">${esc(route.name)}</a></td>
+              <td>${entry.year}</td>
+              <td class="wiki-table-text">${esc(entry.tldr)}</td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>`;
+  }
+
   function renderCatalog() {
     const typeCounts = catalogTypeCounts();
     const initialList = filterCatalogEntries();
+    const history = REPO
+      ? `<a class="wiki-tab" href="${REPO_URL}/commits/${BRANCH}/assets/js/data.js" target="_blank" rel="noopener">历史</a>`
+      : `<span class="wiki-tab is-disabled" title="发布到 GitHub 后可查看编辑历史">历史</span>`;
     return `
-      <div class="view view--catalog">
-        <section class="page-hero">
-          <div class="wrap">
-            <nav class="breadcrumbs" aria-label="面包屑">
-              <a href="#/">EAI WIKI</a><span>/</span><span>INDEX</span>
-            </nav>
-            <div class="page-hero-grid">
-              <div class="page-hero-title">
-                <p class="eyebrow">INDEX / ALL ENTRIES</p>
-                <h1>词条库<em>Index</em></h1>
+      <div class="view view--article view--catalog-wiki">
+        <div class="wiki-skin">
+          <div class="wiki-tabbar">
+            <div class="wiki-tabbar-inner">
+              <a class="wiki-tabbar-brand" href="#/"><span class="wiki-tabbar-mark">E</span><span>EAI Wiki</span></a>
+              <nav class="wiki-tabs" aria-label="页面命名空间">
+                <a class="wiki-tab is-active" href="#/entries">索引</a>
+                <button class="wiki-tab" type="button" data-wiki-discuss data-discuss-title="词条库" data-discuss-url="#/entries">讨论</button>
+                <a class="wiki-tab" href="#/contribute">编辑</a>
+                ${history}
+              </nav>
+              <div class="wiki-tabbar-right">
+                <button class="wiki-tabbar-link" type="button" data-open-search>搜索</button>
+                <a class="wiki-tabbar-link" href="#/">首页</a>
+                <a class="wiki-tabbar-link" href="#/graph">知识网络</a>
               </div>
-              <div class="page-hero-aside">
-                <p>论文、系统、概念、数据集与基准。按五个研究领域和技术路线组织，用同一套模板写作，用同一套标准检验。</p>
-                <div class="page-hero-count">
-                  <strong>${padded(ENTRIES.length)}</strong>
-                  <span>个词条<br>跨 ${DOMAINS.length} 个领域 / ${TOTAL_ROUTES} 条路线</span>
+            </div>
+          </div>
+
+          <div class="wiki-skin-grid">
+            <aside class="wiki-side">
+              <nav class="wiki-toc-box" aria-label="本页目录">
+                <div class="wiki-toc-heading">目录</div>
+                <ol>
+                  <li><button type="button" data-scroll-target="catalog-index">索引与筛选</button></li>
+                  <li><button type="button" data-scroll-target="catalog-scope">收录范围</button></li>
+                  <li><button type="button" data-scroll-target="catalog-contribute">贡献</button></li>
+                </ol>
+              </nav>
+              <div class="wiki-tools">
+                <div class="wiki-tools-head">工具</div>
+                <a href="#/">首页</a>
+                <a href="#/graph">知识网络</a>
+                <a href="#/contribute">共建指南</a>
+                <button type="button" data-print-page>可打印版</button>
+                <button type="button" data-copy-permalink>永久链接</button>
+                <a href="${repoFileUrl("assets/js/data.js")}" target="_blank" rel="noopener">查看源数据</a>
+              </div>
+            </aside>
+
+            <main class="wiki-article-body">
+              <h1 class="wiki-title">词条库</h1>
+              <div class="wiki-site-sub">出自 EAI Wiki，开放的具身智能百科</div>
+              <div class="wiki-statusline">
+                <span class="wiki-status-dot"></span>
+                当前索引 ${ENTRIES.length} 个词条，跨 ${DOMAINS.length} 个领域、${TOTAL_ROUTES} 条技术路线。最后修订 ${formatDate(CFG.updated || "2026-11-11")}。
+              </div>
+              <div class="wiki-hatnote">本页是全部条目的索引。具体工作请进入词条页；领域、路线与讨论页可从各条目顶部标签进入。</div>
+
+              <div class="wiki-lead-layout">
+                <div class="wiki-lead">
+                  <p><strong>词条库</strong>是 EAI Wiki 的条目索引，收录论文、系统、概念、数据集与 benchmark。每条记录都归属于一个研究领域和一条技术路线。</p>
+                  <p>索引按类型、领域、技术路线和关键词筛选。这里不是论文排行榜；词条的技术判断、证据与边界仍以各自页面为准。</p>
                 </div>
+                ${articleInfobox("词条库", [
+                  ["类型", "全站索引"],
+                  ["词条", `${ENTRIES.length} 个`],
+                  ["研究领域", `${DOMAINS.length} 个`],
+                  ["技术路线", `${TOTAL_ROUTES} 条`],
+                  ["数据集 / 基准", `${RESOURCES.length} 个`],
+                  ["状态", '<span class="wiki-status-dot"></span>持续更新']
+                ])}
               </div>
-            </div>
-          </div>
-        </section>
 
-        <section class="catalog-section wrap">
-          <div class="catalog-toolbar">
-            <div class="filter-row" role="group" aria-label="按类型筛选">
-              <button class="filter-chip ${state.catalog.type === "all" ? "is-active" : ""}" type="button" data-catalog-type="all">
-                全部 <span>${typeCounts.all}</span>
-              </button>
-              ${TYPE_ORDER.map(type => `
-                <button class="filter-chip ${state.catalog.type === type ? "is-active" : ""}" type="button" data-catalog-type="${type}">
-                  ${typeLabel(type)} <span>${typeCounts[type] || 0}</span>
-                </button>`).join("")}
-            </div>
-            <div class="catalog-tools">
-              <label class="catalog-search">
-                <span class="sr-only">搜索词条</span>
-                ${smallSearchIcon()}
-                <input id="catalog-search" type="search" value="${esc(state.catalog.q)}" placeholder="筛选词条…" autocomplete="off" spellcheck="false">
-              </label>
-              <label class="select-wrap">
-                <span class="sr-only">按领域筛选</span>
-                <select id="catalog-domain">
-                  <option value="all">全部领域</option>
-                  ${DOMAINS.map(domain => `<option value="${domain.id}" ${state.catalog.domain === domain.id ? "selected" : ""}>${esc(domain.name)}</option>`).join("")}
-                </select>
-                <span class="select-arrow">⌄</span>
-              </label>
-              <label class="select-wrap select-wrap--route">
-                <span class="sr-only">按技术路线筛选</span>
-                <select id="catalog-route">
-                  <option value="all">全部路线</option>
-                  ${DOMAINS.map(domain => `<optgroup label="${esc(domain.name)}">${domain.routes.map(route => `<option value="${route.id}" ${state.catalog.route === route.id ? "selected" : ""}>${esc(route.name)}</option>`).join("")}</optgroup>`).join("")}
-                </select>
-                <span class="select-arrow">⌄</span>
-              </label>
-              <label class="select-wrap">
-                <span class="sr-only">排序方式</span>
-                <select id="catalog-sort">
-                  <option value="featured" ${state.catalog.sort === "featured" ? "selected" : ""}>推荐排序</option>
-                  <option value="latest" ${state.catalog.sort === "latest" ? "selected" : ""}>最新年份</option>
-                  <option value="az" ${state.catalog.sort === "az" ? "selected" : ""}>标题 A–Z</option>
-                </select>
-                <span class="select-arrow">⌄</span>
-              </label>
-            </div>
-          </div>
+              <details class="wiki-mobile-toc">
+                <summary>目录</summary>
+                <ol>
+                  <li><button type="button" data-scroll-target="catalog-index">索引与筛选</button></li>
+                  <li><button type="button" data-scroll-target="catalog-scope">收录范围</button></li>
+                  <li><button type="button" data-scroll-target="catalog-contribute">贡献</button></li>
+                </ol>
+              </details>
 
-          <div class="catalog-meta">
-            <p id="catalog-count" aria-live="polite">显示 ${initialList.length} / ${ENTRIES.length} 个词条</p>
-            <div class="catalog-meta-actions">
-              <button class="text-button ${state.catalog.bookmarksOnly ? "is-active" : ""}" type="button" id="catalog-bookmarks" aria-pressed="${state.catalog.bookmarksOnly}">
-                本机收藏 <span id="catalog-bookmark-count">${state.bookmarks.size}</span>
-              </button>
-              <button class="text-button" type="button" id="catalog-reset">重置筛选 ↗</button>
-            </div>
-          </div>
-          <div id="catalog-results">${entryGridMarkup(initialList)}</div>
-        </section>
+              <section class="wiki-section" id="catalog-index">
+                <div class="wiki-section-heading">
+                  <h2>索引与筛选</h2>
+                </div>
+                <div class="catalog-wiki-toolbar">
+                  <div class="filter-row" role="group" aria-label="按类型筛选">
+                    <button class="filter-chip ${state.catalog.type === "all" ? "is-active" : ""}" type="button" data-catalog-type="all">
+                      全部 <span>${typeCounts.all}</span>
+                    </button>
+                    ${TYPE_ORDER.map(type => `
+                      <button class="filter-chip ${state.catalog.type === type ? "is-active" : ""}" type="button" data-catalog-type="${type}">
+                        ${typeLabel(type)} <span>${typeCounts[type] || 0}</span>
+                      </button>`).join("")}
+                  </div>
+                  <div class="catalog-wiki-controls">
+                    <label class="catalog-search">
+                      <span class="sr-only">搜索词条</span>
+                      ${smallSearchIcon()}
+                      <input id="catalog-search" type="search" value="${esc(state.catalog.q)}" placeholder="筛选词条…" autocomplete="off" spellcheck="false">
+                    </label>
+                    <label class="select-wrap">
+                      <span class="sr-only">按领域筛选</span>
+                      <select id="catalog-domain">
+                        <option value="all">全部领域</option>
+                        ${DOMAINS.map(domain => `<option value="${domain.id}" ${state.catalog.domain === domain.id ? "selected" : ""}>${esc(domain.name)}</option>`).join("")}
+                      </select>
+                      <span class="select-arrow">⌄</span>
+                    </label>
+                    <label class="select-wrap select-wrap--route">
+                      <span class="sr-only">按技术路线筛选</span>
+                      <select id="catalog-route">
+                        <option value="all">全部路线</option>
+                        ${DOMAINS.map(domain => `<optgroup label="${esc(domain.name)}">${domain.routes.map(route => `<option value="${route.id}" ${state.catalog.route === route.id ? "selected" : ""}>${esc(route.name)}</option>`).join("")}</optgroup>`).join("")}
+                      </select>
+                      <span class="select-arrow">⌄</span>
+                    </label>
+                    <label class="select-wrap">
+                      <span class="sr-only">排序方式</span>
+                      <select id="catalog-sort">
+                        <option value="featured" ${state.catalog.sort === "featured" ? "selected" : ""}>推荐排序</option>
+                        <option value="latest" ${state.catalog.sort === "latest" ? "selected" : ""}>最新年份</option>
+                        <option value="az" ${state.catalog.sort === "az" ? "selected" : ""}>标题 A–Z</option>
+                      </select>
+                      <span class="select-arrow">⌄</span>
+                    </label>
+                  </div>
+                </div>
 
-        <section class="catalog-community wrap">
-          <div>
-            <p class="eyebrow">MISSING SOMETHING?</p>
-            <h2>这张索引并不完整。<br><em>它需要你的那一块。</em></h2>
+                <div class="catalog-meta">
+                  <p id="catalog-count" aria-live="polite">显示 ${initialList.length} / ${ENTRIES.length} 个词条</p>
+                  <div class="catalog-meta-actions">
+                    <button class="text-button ${state.catalog.bookmarksOnly ? "is-active" : ""}" type="button" id="catalog-bookmarks" aria-pressed="${state.catalog.bookmarksOnly}">
+                      本机收藏 <span id="catalog-bookmark-count">${state.bookmarks.size}</span>
+                    </button>
+                    <button class="text-button" type="button" id="catalog-reset">重置筛选 ↗</button>
+                  </div>
+                </div>
+                <div id="catalog-results">${catalogTableMarkup(initialList)}</div>
+                <p class="wiki-source-note">表内「概要」来自词条的 tldr；完整技术描述、证据与来源见各自条目。</p>
+              </section>
+
+              <section class="wiki-section" id="catalog-scope">
+                <div class="wiki-section-heading">
+                  <h2>收录范围</h2>
+                </div>
+                <ul class="wiki-list">
+                  <li><strong>论文 / 系统：</strong>有明确方法、实验或系统实现的工作。</li>
+                  <li><strong>概念：</strong>持续被使用的技术概念、范式或系统层。</li>
+                  <li><strong>数据集 / 基准：</strong>可被复用的数据、仿真环境与评测协议。</li>
+                </ul>
+                <p class="wiki-source-note">收录不代表 endorsement；编辑会优先保留有一手来源、能说明边界的条目。</p>
+              </section>
+
+              <section class="wiki-section" id="catalog-contribute">
+                <div class="wiki-section-heading">
+                  <h2>贡献</h2>
+                </div>
+                <p>这张索引并不完整。发现缺失的工作、错误的归位或过时的数据，可以使用条目页的「编辑」标签，或直接提交新词条。</p>
+                <p><a class="wiki-button" href="#/contribute">阅读共建指南</a> <button class="wiki-button wiki-button--primary" type="button" data-open-contribute>贡献一个词条</button></p>
+              </section>
+
+              ${articleCategories([
+                { label: "具身智能", href: "#/" },
+                { label: "索引", href: "#/entries" },
+                { label: "全部词条", href: "#/entries" }
+              ])}
+              ${articleFooter()}
+            </main>
           </div>
-          <div>
-            <p>一门新工作、一段复现经验、一条被忽略的失败结果，都可能让下一个人少走弯路。</p>
-            <button class="button button--orange" type="button" data-open-contribute>提交一个新词条 ${smallArrow()}</button>
-          </div>
-        </section>
+        </div>
       </div>`;
   }
 
@@ -855,7 +957,7 @@
     const emptyAction = state.catalog.bookmarksOnly
       ? `<button class="button button--dark" type="button" data-catalog-show-all>显示全部词条 ${smallArrow()}</button>`
       : "";
-    results.innerHTML = entryGridMarkup(list, emptyMessage, emptyAction);
+    results.innerHTML = catalogTableMarkup(list, emptyMessage, emptyAction);
     const count = document.getElementById("catalog-count");
     if (count) count.textContent = `显示 ${list.length} / ${ENTRIES.length} 个词条`;
     document.querySelectorAll("[data-catalog-type]").forEach(button => {
@@ -2316,128 +2418,144 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
 
 ## 参考与延伸
 你实际读过并推荐的材料。`;
+    const history = REPO
+      ? `<a class="wiki-tab" href="${REPO_URL}/commits/${BRANCH}/assets/js/data.js" target="_blank" rel="noopener">历史</a>`
+      : `<span class="wiki-tab is-disabled" title="发布到 GitHub 后可查看编辑历史">历史</span>`;
     return `
-      <div class="view view--contribute">
-        <section class="contribute-hero">
-          <div class="wrap">
-            <nav class="breadcrumbs breadcrumbs--on-dark" aria-label="面包屑">
-              <a href="#/">EAI WIKI</a><span>/</span><span>CONTRIBUTE</span>
-            </nav>
-            <div class="contribute-hero-grid">
-              <div>
-                <p class="eyebrow eyebrow--light"><span class="eyebrow-dot"></span> OPEN CALL FOR CONTRIBUTORS</p>
-                <h1>少一点搬运，<br><em>多一点判断。</em></h1>
-                <p class="contribute-hero-lede">这不是一个把论文摘要贴在一起的站点。领域与路线页本身就是可编辑的 Wiki 条目：你可以补充技术拆解、失败模式、数据集和一手来源。</p>
-                <div class="contribute-hero-actions">
-                  <button class="button button--orange" type="button" data-open-contribute>贡献一个词条 ${smallArrow()}</button>
-                  <a class="button button--ghost-light" href="${esc(REPO_URL ? `${REPO_URL}/issues/new/choose` : "#/contribute")}" ${REPO ? 'target="_blank" rel="noopener"' : ""} data-issue-choose>在 GitHub 提交 ↗</a>
-                </div>
-              </div>
-              <div class="contribute-hero-card">
-                <span class="mono">CONTRIBUTION / AT A GLANCE</span>
-                <div class="contrib-stat"><strong>3</strong><span>种参与方式<br>评论 · 编辑 · 新词条</span></div>
-                <div class="contrib-stat"><strong>&lt; 10</strong><span>分钟完成<br>一次词条提名</span></div>
-                <div class="contrib-stat"><strong>0</strong><span>行代码要求<br>会写字就够了</span></div>
+      <div class="view view--article view--contribute-wiki">
+        <div class="wiki-skin">
+          <div class="wiki-tabbar">
+            <div class="wiki-tabbar-inner">
+              <a class="wiki-tabbar-brand" href="#/"><span class="wiki-tabbar-mark">E</span><span>EAI Wiki</span></a>
+              <nav class="wiki-tabs" aria-label="页面命名空间">
+                <a class="wiki-tab is-active" href="#/contribute">指南</a>
+                <button class="wiki-tab" type="button" data-wiki-discuss data-discuss-title="共建指南" data-discuss-url="#/contribute">讨论</button>
+                <button class="wiki-tab" type="button" data-open-contribute>编辑</button>
+                ${history}
+              </nav>
+              <div class="wiki-tabbar-right">
+                <button class="wiki-tabbar-link" type="button" data-open-search>搜索</button>
+                <a class="wiki-tabbar-link" href="#/entries">全部条目</a>
+                <a class="wiki-tabbar-link" href="#/">首页</a>
               </div>
             </div>
           </div>
-        </section>
 
-        <section class="contribute-body wrap">
-          <div class="contribute-intro">
-            <p class="eyebrow">WHY A WIKI</p>
-            <div class="prose prose--large">
-              <p>具身智能的论文增长得比任何人的阅读速度都快。搜索结果给你的是「有哪些」，但很少回答「应该先读哪篇」「这个结果可信吗」「它和那篇工作到底是什么关系」。</p>
-              <p>Wiki 的价值不在完整，而在<strong>有判断的连接</strong>：先把它放回领域的技术路线，再把路线放回它的问题史，最后把一句 demo 放回它的评测条件里。</p>
-              <p>因此本站在领域、路线与词条页上采用维基百科式结构：<strong>条目 / 讨论 / 编辑 / 历史</strong>标签、左侧目录、右侧信息框、带 [编辑] 的章节、参考资料与页面分类。它们都可以被后来者修订。</p>
-            </div>
-          </div>
-
-          <section class="ways-section">
-            <div class="section-head section-head--compact">
-              <div>
-                <p class="eyebrow">WAYS IN</p>
-                <h2 class="section-title section-title--small">三种参与方式</h2>
+          <div class="wiki-skin-grid">
+            <aside class="wiki-side">
+              <nav class="wiki-toc-box" aria-label="本页目录">
+                <div class="wiki-toc-heading">目录</div>
+                <ol>
+                  <li><button type="button" data-scroll-target="contribute-ways">参与方式</button></li>
+                  <li><button type="button" data-scroll-target="contribute-rules">写作底线</button></li>
+                  <li><button type="button" data-scroll-target="contribute-process">从想法到合并</button></li>
+                  <li><button type="button" data-scroll-target="contribute-template">词条模板</button></li>
+                  <li><button type="button" data-scroll-target="contribute-faq">常见问题</button></li>
+                  <li><button type="button" data-scroll-target="contribute-roadmap">路线图</button></li>
+                </ol>
+              </nav>
+              <div class="wiki-tools">
+                <div class="wiki-tools-head">工具</div>
+                <a href="#/">首页</a>
+                <a href="#/entries">词条库</a>
+                <a href="#/graph">知识网络</a>
+                <button type="button" data-print-page>可打印版</button>
+                <button type="button" data-copy-permalink>永久链接</button>
+                <a href="${repoFileUrl("CONTRIBUTING.md")}" target="_blank" rel="noopener">完整规范</a>
               </div>
-              <p class="section-aside section-aside--inline">从最轻的一步开始，也可以直接补齐一个领域。</p>
-            </div>
-            <div class="ways-grid">
-              <article class="way-card">
-                <span class="way-num">01</span>
-                <h3>留下一条评论</h3>
-                <p>在任意词条下提问、补充引用、贴复现结果，或指出一个被忽略的限制。评论由 GitHub Discussions 承载，公开且可订阅。</p>
-                <button class="text-link" type="button" data-open-contribute data-intent="comment">写一条补充 ${smallArrow()}</button>
-              </article>
-              <article class="way-card">
-                <span class="way-num">02</span>
-                <h3>编辑一个页面</h3>
-                <p>在任意领域、路线或词条页点击顶部「编辑」标签，或小节右侧的「[编辑]」。提案会记录页面、章节、正文与依据，进入公开审校。</p>
-                <a class="text-link" href="#/edit/domain/manipulation">试试编辑「操作」领域 ${smallArrow()}</a>
-              </article>
-              <article class="way-card way-card--accent">
-                <span class="way-num">03</span>
-                <h3>贡献一个新词条</h3>
-                <p>用统一模板写一篇论文、系统或概念，并把它放进正确的领域与技术路线。从一个清楚的「为什么重要」开始。</p>
-                <button class="text-link" type="button" data-open-contribute>开始写词条 ${smallArrow()}</button>
-              </article>
-            </div>
-          </section>
+            </aside>
 
-          <div class="guide-layout">
-            <div class="guide-main">
-              <section class="guide-section">
-                <div class="entry-section-head">
-                  <span class="section-index">01</span>
-                  <h2>写作底线</h2>
+            <main class="wiki-article-body">
+              <h1 class="wiki-title">共建指南</h1>
+              <div class="wiki-site-sub">出自 EAI Wiki，开放的具身智能百科</div>
+              <div class="wiki-statusline">
+                <span class="wiki-status-dot"></span>
+                帮助页 · 最后修订 ${formatDate(CFG.updated || "2026-11-11")} · 编辑提案进入 GitHub 审校
+              </div>
+              <div class="wiki-hatnote">本页说明如何编辑条目、发起讨论和提交新词条。它不是投稿模板，而是这个 Wiki 的编辑规范。</div>
+
+              <div class="wiki-lead-layout">
+                <div class="wiki-lead">
+                  <p><strong>EAI Wiki</strong> 是一个关于具身智能的开放知识库。它按研究领域、技术路线与具体工作组织，而不是按时间堆叠论文摘要。</p>
+                  <p>你可以只修一个数字，也可以补一整条路线。最重要的不是写得长，而是写清楚：它解决了什么、证据在哪里、边界是什么。</p>
                 </div>
-                <ol class="principle-list">
-                  <li>
-                    <span>01</span>
-                    <div><h3>一手来源优先</h3><p>引用论文、官方项目页或作者博客，不把二手解读当证据。所有链接必须真实可访问。</p></div>
-                  </li>
-                  <li>
-                    <span>02</span>
-                    <div><h3>区分事实与判断</h3><p>「论文报告了 46.9% 提升」是事实；「这是目前最好的方法」是判断。判断可以写，但要标明依据。</p></div>
-                  </li>
-                  <li>
-                    <span>03</span>
-                    <div><h3>把边界写清楚</h3><p>失败模式、评测条件、未验证的假设，至少和成功结果一样重要。不要用 demo 视频替代证据。</p></div>
-                  </li>
-                  <li>
-                    <span>04</span>
-                    <div><h3>AI 可以辅助，不能替你负责</h3><p>允许 AI 辅助起草，但必须人工核对事实与引用，并在 Issue 中说明使用了 AI。禁止编造文献或作者。</p></div>
-                  </li>
+                ${articleInfobox("共建指南", [
+                  ["页面类型", "帮助 / 编辑规范"],
+                  ["参与方式", "评论 · 编辑 · 新词条"],
+                  ["预计时间", "单次提案 &lt; 10 分钟"],
+                  ["编辑入口", '<a href="#/edit/domain/manipulation">领域编辑页</a>'],
+                  ["许可", "文字 CC BY-SA 4.0 · 代码 MIT"],
+                  ["状态", '<span class="wiki-status-dot"></span>持续维护']
+                ])}
+              </div>
+
+              <details class="wiki-mobile-toc">
+                <summary>目录</summary>
+                <ol>
+                  <li><button type="button" data-scroll-target="contribute-ways">参与方式</button></li>
+                  <li><button type="button" data-scroll-target="contribute-rules">写作底线</button></li>
+                  <li><button type="button" data-scroll-target="contribute-process">从想法到合并</button></li>
+                  <li><button type="button" data-scroll-target="contribute-template">词条模板</button></li>
+                  <li><button type="button" data-scroll-target="contribute-faq">常见问题</button></li>
+                  <li><button type="button" data-scroll-target="contribute-roadmap">路线图</button></li>
+                </ol>
+              </details>
+
+              <section class="wiki-section" id="contribute-ways">
+                <div class="wiki-section-heading"><h2>参与方式</h2></div>
+                <table class="wikitable">
+                  <thead><tr><th>方式</th><th>适合做什么</th><th>入口</th></tr></thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>评论</strong></td>
+                      <td>提问、补充引用、贴复现结果，或指出一个被忽略的限制。评论由 GitHub Discussions 承载。</td>
+                      <td><button class="wiki-inline-button" type="button" data-open-contribute data-intent="comment">写一条补充</button></td>
+                    </tr>
+                    <tr>
+                      <td><strong>编辑页面</strong></td>
+                      <td>补充技术定义、机制、失败模式或来源。编辑提案会记录页面、章节、正文与依据。</td>
+                      <td><a href="#/edit/domain/manipulation">试试编辑「操作」领域</a></td>
+                    </tr>
+                    <tr>
+                      <td><strong>新词条</strong></td>
+                      <td>用统一模板写一篇论文、系统或概念，并把它放进正确的领域与技术路线。</td>
+                      <td><button class="wiki-inline-button" type="button" data-open-contribute>开始写词条</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <section class="wiki-section" id="contribute-rules">
+                <div class="wiki-section-heading"><h2>写作底线</h2></div>
+                <ol class="wiki-list">
+                  <li><strong>一手来源优先。</strong>引用论文、官方项目页或作者博客；不要把二手解读当作证据。</li>
+                  <li><strong>区分事实与判断。</strong>「论文报告了 46.9% 提升」是事实；「这是目前最好的方法」是判断，需要说明范围与依据。</li>
+                  <li><strong>把边界写清楚。</strong>失败模式、评测条件、未验证的假设，至少和成功结果一样重要。</li>
+                  <li><strong>AI 可以辅助，不能替你负责。</strong>允许 AI 起草或润色，但必须人工核对事实、数字、作者与链接，并在提案中披露。</li>
                 </ol>
               </section>
 
-              <section class="guide-section">
-                <div class="entry-section-head">
-                  <span class="section-index">02</span>
-                  <h2>从想法到合并</h2>
-                </div>
-                <div class="process-grid">
-                  <div class="process-step"><span>01</span><h3>填写提案</h3><p>编辑现有页面，或提交一个新词条。写清页面/章节、技术内容与一手来源；表单会自动生成 GitHub Issue。</p></div>
-                  <div class="process-step"><span>02</span><h3>公开讨论</h3><p>编辑和社区会在 Issue 中提出补充、质疑与格式建议。这里没有匿名权威。</p></div>
-                  <div class="process-step"><span>03</span><h3>编辑审校</h3><p>核对来源、补齐结构、统一术语。必要时会请你提供更具体的证据。</p></div>
-                  <div class="process-step"><span>04</span><h3>合并发布</h3><p>词条进入词条库与领域页，自动获得讨论区，并出现在下一次更新记录中。</p></div>
-                </div>
+              <section class="wiki-section" id="contribute-process">
+                <div class="wiki-section-heading"><h2>从想法到合并</h2></div>
+                <ol class="wiki-list">
+                  <li><strong>填写提案。</strong>编辑现有页面，或提交一个新词条；写清页面、章节、技术内容与依据。</li>
+                  <li><strong>公开讨论。</strong>编辑与社区会在 Issue 中提出补充、质疑与格式建议。</li>
+                  <li><strong>编辑审校。</strong>核对来源、补齐结构、统一术语；必要时会请你提供更具体的证据。</li>
+                  <li><strong>合并发布。</strong>内容进入页面与索引，讨论记录保留在 GitHub，可回溯、可回滚。</li>
+                </ol>
               </section>
 
-              <section class="guide-section">
-                <div class="entry-section-head">
-                  <span class="section-index">03</span>
+              <section class="wiki-section" id="contribute-template">
+                <div class="wiki-section-heading">
                   <h2>词条模板</h2>
-                  <button class="text-button" type="button" data-copy-template>复制模板 ↗</button>
+                  <button class="wiki-button" type="button" data-copy-template>复制模板</button>
                 </div>
                 <pre class="code-block" id="entry-template"><code>${esc(template)}</code></pre>
-                <p class="code-note">不需要逐项填满。宁可少写，也不要为了完整而编造。</p>
+                <p class="wiki-source-note">不需要逐项填满。宁可少写，也不要为了完整而编造。</p>
               </section>
 
-              <section class="guide-section">
-                <div class="entry-section-head">
-                  <span class="section-index">04</span>
-                  <h2>常见问题</h2>
-                </div>
+              <section class="wiki-section" id="contribute-faq">
+                <div class="wiki-section-heading"><h2>常见问题</h2></div>
                 <div class="faq-list">
                   <details>
                     <summary>我不是研究者，也可以贡献吗？<span>+</span></summary>
@@ -2465,74 +2583,40 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
                   </details>
                 </div>
               </section>
-            </div>
 
-            <aside class="guide-aside">
-              <div class="aside-card">
-                <div class="aside-card-head"><span>BEFORE YOU SUBMIT</span><span>CHECK</span></div>
-                <ul class="check-list">
+              <section class="wiki-section" id="contribute-roadmap">
+                <div class="wiki-section-heading"><h2>路线图</h2></div>
+                <table class="wikitable">
+                  <thead><tr><th>阶段</th><th>目标</th><th>状态</th></tr></thead>
+                  <tbody>
+                    <tr><td>v0.2 种子发布</td><td>${DOMAINS.length} 个领域、${TOTAL_ROUTES} 条技术路线、${ENTRIES.length} 个词条与 ${RESOURCES.length} 个数据/基准资源；等待领域编辑审校。</td><td>进行中</td></tr>
+                    <tr><td>v0.5 领域审校</td><td>为每个领域建立编辑小组，逐条核对引用、补充遗漏工作，加入失败案例与复现记录。</td><td>待开始</td></tr>
+                    <tr><td>v1.0 公共知识</td><td>稳定引用格式、版本记录、同行评议标签，以及和会议/课程/中文社区的交叉链接。</td><td>计划中</td></tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <section class="wiki-section" id="contribute-checklist">
+                <div class="wiki-section-heading"><h2>提交前检查</h2></div>
+                <ul class="wiki-list">
                   <li>一手来源链接可访问</li>
                   <li>领域与技术路线已归位</li>
                   <li>数字带有评测条件</li>
                   <li>事实与判断已区分</li>
                   <li>已说明 AI 参与程度</li>
                 </ul>
-              </div>
-              <div class="aside-card">
-                <div class="aside-card-head"><span>CONTENT LICENSE</span><span>CC</span></div>
-                <p>文字：CC BY-SA 4.0<br>代码：MIT<br>论文图表：归原作者</p>
-                <a class="text-link js-repo-file" href="LICENSE" data-file="LICENSE">阅读许可 ${smallArrow()}</a>
-              </div>
-              <div class="aside-card aside-card--dark">
-                <span class="mono">START SMALL</span>
-                <h3>不知道写什么？</h3>
-                <p>从你最近读过的一篇论文开始。只补一个缺失的词条，或者修正一个你确定错了的数字。</p>
-                <button class="button button--orange" type="button" data-open-contribute>打开贡献表单 ${smallArrow()}</button>
-              </div>
-            </aside>
+                <p><button class="wiki-button wiki-button--primary" type="button" data-open-contribute>贡献一个词条</button> <a class="wiki-button" href="${repoFileUrl("CONTRIBUTING.md")}" target="_blank" rel="noopener">阅读完整规范</a></p>
+              </section>
+
+              ${articleCategories([
+                { label: "具身智能", href: "#/" },
+                { label: "帮助", href: "#/contribute" },
+                { label: "编辑规范", href: "#/contribute" }
+              ])}
+              ${articleFooter()}
+            </main>
           </div>
-
-          <section class="roadmap">
-            <div class="roadmap-head">
-              <p class="eyebrow">ROADMAP / 2026</p>
-              <h2>从种子版开始，<br><em>慢慢长成一张可信的地图。</em></h2>
-            </div>
-            <div class="roadmap-track">
-              <div class="roadmap-item is-current">
-                <span class="roadmap-phase">NOW / v0.2</span>
-                <h3>种子发布</h3>
-                <p>${DOMAINS.length} 个领域、${TOTAL_ROUTES} 条技术路线、${ENTRIES.length} 个基础词条与 ${RESOURCES.length} 个数据/基准资源。内容为 AI 辅助起草，等待领域编辑审校。</p>
-                <span class="roadmap-status">进行中</span>
-              </div>
-              <div class="roadmap-item">
-                <span class="roadmap-phase">NEXT / v0.5</span>
-                <h3>领域审校</h3>
-                <p>为每个领域建立编辑小组，逐条核对引用、补充遗漏工作，加入失败案例与复现记录。</p>
-                <span class="roadmap-status">待开始</span>
-              </div>
-              <div class="roadmap-item">
-                <span class="roadmap-phase">LATER / v1.0</span>
-                <h3>可引用的公共知识</h3>
-                <p>稳定引用格式、版本记录、同行评议标签，以及和会议/课程/中文社区的交叉链接。</p>
-                <span class="roadmap-status">计划中</span>
-              </div>
-            </div>
-          </section>
-
-          <section class="contribute-final">
-            <div>
-              <span class="mono">YOUR TURN</span>
-              <h2>把你知道的，<br>留给下一个人。</h2>
-            </div>
-            <div>
-              <p>写一条评论也算。一个新词条也算。修正一个错误，可能比写一篇新文章更有价值。</p>
-              <div class="contribute-final-actions">
-                <button class="button button--orange" type="button" data-open-contribute>贡献一个词条 ${smallArrow()}</button>
-                <a class="button button--outline js-repo-file" href="CONTRIBUTING.md" data-file="CONTRIBUTING.md">阅读完整规范 ↗</a>
-              </div>
-            </div>
-          </section>
-        </section>
+        </div>
       </div>`;
   }
 

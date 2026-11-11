@@ -15,6 +15,10 @@
 
 ![EAI Wiki homepage](docs/preview.png)
 
+词条库也是 Wiki 索引页：左侧目录、筛选工具、类型与领域表格、条目的讨论 / 编辑标签，而不是卡片瀑布流。
+
+![Wiki index page](docs/preview-catalog.png)
+
 领域、路线和词条详情页都采用维基百科式的文章版式：**条目 / 讨论 / 编辑 / 历史**命名空间标签、左侧目录、右侧信息框、带 `[编辑]` 的章节、wikitable、编号参考资料、页面分类和最后修订信息。编辑与讨论不是弹窗，而是独立的编辑页和 `讨论:` 讨论页。
 
 ![Route wiki page](docs/preview-route.png)
@@ -26,6 +30,10 @@
 讨论页是独立的 `讨论:` 命名空间，而不是文章底部的评论区；每个页面都有独立的讨论串。
 
 ![Wiki talk page](docs/preview-talk.png)
+
+共建指南也改成 Wiki 帮助页，保留编辑规范、模板与常见问题。
+
+![Wiki help page](docs/preview-contribute.png)
 
 ---
 
@@ -310,9 +318,11 @@ eai-wiki/
 │   ├── check-links.mjs           # 检查论文与项目链接
 │   └── og-template.html          # 可重新渲染的社交封面模板
 ├── docs/preview.png              # 首页预览
+├── docs/preview-catalog.png      # 词条库索引预览
 ├── docs/preview-route.png        # 路线 Wiki 预览
 ├── docs/preview-edit.png         # 编辑页预览
 ├── docs/preview-talk.png         # 讨论页预览
+├── docs/preview-contribute.png   # 共建帮助页预览
 ├── GISCUS_SETUP.md               # 讨论页 / 评论区接入说明
 ├── CONTRIBUTING.md               # 编辑与贡献规范
 ├── LICENSE                       # 代码：MIT
@@ -359,7 +369,8 @@ node scripts/check-links.mjs
 
 ## 设计说明
 
-- **两层视觉系统**：首页、词条库、知识网络与共建页保留暖纸色编辑设计；领域页、路线页、词条页切换为白底、蓝链、信息框与左侧目录的维基百科式文章版式。
+- **深色 Wiki 视觉**：全站采用炭黑背景（`#171715`）、米白文字与橙色强调。配色层不改变文章页与首页布局；**词条库与共建指南**另按 Wiki 索引 / 帮助页格式重排。
+- **首页 / 知识网络**保留编辑式视觉；**词条库、领域、路线、词条、编辑页、讨论页、共建指南**采用 Wiki 索引 / 文章 / 帮助页结构。
 - **维基文章结构**：命名空间标签、导言、Infobox、目录、带 `[编辑]` 的段落、wikitable、编号参考资料、页面分类和最后修订。
 - **层级优先**：首页强调领域，领域页用表格索引路线与资源，路线页才展开技术拆解和代表工作。
 - **没有外部字体和图片依赖**：离线可用，不依赖 Google Fonts 或图床。
@@ -367,7 +378,7 @@ node scripts/check-links.mjs
 - **无障碍**：跳转链接、语义标题、键盘搜索、可视 focus、`prefers-reduced-motion`、原生 `<dialog>`。
 - **明确的种子状态**：内容标注为 AI 辅助起草、等待领域编辑审校，不把 demo 当权威。
 
-如需调整品牌色，修改 `assets/css/styles.css` 顶部的 `:root` 变量。领域和路线色彩来自 `data.js` 的 `accent` / `tint`。
+如需调整品牌色，修改 `assets/css/styles.css` 末尾「dark colors」层的变量；`data.js` 中的 `accent` 会继续用于领域强调色与卡片色混合。
 
 ---
 

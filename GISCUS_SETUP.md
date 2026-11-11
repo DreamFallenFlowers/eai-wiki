@@ -116,7 +116,7 @@ window.EAI_CONFIG = {
     reactionsEnabled: "1",
     emitMetadata: "0",
     inputPosition: "top",
-    theme: "light",
+    theme: "dark_dimmed",
     lang: "zh-CN"
   }
 };
@@ -131,7 +131,7 @@ window.EAI_CONFIG = {
 | `category` | 分类名称，必须与 GitHub 中的名称一致 |
 | `mapping` | 设为 `specific`，由站点为每个领域、路线与词条页面提供独立 term |
 | `strict` | `0` 表示 term 不存在时创建新讨论 |
-| `theme` | 目前默认 `light`；也可改为 `preferred_color_scheme` 或自定义 CSS URL |
+| `theme` | 深色站点默认 `dark_dimmed`；也可改为 `preferred_color_scheme` 或自定义 CSS URL |
 | `lang` | `zh-CN` |
 
 站点的 `data-term` 会分别写成 `eai-wiki/entry/<entry-id>`、`eai-wiki/route/<domain>/<route>` 或 `eai-wiki/domain/<domain>`，因此不同页面不会串评论。
