@@ -16,8 +16,6 @@
 
 首页只保留 hero、七个领域卡片与底部贡献 CTA，不再堆叠精选、阅读路径、知识网络和主题云。七个领域是导航、操作、移动操作、硬件、控制、仿真器、数据与评测；硬件领域继续按灵巧手、机械臂、人形机器人、轮式机器人、传感器与执行器拆分。
 
-![Seven research areas](docs/preview-domains.png)
-
 硬件领域页把五条路线、对应词条与具体平台放进同一张 Wiki 表格：
 
 ![Hardware domain](docs/preview-hardware.png)
@@ -326,7 +324,6 @@ eai-wiki/
 │   ├── check-links.mjs           # 检查论文与项目链接
 │   └── og-template.html          # 可重新渲染的社交封面模板
 ├── docs/preview.png              # 首页预览
-├── docs/preview-domains.png      # 七个研究领域卡片
 ├── docs/preview-hardware.png     # 硬件领域 Wiki 页
 ├── docs/preview-catalog.png      # 词条库索引预览
 ├── docs/preview-route.png        # 路线 Wiki 预览

@@ -332,7 +332,7 @@
   function renderHome() {
     return `
     <div class="view view--home">
-      <section class="hero wrap">
+      <section class="hero hero--cards wrap">
         <div class="hero-copy">
           <p class="eyebrow hero-eyebrow reveal">
             <span class="eyebrow-dot"></span>
@@ -352,30 +352,12 @@
             <span class="hero-search-hint">按 <kbd>Ctrl K</kbd> 开始</span>
             <span class="hero-search-arrow">${smallArrow()}</span>
           </button>
-          <div class="hero-trending reveal" style="--delay:210ms">
-            <span>从这里开始</span>
-            ${DOMAINS.map(domain => `<a href="#/domain/${domain.id}">${esc(domain.name)}</a>`).join("")}
-          </div>
         </div>
-        ${heroArt()}
-      </section>
 
-      <section class="section domains-section wrap" id="domains">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">01 / RESEARCH AREAS</p>
-            <h2 class="section-title">七个领域，<br><em>一张技术地图。</em></h2>
-          </div>
-          <div class="section-aside">
-            <p>每个领域先拆成技术路线，再落到具体论文、系统与概念。每个领域另设常用的数据、硬件平台与 benchmark，方便从「读论文」进入「做实验」。</p>
-            <a class="text-link" href="#/entries">浏览全部 ${ENTRIES.length} 个词条 ${smallArrow()}</a>
-          </div>
-        </div>
         <div class="domain-grid">
           ${DOMAINS.map(domainCard).join("")}
         </div>
       </section>
-
     </div>`;
   }
 
