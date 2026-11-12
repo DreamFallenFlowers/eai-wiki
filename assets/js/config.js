@@ -8,7 +8,7 @@
  */
 window.EAI_CONFIG = {
   // Example: "your-name/eai-wiki". Leave empty for automatic github.io detection.
-  repo: "",
+  repo: "DreamFallenFlowers/eai-wiki",
 
   // Community links shown around the site.
   links: {
