@@ -4885,6 +4885,56 @@ body { color: var(--ink); }
 .view--contribute-wiki .faq-list details { border-color: var(--line); }
 .view--contribute-wiki .faq-list details p { color: #c9c4ba; }
 .view--contribute-wiki .code-block { background: #11110f; color: #e7e2d8; border-color: #4a4a44; }
+.contribute-invitation {
+  position: relative;
+  margin: 28px 0 34px;
+  padding: clamp(24px, 3.6vw, 42px);
+  border: 1px solid var(--line-strong);
+  background:
+    radial-gradient(120% 160% at 100% 0%, rgba(236, 93, 56, 0.16), transparent 44%),
+    #1f1f1c;
+  overflow: hidden;
+}
+.contribute-invitation::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 96px;
+  height: 3px;
+  background: var(--orange);
+}
+.contribute-invitation .eyebrow { color: var(--orange); margin-bottom: 14px; }
+.contribute-invitation h2 {
+  max-width: 800px;
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(36px, 4.6vw, 58px);
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -0.045em;
+}
+.contribute-invitation h2 em { color: var(--orange); font-style: normal; }
+.contribute-invitation p {
+  max-width: 720px;
+  margin-top: 18px;
+  color: #c9c4ba;
+  font-size: 13.5px;
+  line-height: 1.9;
+}
+.contribute-invitation-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 24px; }
+.contribute-invitation .contribute-invitation-sign {
+  margin-top: 22px;
+  color: var(--muted-light);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+@media (max-width: 590px) {
+  .contribute-invitation h2 { font-size: clamp(30px, 7.8vw, 36px); }
+}
 .site-footer { background: #11110f; color: var(--cream); }
 .site-footer::before { opacity: 0.9; }
 .marquee { background: #11110f; border-color: #2a2a26; color: var(--cream); }

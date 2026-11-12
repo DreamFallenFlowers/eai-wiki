@@ -2262,7 +2262,6 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
                   <li><button type="button" data-scroll-target="contribute-process">从想法到合并</button></li>
                   <li><button type="button" data-scroll-target="contribute-template">词条模板</button></li>
                   <li><button type="button" data-scroll-target="contribute-faq">常见问题</button></li>
-                  <li><button type="button" data-scroll-target="contribute-roadmap">路线图</button></li>
                 </ol>
               </nav>
               <div class="wiki-tools">
@@ -2284,6 +2283,18 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
                 帮助页 · 最后修订 ${formatDate(CFG.updated || "2026-11-11")} · 编辑提案进入 GitHub 审校
               </div>
               <div class="wiki-hatnote">本页说明如何编辑条目、发起讨论和提交新词条。它不是投稿模板，而是这个 Wiki 的编辑规范。</div>
+
+              <section class="contribute-invitation" aria-labelledby="contribute-invitation-title">
+                <p class="eyebrow">OPEN CALL / 写给每一个读过论文的人</p>
+                <h2 id="contribute-invitation-title">你读过的论文，<br><em>不该只停在浏览器里。</em></h2>
+                <p>具身智能的知识散落在论文、代码、实验记录和一次次失败的复现里。每一个被你看懂、又被你讲清楚的细节，都可能成为另一个人的起点。</p>
+                <p>不必一次写完。补一个被忽略的限制、纠正一个数字、贴一条能跑通的复现记录，都是在这张地图上留下坐标。这里没有旁观者。</p>
+                <div class="contribute-invitation-actions">
+                  <button class="wiki-button wiki-button--primary" type="button" data-open-contribute>写下第一个词条</button>
+                  <a class="wiki-button" href="#/entries">找一页来编辑</a>
+                </div>
+                <p class="contribute-invitation-sign">EAI Wiki · 由读者写成，也写给下一位读者</p>
+              </section>
 
               <div class="wiki-lead-layout">
                 <div class="wiki-lead">
@@ -2308,7 +2319,6 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
                   <li><button type="button" data-scroll-target="contribute-process">从想法到合并</button></li>
                   <li><button type="button" data-scroll-target="contribute-template">词条模板</button></li>
                   <li><button type="button" data-scroll-target="contribute-faq">常见问题</button></li>
-                  <li><button type="button" data-scroll-target="contribute-roadmap">路线图</button></li>
                 </ol>
               </details>
 
@@ -2329,7 +2339,7 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
                     </tr>
                     <tr>
                       <td><strong>新词条</strong></td>
-                      <td>用统一模板写一篇论文、系统或概念，并把它放进正确的领域与技术路线。</td>
+                      <td>用一个参考模板写一篇论文、系统或概念，并把它放进正确的领域与技术路线。</td>
                       <td><button class="wiki-inline-button" type="button" data-open-contribute>开始写词条</button></td>
                     </tr>
                   </tbody>
@@ -2358,11 +2368,11 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
 
               <section class="wiki-section" id="contribute-template">
                 <div class="wiki-section-heading">
-                  <h2>词条模板</h2>
+                  <h2>词条模板（参考）</h2>
                   <button class="wiki-button" type="button" data-copy-template>复制模板</button>
                 </div>
+                <p class="wiki-source-note"><strong>模板仅供参考，不需要完全遵循这个格式。</strong>可以根据词条类型删减、合并或新增章节；哪怕只写一段有来源的判断，也比为了填满格式而编造更有价值。</p>
                 <pre class="code-block" id="entry-template"><code>${esc(template)}</code></pre>
-                <p class="wiki-source-note">不需要逐项填满。宁可少写，也不要为了完整而编造。</p>
               </section>
 
               <section class="wiki-section" id="contribute-faq">
@@ -2393,30 +2403,6 @@ ${DOMAINS.map(domain => domain.name).join(" / ")}
                     <p>除特别注明外，文字内容采用 CC BY-SA 4.0，代码采用 MIT。转载请署名并保持相同许可。论文图表与第三方素材的版权归原作者所有。</p>
                   </details>
                 </div>
-              </section>
-
-              <section class="wiki-section" id="contribute-roadmap">
-                <div class="wiki-section-heading"><h2>路线图</h2></div>
-                <table class="wikitable">
-                  <thead><tr><th>阶段</th><th>目标</th><th>状态</th></tr></thead>
-                  <tbody>
-                    <tr><td>v0.2 种子发布</td><td>${DOMAINS.length} 个领域、${TOTAL_ROUTES} 条技术路线、${ENTRIES.length} 个词条与 ${RESOURCES.length} 个数据/基准资源；等待领域编辑审校。</td><td>进行中</td></tr>
-                    <tr><td>v0.5 领域审校</td><td>为每个领域建立编辑小组，逐条核对引用、补充遗漏工作，加入失败案例与复现记录。</td><td>待开始</td></tr>
-                    <tr><td>v1.0 公共知识</td><td>稳定引用格式、版本记录、同行评议标签，以及和会议/课程/中文社区的交叉链接。</td><td>计划中</td></tr>
-                  </tbody>
-                </table>
-              </section>
-
-              <section class="wiki-section" id="contribute-checklist">
-                <div class="wiki-section-heading"><h2>提交前检查</h2></div>
-                <ul class="wiki-list">
-                  <li>一手来源链接可访问</li>
-                  <li>领域与技术路线已归位</li>
-                  <li>数字带有评测条件</li>
-                  <li>事实与判断已区分</li>
-                  <li>已说明 AI 参与程度</li>
-                </ul>
-                <p><button class="wiki-button wiki-button--primary" type="button" data-open-contribute>贡献一个词条</button> <a class="wiki-button" href="${repoFileUrl("CONTRIBUTING.md")}" target="_blank" rel="noopener">阅读完整规范</a></p>
               </section>
 
               ${articleCategories([
